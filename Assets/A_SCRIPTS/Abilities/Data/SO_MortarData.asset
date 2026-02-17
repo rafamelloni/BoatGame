@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8eb2d5a3daa6a0641a531cf3dc99983e, type: 3}
+  m_Name: SO_MortarData
+  m_EditorClassIdentifier: Assembly-CSharp::SO_MorterData
+  cooldown: 1.5
+  visualProjectilePrefab: {fileID: 6816158046629421336, guid: 5e5b99764fd6df44881d3e06312f06ca, type: 3}
+  visualShootForce: 25
+  visualLifetime: 1.2
+  realProjectilePrefab: {fileID: 7922941663222933556, guid: f83def68aac316a459c7defd67b0b841, type: 3}
+  backDistance: 8
+  height: 15
+  randomRadius: 2
+  explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
+  circleVfx: {fileID: 3918690890547098858, guid: 9ecfae6d2abf1da42b9a20484db2130a, type: 3}

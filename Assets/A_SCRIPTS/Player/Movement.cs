@@ -2,16 +2,15 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    [Header("Movement")]
-    public float moveSpeed = 8f;
-    public float turnSpeed = 90f;
+    private PlayerStats stats;
 
-    [Header("Inertia")]
-    public float acceleration = 5f;
-    public float deceleration = 4f;
+    private float _currentSpeed = 0f;
+    private float _smoothTurn = 0f;
 
-    private float currentSpeed = 0f;
-    private float smoothTurn = 0f;
+    private void Awake()
+    {
+        stats = GetComponent<PlayerStats>();
+    }
 
     void Update()
     {
@@ -21,33 +20,27 @@ public class Movement : MonoBehaviour
         // --- ACELERACIÓN ---
         if (vertical != 0)
         {
-            currentSpeed = Mathf.Lerp(
-                currentSpeed,
-                vertical * moveSpeed,
-                Time.deltaTime * acceleration
+            _currentSpeed = Mathf.Lerp(
+                _currentSpeed,
+                vertical * stats.moveSpeed,
+                Time.deltaTime * stats.acceleration
             );
         }
         else
         {
-            currentSpeed = Mathf.Lerp(
-                currentSpeed,
+            _currentSpeed = Mathf.Lerp(
+                _currentSpeed,
                 0f,
-                Time.deltaTime * deceleration
+                Time.deltaTime * stats.deceleration
             );
         }
 
-        // Calcular movimiento antes de aplicarlo (para debug)
-        Vector3 movement = transform.forward * currentSpeed * Time.deltaTime;
-        float movementMagnitude = movement.magnitude / Time.deltaTime; // m/s reales
-
         // --- MOVIMIENTO ---
-        transform.position += movement;
+        transform.position += transform.forward * _currentSpeed * Time.deltaTime;
 
         // --- GIRO SUAVIZADO ---
-        float targetTurn = horizontal * turnSpeed;
-        smoothTurn = Mathf.Lerp(smoothTurn, targetTurn, Time.deltaTime * 5f);
-        transform.Rotate(0f, smoothTurn * Time.deltaTime, 0f);
-
-     
+        float targetTurn = horizontal * stats.turnSpeed;
+        _smoothTurn = Mathf.Lerp(_smoothTurn, targetTurn, Time.deltaTime * 5f);
+        transform.Rotate(0f, _smoothTurn * Time.deltaTime, 0f);
     }
 }
