@@ -3,14 +3,14 @@ using UnityEngine;
 public class AbilityController : MonoBehaviour
 {
     [Header("Equip")]
-    [SerializeField] private SO_CannonData cannonsData;
-    [SerializeField] private SO_MorterData morterData;
+    [SerializeField] private SO_CannonData _cannonsData;
+    [SerializeField] private SO_MorterData _morterData;
 
     [Header("Mortar Shoot Point")]
-    [SerializeField] private Transform mortarShootPoint;
+    [SerializeField] private Transform _mortarShootPoint;
 
-    private IAbilityStrategy abilityE;
-    private IAbilityStrategy abilityQ;
+    private IAbilityStrategy _abilityE;
+    private IAbilityStrategy _abilityQ;
 
     private void Awake()
     {
@@ -21,20 +21,20 @@ public class AbilityController : MonoBehaviour
         if (runner == null) runner = gameObject.AddComponent<CoroutineRunner>();
 
         // crear estrategia
-        abilityE = new CannonStrategy(cannonsData, hardpoints, runner);
-        abilityQ = new MorterStrategy(morterData, transform, mortarShootPoint, runner);
+        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner);
+        _abilityQ = new MorterStrategy(_morterData, transform, _mortarShootPoint, runner);
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            abilityE.TryExecute();
+            _abilityE.TryExecute();
         }
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            abilityQ.TryExecute();
+            _abilityQ.TryExecute();
         }
     }
 }

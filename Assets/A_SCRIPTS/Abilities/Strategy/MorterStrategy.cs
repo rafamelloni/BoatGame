@@ -1,28 +1,33 @@
 using UnityEngine;
 using System.Collections;
 
-
 public class MorterStrategy : IAbilityStrategy
 {
-    private readonly SO_MorterData data;
-    private readonly Transform ownerTransform;
-    private readonly Transform shootPoint;
-    private readonly CoroutineRunner runner;
+    // SO: referencias base (NO se modifican)
+    private readonly SO_MorterData _baseData;
+
+    // Runtime: números modificables (SÍ se modifican)
+    private readonly RT_MortarData _rt;
+
+    private readonly Transform _ownerTransform;
+    private readonly Transform _shootPoint;
+    private readonly CoroutineRunner _runner;
 
     private float nextFireTime = 0f;
 
-    public MorterStrategy(SO_MorterData data, Transform ownerTransform, Transform shootPoint, CoroutineRunner runner)
+    public MorterStrategy(SO_MorterData baseData , Transform ownerTransform, Transform shootPoint, CoroutineRunner runner)
     {
-        this.data = data;
-        this.ownerTransform = ownerTransform;
-        this.shootPoint = shootPoint;
-        this.runner = runner;
+        this._baseData = baseData;
+        _rt = new RT_MortarData(_baseData);
+        this._ownerTransform = ownerTransform;
+        this._shootPoint = shootPoint;
+        this._runner = runner;
     }
 
     public void TryExecute()
     {
         if (Time.time < nextFireTime) return;
-        nextFireTime = Time.time + data.cooldown;
+        nextFireTime = Time.time + _rt.cooldown;
 
         VisualShoot();
         SpawnRealProjectile();
@@ -30,22 +35,25 @@ public class MorterStrategy : IAbilityStrategy
 
     private void VisualShoot()
     {
-        if (data.visualProjectilePrefab == null || shootPoint == null) return;
+        if (_baseData.visualProjectilePrefab == null || _shootPoint == null) return;
 
         GameObject proj = Object.Instantiate(
-            data.visualProjectilePrefab,
-            shootPoint.position,
+            _baseData.visualProjectilePrefab,
+            _shootPoint.position,
             Quaternion.identity
         );
 
         Rigidbody rb = proj.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            // OJO: tu c�digo usaba linearVelocity; en Unity normal es velocity
-            rb.linearVelocity = Vector3.up * data.visualShootForce;
+            // Si estás en Unity normal es rb.velocity; rb.linearVelocity es DOTS/Unity Physics
+            rb.linearVelocity = Vector3.up * _rt.visualShootForce;
         }
 
-        runner.StartCoroutine(DisableAfterSeconds(proj, data.visualLifetime));
+        if (_runner != null)
+            _runner.StartCoroutine(DisableAfterSeconds(proj, _rt.visualLifetime));
+        else
+            Object.Destroy(proj, _rt.visualLifetime); // fallback si no tenés runner
     }
 
     private IEnumerator DisableAfterSeconds(GameObject go, float seconds)
@@ -56,31 +64,27 @@ public class MorterStrategy : IAbilityStrategy
 
     private void SpawnRealProjectile()
     {
-        if (data.realProjectilePrefab == null) return;
+        if (_baseData.realProjectilePrefab == null) return;
+        if (_ownerTransform == null) return;
 
-        // Direcci�n atr�s del jugador (plano XZ)
-        Vector3 backDir = -ownerTransform.forward;
+        Vector3 backDir = -_ownerTransform.forward;
         backDir.y = 0f;
         backDir.Normalize();
 
-        // Posici�n final de spawn
         Vector3 spawnPos =
-            ownerTransform.position +
-            backDir * data.backDistance +
-            Vector3.up * data.height;
+            _ownerTransform.position +
+            backDir * _rt.backDistance +
+            Vector3.up * _rt.height;
 
-        // Random offset
-        Vector2 rand = Random.insideUnitCircle * data.randomRadius;
+        Vector2 rand = Random.insideUnitCircle * _rt.randomRadius;
         spawnPos += new Vector3(rand.x, 0f, rand.y);
 
-        // Instanciamos
-        GameObject real = Object.Instantiate(data.realProjectilePrefab, spawnPos, Quaternion.identity);
+        GameObject real = Object.Instantiate(_baseData.realProjectilePrefab, spawnPos, Quaternion.identity);
 
-        // Setup en la instancia (importante)
         var barrel = real.GetComponent<BarrelExplosion>();
         if (barrel != null)
         {
-            barrel.Setup(data.explosionVfx, data.circleVfx);
+            barrel.Setup(_baseData.explosionVfx, _baseData.circleVfx);
         }
     }
 }
