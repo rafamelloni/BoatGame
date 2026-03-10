@@ -14,6 +14,7 @@ public class FakeWaveMovement : MonoBehaviour
     public float manualTiltAmount = 10f;
     public float tiltSmoothSpeed = 5f;
     public float tiltReturnSpeed = 3f;
+    public Animator anim;
 
     private float baseHeight;
 
@@ -58,10 +59,13 @@ public class FakeWaveMovement : MonoBehaviour
 
         // si nadie llamó al método este frame, vuelve a 0 suavemente
         _targetExtraTiltX = 0f;
+        anim.SetBool("IsSprinting", false);
+
     }
 
     public void ApplyForwardTilt()
     {
         _targetExtraTiltX = -manualTiltAmount;
+        anim.SetBool("IsSprinting", true);
     }
 }
