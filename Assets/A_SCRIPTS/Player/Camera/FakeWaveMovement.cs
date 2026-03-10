@@ -10,7 +10,15 @@ public class FakeWaveMovement : MonoBehaviour
     public float tiltAmplitude = 5f;
     public float tiltFrequency = 1f;
 
+    [Header("Forward Tilt")]
+    public float manualTiltAmount = 10f;
+    public float tiltSmoothSpeed = 5f;
+    public float tiltReturnSpeed = 3f;
+
     private float baseHeight;
+
+    private float _currentExtraTiltX = 0f;
+    private float _targetExtraTiltX = 0f;
 
     void Start()
     {
@@ -21,23 +29,39 @@ public class FakeWaveMovement : MonoBehaviour
     {
         float t = Time.time;
 
-        // --- SOLO ALTURA ---
+        // --- ALTURA ---
         Vector3 pos = transform.position;
         pos.y = baseHeight + Mathf.Sin(t * frequency) * amplitude;
         transform.position = pos;
 
-        // --- SOLO TILT (NO TOCAR EL YAW) ---
+        // --- INTERPOLAR TILT EXTRA ---
+        float smooth = _targetExtraTiltX != 0 ? tiltSmoothSpeed : tiltReturnSpeed;
+        _currentExtraTiltX = Mathf.Lerp(
+            _currentExtraTiltX,
+            _targetExtraTiltX,
+            Time.deltaTime * smooth
+        );
+
+        // --- TILT DE OLAS ---
         float tiltX = Mathf.Sin(t * tiltFrequency) * tiltAmplitude;
         float tiltZ = Mathf.Cos(t * tiltFrequency * 0.8f) * tiltAmplitude;
 
-        // Guardamos Y actual (rotation.y que viene del Movement)
+        tiltX += _currentExtraTiltX;
+
         float currentYaw = transform.rotation.eulerAngles.y;
 
-        // Aplicamos solo inclinación X/Z
         transform.rotation = Quaternion.Euler(
             tiltX,
-            currentYaw,   //  AHORA EL BARCO PUEDE GIRAR CON A/D
+            currentYaw,
             tiltZ
         );
+
+        // si nadie llamó al método este frame, vuelve a 0 suavemente
+        _targetExtraTiltX = 0f;
+    }
+
+    public void ApplyForwardTilt()
+    {
+        _targetExtraTiltX = -manualTiltAmount;
     }
 }

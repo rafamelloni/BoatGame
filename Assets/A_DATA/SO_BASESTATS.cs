@@ -10,4 +10,7 @@ public class SO_BASESTATS : ScriptableObject
     [Header("Inertia")]
     public float acceleration = 5f;
     public float deceleration = 4f;
+
+    [Header("Sprint")]
+    public float sprintMultiplier = 1.6f;
 }

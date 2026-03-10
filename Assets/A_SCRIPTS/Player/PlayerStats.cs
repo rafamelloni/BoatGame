@@ -11,6 +11,7 @@ public class PlayerStats : MonoBehaviour
     public float turnSpeed;
     public float acceleration;
     public float deceleration;
+    public float sprintMultiplier;
 
     private void Awake()
     {
@@ -29,5 +30,6 @@ public class PlayerStats : MonoBehaviour
         turnSpeed = baseStats.turnSpeed;
         acceleration = baseStats.acceleration;
         deceleration = baseStats.deceleration;
+        sprintMultiplier = baseStats.sprintMultiplier;
     }
 }
