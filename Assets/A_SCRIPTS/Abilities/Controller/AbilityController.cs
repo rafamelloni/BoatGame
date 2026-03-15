@@ -5,6 +5,7 @@ public class AbilityController : MonoBehaviour
     [Header("Equip")]
     [SerializeField] private SO_CannonData _cannonsData;
     [SerializeField] private SO_MorterData _morterData;
+    [SerializeField] private ParticleSystem[] _smokeParticle; //Bad done Particle sistem, not supposed to be here
 
     [Header("Mortar Shoot Point")]
     [SerializeField] private Transform _mortarShootPoint;
@@ -30,6 +31,11 @@ public class AbilityController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             _abilityE.TryExecute();
+            foreach(var smokeParticle in _smokeParticle)
+            {
+                smokeParticle.Play();
+            }
+            
         }
 
         if (Input.GetKeyDown(KeyCode.Q))
