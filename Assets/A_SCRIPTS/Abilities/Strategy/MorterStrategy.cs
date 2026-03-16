@@ -30,7 +30,6 @@ public class MorterStrategy : IAbilityStrategy
         nextFireTime = Time.time + _rt.cooldown;
 
         VisualShoot();
-        SpawnRealProjectile();
     }
 
     private void VisualShoot()
@@ -54,6 +53,9 @@ public class MorterStrategy : IAbilityStrategy
             _runner.StartCoroutine(DisableAfterSeconds(proj, _rt.visualLifetime));
         else
             Object.Destroy(proj, _rt.visualLifetime); // fallback si no tenés runner
+
+        SpawnRealProjectile();
+
     }
 
     private IEnumerator DisableAfterSeconds(GameObject go, float seconds)
