@@ -19,3 +19,4 @@ MonoBehaviour:
   timeBetweenShots: 0.5
   cooldown: 1.5
   explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
+  trasilRederer: {fileID: 3430440030359892173, guid: 03d3d9e452ce62340962d353c7a01990, type: 3}

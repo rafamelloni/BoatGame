@@ -10,6 +10,9 @@ public class AbilityController : MonoBehaviour
     [Header("Mortar Shoot Point")]
     [SerializeField] private Transform _mortarShootPoint;
 
+    [Header("Bullet Factory")]
+    [SerializeField] private BulletFactory _bulletFactory;
+
     private IAbilityStrategy _abilityE;
     private IAbilityStrategy _abilityQ;
 
@@ -22,7 +25,7 @@ public class AbilityController : MonoBehaviour
         if (runner == null) runner = gameObject.AddComponent<CoroutineRunner>();
 
         // crear estrategia
-        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner);
+        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory);
         _abilityQ = new MorterStrategy(_morterData, transform, _mortarShootPoint, runner);
     }
 
@@ -30,12 +33,7 @@ public class AbilityController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            _abilityE.TryExecute();
-            foreach(var smokeParticle in _smokeParticle)
-            {
-                smokeParticle.Play();
-            }
-            
+            _abilityE.TryExecute(); 
         }
 
         if (Input.GetKeyDown(KeyCode.Q))

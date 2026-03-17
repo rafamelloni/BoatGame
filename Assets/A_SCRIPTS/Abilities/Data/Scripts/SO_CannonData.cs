@@ -17,4 +17,5 @@ public class SO_CannonData : ScriptableObject
 
     [Header("VFX")]
     public GameObject explosionVfx;
+    public TrailRenderer trasilRederer;
 }

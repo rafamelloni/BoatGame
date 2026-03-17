@@ -8,18 +8,20 @@ public class CannonStrategy : IAbilityStrategy
     //Realtime si se modifica.
     private readonly RT_CannonData _rtData;
 
-
+    //factory de balas
+    private BulletFactory _cannonBullet;
     private readonly ShipHardpoints hardpoints;
     private readonly CoroutineRunner runner;
 
     private float nextFireTime = 0f;
 
-    public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner)
+    public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet)
     {
         this._baseData = data;
         _rtData = new RT_CannonData(_baseData);
         this.hardpoints = hardpoints;
         this.runner = runner;
+        this._cannonBullet = cannonBullet;
     }
 
     public void TryExecute()
@@ -47,20 +49,12 @@ public class CannonStrategy : IAbilityStrategy
 
     private void FireFromPoint(Transform point, float side)
     {
-        GameObject bullet = Object.Instantiate(_baseData.bulletPrefab, point.position, Quaternion.identity);
-
-        var cb = bullet.GetComponent<CannonBullet>();
+        var b = _cannonBullet.Create();
+        
+        Transform pointSH = point;
+        float sideSH = side;
+        var cb = b.GetComponent<CannonBullet>();
         if (cb != null)
-            cb.Setup(_baseData.explosionVfx);
-
-        var rb = bullet.GetComponent<Rigidbody>();
-        if (rb == null) return;
-
-        Vector3 dir = point.right * side;
-        dir.y = 0f;
-        dir.Normalize();
-
-        Vector3 shootDir = (dir + Vector3.up * _rtData.verticalArc).normalized;
-        rb.linearVelocity = shootDir * _rtData.bulletSpeed;
+            cb.Setup(_baseData.explosionVfx, pointSH, _rtData, sideSH);
     }
 }
