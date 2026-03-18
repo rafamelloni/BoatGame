@@ -154,6 +154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef17d5f19df19624fb20861e665464fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CannonBullet
+  waterSplash: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}
   _explosionRadius: 2
   _damageLayers:
     serializedVersion: 2

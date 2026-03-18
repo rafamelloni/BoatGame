@@ -4,6 +4,7 @@ public class CannonBullet : BulletsBase
 {
     private ParticlePool _particlePool;
     private GameObject _explosionVFX;
+    public GameObject waterSplash;
     private Rigidbody _rb;
     private TrailRenderer _trail;
     private Transform _pointShoot;
@@ -75,6 +76,11 @@ public class CannonBullet : BulletsBase
                 _particlePool.GetParticle(_explosionVFX, explosionPoint);
             }
         }
+
+        ContactPoint contact0 = collision.contacts[0];
+        Vector3 explosionPoint0 = contact0.point;
+        _particlePool.GetParticle(waterSplash, explosionPoint0);
+
         Pool.Return(this);
     }
 
