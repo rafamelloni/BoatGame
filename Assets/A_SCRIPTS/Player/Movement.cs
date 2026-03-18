@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    private PlayerStats _stats;
+    private RT_PlayerStats _stats;
 
     public FakeWaveMovement fakeWaveMomenent;
 
@@ -11,7 +11,7 @@ public class Movement : MonoBehaviour
 
     private void Awake()
     {
-        _stats = GetComponent<PlayerStats>();
+        _stats = GetComponent<RT_PlayerStats>();
     }
 
     void Update()

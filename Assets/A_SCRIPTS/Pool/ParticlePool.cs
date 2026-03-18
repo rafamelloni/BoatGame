@@ -24,21 +24,16 @@ public class ParticlePool : MonoBehaviour
             }
 
             poolDictionary.Add(prefab, pool);
-            Debug.Log($"Prefab: {prefab.name} | Cantidad en pool: {pool.Count}");
         }
     }
 
     public GameObject GetParticle(GameObject prefab, Vector3 position)
     {
-        print(" deactivated prefab name = " + prefab.name);
-        
-
         if (poolDictionary.ContainsKey(prefab) && poolDictionary[prefab].Count > 0)
         {
             GameObject particle = poolDictionary[prefab].Dequeue();
             particle.transform.position = position;
             particle.SetActive(true);
-            print("particle activated");
 
             // Desactivar después de que termine la animación
             ParticleSystem ps = particle.GetComponent<ParticleSystem>();

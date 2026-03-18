@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1694775986376480644}
   - component: {fileID: 898275463011901637}
   - component: {fileID: 3430440030359892173}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -154,7 +154,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef17d5f19df19624fb20861e665464fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CannonBullet
-  explosionVfx: {fileID: 0}
+  _explosionRadius: 2
+  _damageLayers:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!96 &3430440030359892173
 TrailRenderer:
   serializedVersion: 4

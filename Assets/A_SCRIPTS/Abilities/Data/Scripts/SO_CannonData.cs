@@ -7,6 +7,7 @@ public class SO_CannonData : ScriptableObject
     public GameObject bulletPrefab;
     public float bulletSpeed = 20f;
     public float verticalArc = 0.25f;
+    public float damage = 15f;
 
     [Header("Burst")]
     public int shotsPerBurst = 2;

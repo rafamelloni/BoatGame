@@ -7,6 +7,7 @@ public class RT_CannonData : MonoBehaviour
     public int shotsPerBurst;
     public float timeBetweenShots;
     public float cooldown;
+    public float damage;
 
     public RT_CannonData(SO_CannonData so)
     {
@@ -15,5 +16,6 @@ public class RT_CannonData : MonoBehaviour
         shotsPerBurst = so.shotsPerBurst;
         timeBetweenShots = so.timeBetweenShots;
         cooldown = so.cooldown;
+        damage = so.damage;
     }
 }
