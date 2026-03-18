@@ -10,8 +10,9 @@ public class AbilityController : MonoBehaviour
     [Header("Mortar Shoot Point")]
     [SerializeField] private Transform _mortarShootPoint;
 
-    [Header("Bullet Factory")]
+    [Header("Bullet Factory/Partivle pool")]
     [SerializeField] private BulletFactory _bulletFactory;
+    [SerializeField] private ParticlePool _particlePool;
 
     private IAbilityStrategy _abilityE;
     private IAbilityStrategy _abilityQ;
@@ -25,7 +26,7 @@ public class AbilityController : MonoBehaviour
         if (runner == null) runner = gameObject.AddComponent<CoroutineRunner>();
 
         // crear estrategia
-        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory);
+        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory, _particlePool);
         _abilityQ = new MorterStrategy(_morterData, transform, _mortarShootPoint, runner);
     }
 

@@ -2,11 +2,12 @@ using UnityEngine;
 
 public class CannonBullet : BulletsBase
 {
-    [SerializeField] GameObject explosionVfx;
+    private ParticlePool _particlePool;
+    private GameObject _explosionVFX;
     private Rigidbody _rb;
     private TrailRenderer _trail;
     private Transform _pointShoot;
-    RT_CannonData _rtData;
+    private RT_CannonData _rtData;
     float _side;
 
     private void Awake()
@@ -15,9 +16,16 @@ public class CannonBullet : BulletsBase
         _trail = GetComponent<TrailRenderer>();
     }
 
-    public void Setup(GameObject vfx, Transform point, RT_CannonData rtData, float side)
+    public override void TurnOff()
     {
-        explosionVfx = vfx;
+        gameObject.SetActive(false);
+        _trail.Clear();
+    }
+
+    public void Setup(ParticlePool poolParticle, Transform point, RT_CannonData rtData, float side, GameObject explosionVFX)
+    {
+        _explosionVFX = explosionVFX;
+        _particlePool = poolParticle;
         _pointShoot = point;
         _rtData = rtData;
         _side = side;
@@ -48,12 +56,14 @@ public class CannonBullet : BulletsBase
         if (collision.gameObject.CompareTag("Floor"))
         {
             ContactPoint contact = collision.contacts[0];
+            _particlePool.GetParticle(_explosionVFX, contact.point);
+            print(_particlePool);
 
-            Instantiate(
-                explosionVfx,
-                contact.point,
-                Quaternion.LookRotation(contact.normal)
-            );
+            //Instantiate(
+            //    _explosionVfx,
+            //    contact.point,
+            //     Quaternion.LookRotation(contact.normal)
+            //);
 
 
             Pool.Return(this);

@@ -10,18 +10,21 @@ public class CannonStrategy : IAbilityStrategy
 
     //factory de balas
     private BulletFactory _cannonBullet;
+    private ParticlePool _particlePool;
+
     private readonly ShipHardpoints hardpoints;
     private readonly CoroutineRunner runner;
 
     private float nextFireTime = 0f;
 
-    public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet)
+    public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet, ParticlePool particlePool)
     {
         this._baseData = data;
         _rtData = new RT_CannonData(_baseData);
         this.hardpoints = hardpoints;
         this.runner = runner;
         this._cannonBullet = cannonBullet;
+        _particlePool = particlePool;
     }
 
     public void TryExecute()
@@ -55,6 +58,6 @@ public class CannonStrategy : IAbilityStrategy
         float sideSH = side;
         var cb = b.GetComponent<CannonBullet>();
         if (cb != null)
-            cb.Setup(_baseData.explosionVfx, pointSH, _rtData, sideSH);
+            cb.Setup(_particlePool, pointSH, _rtData, sideSH, _baseData.explosionVfx);
     }
 }
