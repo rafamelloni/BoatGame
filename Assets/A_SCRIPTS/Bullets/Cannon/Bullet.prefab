@@ -109,7 +109,7 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -159,7 +159,6 @@ MonoBehaviour:
   _damageLayers:
     serializedVersion: 2
     m_Bits: 192
-  impactMarkerPrefab: {fileID: 2588620347789144092, guid: f53c791508ce7bc42a69112fb46c27b6, type: 3}
 --- !u!96 &3430440030359892173
 TrailRenderer:
   serializedVersion: 4

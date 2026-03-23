@@ -59,29 +59,51 @@ public class CannonBullet : BulletsBase
         Vector3 shootDir = (dir + Vector3.up * _rtData.verticalArc).normalized;
         _rb.linearVelocity = shootDir * _rtData.bulletSpeed;
     }
-
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("Enemy"))
-        {
-            ContactPoint contact = collision.contacts[0];
-            Vector3 explosionPoint = contact.point;
+       
 
+        Vector3 explosionPoint = other.ClosestPoint(transform.position);
+
+        if (other.CompareTag("Enemy"))
+        {
             Explode(explosionPoint);
 
             if (_explosionVFX != null)
-            {
-                
                 ParticlePool.Instance.GetParticle(_explosionVFX, explosionPoint);
-            }
         }
 
-        ContactPoint contact0 = collision.contacts[0];
-        Vector3 explosionPoint0 = contact0.point;
+        Vector3 explosionPoint0 = other.ClosestPoint(transform.position);
+
         ParticlePool.Instance.GetParticle(waterSplash, explosionPoint0);
+        
 
         Pool.Return(this);
     }
+
+
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    if (collision.gameObject.CompareTag("Enemy"))
+    //    {
+    //        ContactPoint contact = collision.contacts[0];
+    //        Vector3 explosionPoint = contact.point;
+
+    //        Explode(explosionPoint);
+
+    //        if (_explosionVFX != null)
+    //        {
+
+    //            ParticlePool.Instance.GetParticle(_explosionVFX, explosionPoint);
+    //        }
+    //    }
+
+    //    ContactPoint contact0 = collision.contacts[0];
+    //    Vector3 explosionPoint0 = contact0.point;
+    //    ParticlePool.Instance.GetParticle(waterSplash, explosionPoint0);
+
+    //    Pool.Return(this);
+    //}
 
     private void Explode(Vector3 center)
     {
