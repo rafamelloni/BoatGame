@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class CannonBullet : BulletsBase
 {
-    private ParticlePool _particlePool;
     private GameObject _explosionVFX;
     public GameObject waterSplash;
     private Rigidbody _rb;
@@ -30,10 +29,9 @@ public class CannonBullet : BulletsBase
         _trail.Clear();
     }
 
-    public void Setup(ParticlePool poolParticle, Transform point, RT_CannonData rtData, float side, GameObject explosionVFX)
+    public void Setup(Transform point, RT_CannonData rtData, float side, GameObject explosionVFX)
     {
         _explosionVFX = explosionVFX;
-        _particlePool = poolParticle;
         _pointShoot = point;
         _rtData = rtData;
         _side = side;
@@ -71,15 +69,16 @@ public class CannonBullet : BulletsBase
 
             Explode(explosionPoint);
 
-            if (_particlePool != null && _explosionVFX != null)
+            if (_explosionVFX != null)
             {
-                _particlePool.GetParticle(_explosionVFX, explosionPoint);
+                
+                ParticlePool.Instance.GetParticle(_explosionVFX, explosionPoint);
             }
         }
 
         ContactPoint contact0 = collision.contacts[0];
         Vector3 explosionPoint0 = contact0.point;
-        _particlePool.GetParticle(waterSplash, explosionPoint0);
+        ParticlePool.Instance.GetParticle(waterSplash, explosionPoint0);
 
         Pool.Return(this);
     }

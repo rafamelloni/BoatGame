@@ -1,29 +1,28 @@
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class EnemyHealth : MonoBehaviour, IDamageable
 {
 
     //Data
-    [SerializeField]SO_EnemyData _baseData;
     private RT_EnemyStats _rtData;
 
 
     //Temporal Vfx
-    public GameObject woodExplosion;
-    public ParticlePool pool;
+    public Coins coins;
 
 
     //Notifyers
     public event Action OnDeath;
     public event Action<float> OnDamage; // para UI o feedback
 
-    private void Start()
+    private void Update()
     {
-        Init(_baseData, woodExplosion, pool);
+        print("Mi nombre es: " + gameObject.name + " y tengo de vida :" + _rtData.currentHealth);
     }
 
-    public void Init(SO_EnemyData baseData, GameObject woodExplosionVFX, ParticlePool pool)
+    public void InitializeComponent(SO_EnemyData baseData)
     {
         _rtData = new RT_EnemyStats(baseData);
     }
@@ -48,7 +47,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private void Die()
     {
         OnDeath?.Invoke();
-        pool.GetParticle(woodExplosion, transform.position);
+        
+        ParticlePool.Instance.GetParticle(_rtData.woodExplosion, transform.position);
+        coins.Init(transform);
         gameObject.SetActive(false);
     }
 

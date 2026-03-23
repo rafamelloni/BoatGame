@@ -4,14 +4,28 @@ using UnityEngine;
 
 public class ParticlePool : MonoBehaviour
 {
-    [SerializeField] private List<GameObject> particlePrefabs; // Lista con los 3 prefabs
-    [SerializeField] private int poolSizePerType = 10; // Cantidad de cada tipo en la pool
+    public static ParticlePool Instance { get; private set; }
+
+    [SerializeField] private List<GameObject> particlePrefabs;
+    [SerializeField] private int poolSizePerType = 10;
 
     private Dictionary<GameObject, Queue<GameObject>> poolDictionary = new Dictionary<GameObject, Queue<GameObject>>();
 
+    private void Awake()
+    {
+        // Singleton
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject); // opcional
+    }
+
     private void Start()
     {
-        // Crear una pool para cada tipo de partícula
         foreach (GameObject prefab in particlePrefabs)
         {
             Queue<GameObject> pool = new Queue<GameObject>();
@@ -35,7 +49,6 @@ public class ParticlePool : MonoBehaviour
             particle.transform.position = position;
             particle.SetActive(true);
 
-            // Desactivar después de que termine la animación
             ParticleSystem ps = particle.GetComponent<ParticleSystem>();
             if (ps != null)
             {
@@ -44,10 +57,8 @@ public class ParticlePool : MonoBehaviour
 
             return particle;
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
     }
 
     private IEnumerator DeactivateAfterTime(GameObject obj, GameObject prefab, float time)

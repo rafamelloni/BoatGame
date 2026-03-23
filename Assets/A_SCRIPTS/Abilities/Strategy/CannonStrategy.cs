@@ -58,6 +58,6 @@ public class CannonStrategy : IAbilityStrategy
         float sideSH = side;
         var cb = b.GetComponent<CannonBullet>();
         if (cb != null)
-            cb.Setup(_particlePool, pointSH, _rtData, sideSH, _baseData.explosionVfx);
+            cb.Setup(pointSH, _rtData, sideSH, _baseData.explosionVfx);
     }
 }
