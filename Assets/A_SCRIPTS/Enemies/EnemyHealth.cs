@@ -49,7 +49,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         OnDeath?.Invoke();
         
         ParticlePool.Instance.GetParticle(_rtData.woodExplosion, transform.position);
-        coins.Init(transform);
+        //coins.Init(transform);
         gameObject.SetActive(false);
     }
 

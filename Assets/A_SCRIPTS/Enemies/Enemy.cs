@@ -4,10 +4,8 @@ public abstract class Enemy : MonoBehaviour
 {
     protected SO_EnemyData _baseData;
 
+    [Header("Components From Enemy BaseClass")]
     public SO_EnemyData baseData;
-
-
-    [Header("Components")]
     [SerializeField] protected EnemyHealth _enemyHealth;
 
     private void Awake()

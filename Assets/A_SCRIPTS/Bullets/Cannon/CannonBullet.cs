@@ -61,8 +61,6 @@ public class CannonBullet : BulletsBase
     }
     private void OnTriggerEnter(Collider other)
     {
-       
-
         Vector3 explosionPoint = other.ClosestPoint(transform.position);
 
         if (other.CompareTag("Enemy"))
@@ -81,30 +79,6 @@ public class CannonBullet : BulletsBase
         Pool.Return(this);
     }
 
-
-    //private void OnCollisionEnter(Collision collision)
-    //{
-    //    if (collision.gameObject.CompareTag("Enemy"))
-    //    {
-    //        ContactPoint contact = collision.contacts[0];
-    //        Vector3 explosionPoint = contact.point;
-
-    //        Explode(explosionPoint);
-
-    //        if (_explosionVFX != null)
-    //        {
-
-    //            ParticlePool.Instance.GetParticle(_explosionVFX, explosionPoint);
-    //        }
-    //    }
-
-    //    ContactPoint contact0 = collision.contacts[0];
-    //    Vector3 explosionPoint0 = contact0.point;
-    //    ParticlePool.Instance.GetParticle(waterSplash, explosionPoint0);
-
-    //    Pool.Return(this);
-    //}
-
     private void Explode(Vector3 center)
     {
         _lastExplosionPoint = center;
@@ -122,19 +96,4 @@ public class CannonBullet : BulletsBase
             }
         }
     }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-
-        if (Application.isPlaying && _showLastExplosion)
-        {
-            Gizmos.DrawWireSphere(_lastExplosionPoint, _explosionRadius);
-        }
-        else
-        {
-            Gizmos.DrawWireSphere(transform.position, _explosionRadius);
-        }
-    }
-
 }
