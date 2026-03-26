@@ -74,6 +74,6 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         float sideSH = side;
         var cb = b.GetComponent<CannonBullet>();
         if (cb != null)
-            cb.Setup(pointSH, _rtData, sideSH, _baseData.explosionVfx);
+            cb.Setup(pointSH, _rtData, sideSH);
     }
 }

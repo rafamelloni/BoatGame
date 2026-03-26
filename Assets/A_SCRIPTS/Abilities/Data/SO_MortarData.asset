@@ -17,8 +17,12 @@ MonoBehaviour:
   visualShootForce: 70
   visualLifetime: 1.2
   realProjectilePrefab: {fileID: 7922941663222933556, guid: f83def68aac316a459c7defd67b0b841, type: 3}
+  pos: {fileID: 6275394130855316609, guid: 197efde0872d2ce488fe10da2e27cef0, type: 3}
   backDistance: 8
   height: 15
   randomRadius: 2
-  explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
+  damage: 35
+  fallingSpeed: 500
+  explosionVFX: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
+  waterSplashVFX: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}
   circleVfx: {fileID: 3918690890547098858, guid: 9ecfae6d2abf1da42b9a20484db2130a, type: 3}

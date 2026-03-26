@@ -12,16 +12,18 @@ public class MorterStrategy : IAbilityStrategy
     private readonly Transform _ownerTransform;
     private readonly Transform _shootPoint;
     private readonly CoroutineRunner _runner;
+    private BulletFactory _barrelFactory;
 
     private float nextFireTime = 0f;
 
-    public MorterStrategy(SO_MorterData baseData , Transform ownerTransform, Transform shootPoint, CoroutineRunner runner)
+    public MorterStrategy(SO_MorterData baseData , Transform ownerTransform, Transform shootPoint, CoroutineRunner runner, BulletFactory barrelFactory)
     {
         this._baseData = baseData;
         _rt = new RT_MortarData(_baseData);
         this._ownerTransform = ownerTransform;
         this._shootPoint = shootPoint;
         this._runner = runner;
+        _barrelFactory = barrelFactory;
     }
 
     public void TryExecute()
@@ -69,24 +71,13 @@ public class MorterStrategy : IAbilityStrategy
         if (_baseData.realProjectilePrefab == null) return;
         if (_ownerTransform == null) return;
 
-        Vector3 backDir = -_ownerTransform.forward;
-        backDir.y = 0f;
-        backDir.Normalize();
+        Transform spawnPos = _ownerTransform;
 
-        Vector3 spawnPos =
-            _ownerTransform.position +
-            backDir * _rt.backDistance +
-            Vector3.up * _rt.height;
-
-        Vector2 rand = Random.insideUnitCircle * _rt.randomRadius;
-        spawnPos += new Vector3(rand.x, 0f, rand.y);
-
-        GameObject real = Object.Instantiate(_baseData.realProjectilePrefab, spawnPos, Quaternion.identity);
-
-        var barrel = real.GetComponent<BarrelExplosion>();
-        if (barrel != null)
+        var b = _barrelFactory.Create();
+        var cb = b.GetComponent<BarrelExplosion>();
+        if (cb != null)
         {
-            barrel.Setup(_baseData.explosionVfx, _baseData.circleVfx);
+            cb.Setup(spawnPos, _rt);
         }
     }
 }

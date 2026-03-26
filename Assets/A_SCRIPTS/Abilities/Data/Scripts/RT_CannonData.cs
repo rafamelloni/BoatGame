@@ -9,6 +9,9 @@ public class RT_CannonData : MonoBehaviour
     public float cooldown;
     public float damage;
 
+    public GameObject waterSplashVFX;
+    public GameObject explosionVFX;
+
     public RT_CannonData(SO_CannonData so)
     {
         bulletSpeed = so.bulletSpeed;
@@ -17,5 +20,8 @@ public class RT_CannonData : MonoBehaviour
         timeBetweenShots = so.timeBetweenShots;
         cooldown = so.cooldown;
         damage = so.damage;
+
+        waterSplashVFX = so.waterSplash;
+        explosionVFX = so.explosionVfx;
     }
 }

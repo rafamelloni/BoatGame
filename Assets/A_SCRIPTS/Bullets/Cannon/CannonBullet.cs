@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class CannonBullet : BulletsBase
 {
-    private GameObject _explosionVFX;
-    public GameObject waterSplash;
+    
     private Rigidbody _rb;
     private TrailRenderer _trail;
     private Transform _pointShoot;
@@ -33,13 +32,11 @@ public class CannonBullet : BulletsBase
         _trail.Clear();
     }
 
-    public void Setup(Transform point, RT_CannonData rtData, float side, GameObject explosionVFX)
+    public void Setup(Transform point, RT_CannonData rtData, float side)
     {
-        _explosionVFX = explosionVFX;
         _pointShoot = point;
         _rtData = rtData;
         _side = side;
-
         Launch();
     }
 
@@ -75,14 +72,12 @@ public class CannonBullet : BulletsBase
         if (other.CompareTag("Enemy"))
         {
             Explode(explosionPoint);
-
-            if (_explosionVFX != null)
-                ParticlePool.Instance.GetParticle(_explosionVFX, explosionPoint);
+            ParticlePool.Instance.GetParticle(_rtData.explosionVFX, explosionPoint);
         }
         if (other.CompareTag("Floor"))
         {
             Vector3 explosionPoint0 = other.ClosestPoint(transform.position);
-            ParticlePool.Instance.GetParticle(waterSplash, explosionPoint0);
+            ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint0);
 
         }
        

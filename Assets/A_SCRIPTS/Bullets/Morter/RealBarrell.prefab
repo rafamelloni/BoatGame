@@ -102,9 +102,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7922941663222933556}
   serializedVersion: 5
-  m_Mass: 1
+  m_Mass: 5
   m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_AngularDamping: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -255,7 +255,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -275,9 +275,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e7361ba64c25974d81c912775efc6db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BarrelExplosion
-  explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
-  circle: {fileID: 3918690890547098858, guid: 9ecfae6d2abf1da42b9a20484db2130a, type: 3}
   rayDistance: 35
   floorLayer:
     serializedVersion: 2
     m_Bits: 8
+  _explosionRadius: 2
+  _damageLayers:
+    serializedVersion: 2
+    m_Bits: 64

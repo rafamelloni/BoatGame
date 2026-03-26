@@ -13,11 +13,15 @@ public class SO_MorterData : ScriptableObject
 
     [Header("Real Projectile")]
     public GameObject realProjectilePrefab;
+    public GameObject pos;
     public float backDistance = 8f;
     public float height = 12f;
     public float randomRadius = 2f;
+    public float damage = 35f;
+    public float fallingSpeed = 10f;
 
     [Header("VFX")]
-    public GameObject explosionVfx;
+    public GameObject explosionVFX;
+    public GameObject waterSplashVFX;
     public GameObject circleVfx;
 }

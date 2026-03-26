@@ -8,19 +8,13 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     //Data
     private RT_EnemyStats _rtData;
 
-
     //Temporal Vfx
     public Coins coins;
-
 
     //Notifyers
     public event Action OnDeath;
     public event Action<float> OnDamage; // para UI o feedback
 
-    private void Update()
-    {
-        print("Mi nombre es: " + gameObject.name + " y tengo de vida :" + _rtData.currentHealth);
-    }
 
     public void InitializeComponent(SO_EnemyData baseData)
     {
