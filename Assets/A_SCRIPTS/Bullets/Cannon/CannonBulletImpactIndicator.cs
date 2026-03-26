@@ -8,6 +8,7 @@ public class CannonBulletImpactIndicator : MonoBehaviour
     [SerializeField] private Renderer indicatorRenderer;
     [SerializeField] private string shaderFloatName = "_Size";
 
+
     [Header("Ground")]
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float maxPredictTime = 10f;
@@ -24,6 +25,7 @@ public class CannonBulletImpactIndicator : MonoBehaviour
     private float _flightTime;
     private float _currentTime;
     private bool _initialized;
+    private Vector3 _originalLocalScale;
 
     private Transform _originalParent;
 
@@ -35,6 +37,7 @@ public class CannonBulletImpactIndicator : MonoBehaviour
         if (indicatorVisual != null)
         {
             _originalParent = indicatorVisual.parent;
+            _originalLocalScale = indicatorVisual.localScale;
             indicatorVisual.gameObject.SetActive(false);
         }
     }
@@ -113,6 +116,7 @@ public class CannonBulletImpactIndicator : MonoBehaviour
             indicatorVisual.SetParent(_originalParent, false);
             indicatorVisual.localPosition = Vector3.zero;
             indicatorVisual.localRotation = Quaternion.identity;
+            indicatorVisual.localScale = _originalLocalScale;
         }
     }
 }
