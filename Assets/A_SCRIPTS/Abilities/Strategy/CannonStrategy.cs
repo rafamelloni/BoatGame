@@ -1,6 +1,7 @@
+using System;
 using System.Collections;
 using UnityEngine;
-public class CannonStrategy : IAbilityStrategy
+public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
 {
     //No se modifica. Se usa para cosas que no van a cambiar como los VFX
     private readonly SO_CannonData _baseData;
@@ -10,27 +11,42 @@ public class CannonStrategy : IAbilityStrategy
 
     //factory de balas
     private BulletFactory _cannonBullet;
-    private ParticlePool _particlePool;
 
     private readonly ShipHardpoints hardpoints;
     private readonly CoroutineRunner runner;
 
     private float nextFireTime = 0f;
 
-    public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet, ParticlePool particlePool)
+
+    //Data de la interfaz de cooldown
+    public event Action<float> OnCooldownStarted; //Delegate que se llama cuando arrranca el cooldown de la abilidad
+    public float CooldownDuration => _rtData.cooldown;
+    public float RemainingCooldown
+    {
+        get
+        {
+            float remaining = nextFireTime - Time.time;
+            return Mathf.Max(0f, remaining);
+        }
+    }
+    public bool IsOnCooldown => Time.time < nextFireTime;
+
+    public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet)
     {
         this._baseData = data;
         _rtData = new RT_CannonData(_baseData);
         this.hardpoints = hardpoints;
         this.runner = runner;
         this._cannonBullet = cannonBullet;
-        _particlePool = particlePool;
     }
 
     public void TryExecute()
     {
         if (Time.time < nextFireTime) return;
         nextFireTime = Time.time + _rtData.cooldown;
+
+        //LLamamos delegate, ejecutamos todo lo que este suscrito a cuando arranca el cooldown de la abilidad
+        OnCooldownStarted?.Invoke(_rtData.cooldown);
 
         runner.StartCoroutine(FireBurst());
     }

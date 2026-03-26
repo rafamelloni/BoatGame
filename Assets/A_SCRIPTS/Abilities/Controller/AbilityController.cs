@@ -5,17 +5,20 @@ public class AbilityController : MonoBehaviour
     [Header("Equip")]
     [SerializeField] private SO_CannonData _cannonsData;
     [SerializeField] private SO_MorterData _morterData;
-    [SerializeField] private ParticleSystem[] _smokeParticle; //Bad done Particle sistem, not supposed to be here
+    [SerializeField] private CooldownRadialUI cannonCooldownUI;
+   // [SerializeField] private ParticleSystem[] _smokeParticle; //Bad done Particle sistem, not supposed to be here
+
+
 
     [Header("Mortar Shoot Point")]
     [SerializeField] private Transform _mortarShootPoint;
 
     [Header("Bullet Factory/Partivle pool")]
     [SerializeField] private BulletFactory _bulletFactory;
-    [SerializeField] private ParticlePool _particlePool;
 
-    private IAbilityStrategy _abilityE;
-    private IAbilityStrategy _abilityQ;
+
+    private CannonStrategy _abilityE;
+    private MorterStrategy _abilityQ;
 
     private void Awake()
     {
@@ -26,7 +29,9 @@ public class AbilityController : MonoBehaviour
         if (runner == null) runner = gameObject.AddComponent<CoroutineRunner>();
 
         // crear estrategia
-        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory, _particlePool);
+        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory);
+        _abilityE.OnCooldownStarted += cannonCooldownUI.PlayCooldown;
+
         _abilityQ = new MorterStrategy(_morterData, transform, _mortarShootPoint, runner);
     }
 
