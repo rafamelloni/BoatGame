@@ -17,7 +17,7 @@ MonoBehaviour:
   verticalArc: 0.5
   damage: 30
   shotsPerBurst: 2
-  timeBetweenShots: 0.5
+  timeBetweenShots: 0.7
   cooldown: 1.5
   explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
   waterSplash: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}

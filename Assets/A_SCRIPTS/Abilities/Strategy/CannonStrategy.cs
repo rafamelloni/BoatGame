@@ -56,10 +56,19 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         for (int i = 0; i < _rtData.shotsPerBurst; i++)
         {
             foreach (Transform p in hardpoints.rightShootPoints)
+            {
                 FireFromPoint(p, 1f);
+                hardpoints._cannonSmokeShootR.Play();
+            }
+                
 
             foreach (Transform p in hardpoints.leftShootPoints)
+            {
                 FireFromPoint(p, -1f);
+                hardpoints._cannonSmokeShootL.Play();
+
+            }
+
 
             if (i < _rtData.shotsPerBurst - 1)
                 yield return new WaitForSeconds(_rtData.timeBetweenShots);

@@ -19,6 +19,8 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private BulletFactory _barrelFactory;
 
 
+
+
     private CannonStrategy _abilityE;
     private MorterStrategy _abilityQ;
 
@@ -41,7 +43,7 @@ public class AbilityController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            _abilityE.TryExecute(); 
+            _abilityE.TryExecute();
         }
 
         if (Input.GetKeyDown(KeyCode.Q))

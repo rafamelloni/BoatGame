@@ -16,8 +16,11 @@ public class SO_CannonData : ScriptableObject
     [Header("Cooldown")]
     public float cooldown = 1.5f;
 
-    [Header("VFX")]
+    [Header("VFX BULLET")]
     public GameObject explosionVfx;
     public  GameObject waterSplash;
     public TrailRenderer trasilRederer;
+
+
+
 }

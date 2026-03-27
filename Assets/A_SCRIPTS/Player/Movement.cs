@@ -1,9 +1,14 @@
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 public class Movement : MonoBehaviour
 {
     private RT_PlayerStats _stats;
+    public ParticleSystem trail;
+    public ParticleSystem trail1;
 
+    public ParticleSystem trailSprint;
+    public ParticleSystem trailSprint1;
     public FakeWaveMovement fakeWaveMomenent;
 
     private float _currentSpeed = 0f;
@@ -28,13 +33,21 @@ public class Movement : MonoBehaviour
         if (sprint && vertical > 0)
         {
             moveSpeed *= _stats.sprintMultiplier;
+            trailSprint.Play();
+            trailSprint1.Play();
             fakeWaveMomenent.ApplyForwardTilt();
+        }else if (!sprint)
+        {
+            trailSprint.Stop();
+            trailSprint1.Stop();
         }
 
 
         // --- ACELERACIÓN ---
         if (vertical != 0)
         {
+            trail.Play();
+
             _currentSpeed = Mathf.Lerp(
                 _currentSpeed,
                 vertical * moveSpeed,
@@ -43,6 +56,8 @@ public class Movement : MonoBehaviour
         }
         else
         {
+            trail.Stop();
+
             _currentSpeed = Mathf.Lerp(
                 _currentSpeed,
                 0f,
