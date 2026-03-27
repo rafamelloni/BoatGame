@@ -6,6 +6,7 @@ public class Movement : MonoBehaviour
     private RT_PlayerStats _stats;
     public ParticleSystem trail;
     public ParticleSystem trail1;
+    public ParticleSystem trail2;
 
     public ParticleSystem trailSprint;
     public ParticleSystem trailSprint1;
@@ -47,6 +48,8 @@ public class Movement : MonoBehaviour
         if (vertical != 0)
         {
             trail.Play();
+            trail1.Play();
+            trail2.Play();
 
             _currentSpeed = Mathf.Lerp(
                 _currentSpeed,
@@ -57,6 +60,8 @@ public class Movement : MonoBehaviour
         else
         {
             trail.Stop();
+            trail1.Stop();
+            trail2.Stop();
 
             _currentSpeed = Mathf.Lerp(
                 _currentSpeed,
