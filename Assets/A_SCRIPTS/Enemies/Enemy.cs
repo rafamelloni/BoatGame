@@ -8,7 +8,7 @@ public abstract class Enemy : MonoBehaviour
     public SO_EnemyData baseData;
     [SerializeField] protected EnemyHealth _enemyHealth;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         Init(baseData);
     }
@@ -19,6 +19,7 @@ public abstract class Enemy : MonoBehaviour
 
         if (_enemyHealth != null)
         {
+            print("enemt init");
             _enemyHealth.InitializeComponent(_baseData);
         }
 

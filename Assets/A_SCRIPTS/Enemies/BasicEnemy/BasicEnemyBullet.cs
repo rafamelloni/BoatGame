@@ -2,15 +2,10 @@ using UnityEngine;
 
 public class BasicEnemyBullet : BulletsBase
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
+    [SerializeField] private float _speed;
     void Update()
     {
-        
+        transform.position += transform.right * _speed * Time.deltaTime;
+
     }
 }
