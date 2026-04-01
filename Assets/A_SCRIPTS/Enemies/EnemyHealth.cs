@@ -16,7 +16,6 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public void InitializeComponent(SO_EnemyData baseData)
     {
         _rtData = new RT_EnemyStats(baseData);
-        print("initialized: " +  _rtData.maxHealth);
     }
 
     public void ResetHealth()
@@ -39,12 +38,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private void Die()
     {
         OnDeath?.Invoke();
-
-
         if (_rtData.woodExplosion != null)
         {
             ParticlePool.Instance.GetParticle(_rtData.woodExplosion, transform.position);
-
         }
         gameObject.SetActive(false);
     }
