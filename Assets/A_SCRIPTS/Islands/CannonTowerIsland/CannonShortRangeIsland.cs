@@ -45,7 +45,7 @@ public class CannonShortRangeIsland : MonoBehaviour
 
         if (dir == Vector3.zero) return;
 
-        Quaternion targetRot = Quaternion.LookRotation(dir) * Quaternion.Euler(0, 90, 0);
+        Quaternion targetRot = Quaternion.LookRotation(dir) * Quaternion.Euler(0, 0, 0);
         transform.rotation = Quaternion.Slerp(
             transform.rotation,
             targetRot,
