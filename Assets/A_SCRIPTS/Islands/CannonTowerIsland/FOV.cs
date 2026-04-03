@@ -17,7 +17,7 @@ public class FOV : MonoBehaviour
         {
             //acttiva el canvas de vida, feedback de que te puede atacar
             _uiHealth.SetActive(true);
-            print(CanSeeTarget());
+            
         }
         else
         {

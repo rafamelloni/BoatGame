@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 using System.Collections.Generic;
 
 public class AbilityUpgradeSystem : MonoBehaviour
@@ -12,10 +11,9 @@ public class AbilityUpgradeSystem : MonoBehaviour
     }
 
     [SerializeField] private List<UpgradeRule> _upgradeRules;
-
-    //data para icons upgrades
     [SerializeField] private UpgradeIconLibrary _iconLibrary;
-    public event Action<Sprite> OnUpgradeApplied;
+    [SerializeField] private EnemyUpgradeDisplay _popupPrefab;
+    [SerializeField] private Transform _target;
 
     private readonly List<IUpgradeable> _abilities = new();
 
@@ -24,7 +22,8 @@ public class AbilityUpgradeSystem : MonoBehaviour
         var enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
         foreach (var enemy in enemies)
         {
-            enemy.OnDeath += HandleEnemyDied;
+            EnemyHealth captured = enemy;
+            captured.OnDeath += () => HandleEnemyDied(captured.transform.position);
         }
     }
 
@@ -39,7 +38,7 @@ public class AbilityUpgradeSystem : MonoBehaviour
         _abilities.Remove(ability);
     }
 
-    public void HandleEnemyDied()
+    private void HandleEnemyDied(Vector3 position)
     {
         if (_abilities.Count == 0 || _upgradeRules.Count == 0) return;
 
@@ -50,8 +49,14 @@ public class AbilityUpgradeSystem : MonoBehaviour
         UpgradeRule chosenRule = _upgradeRules[ruleIndex];
 
         chosenAbility.ApplyUpgrade(chosenRule.stat, chosenRule.valuePerKill);
+       
 
         Sprite icon = _iconLibrary.GetIcon(chosenAbility.AbilityId, chosenRule.stat);
-        OnUpgradeApplied?.Invoke(icon);
+        if (icon == null) return;
+
+        EnemyUpgradeDisplay popup = Instantiate(_popupPrefab, position, Quaternion.identity);
+        popup.Play(icon, position);
+        print("abiltiy stat : " + chosenRule.stat + "valuexkill: " + chosenRule.valuePerKill);
+        print("abiltiy: " + chosenAbility.AbilityId + "value: " + chosenRule.stat);
     }
 }

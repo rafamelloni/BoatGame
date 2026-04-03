@@ -1,64 +1,56 @@
-// EnemyUpgradeDisplay.cs
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using static UnityEngine.GraphicsBuffer;
 
 public class EnemyUpgradeDisplay : MonoBehaviour
 {
-    [SerializeField] private AbilityUpgradeSystem _upgradeSystem;
     [SerializeField] private Image _iconImage;
-    [SerializeField] private float _floatDistance = 80f;
-    [SerializeField] private float _duration = 1f;
+    [SerializeField] private float _duration = 1.5f;
+    // valor entre 0 y 1, ajustás en inspector. (0.85, 0.85) = esquina superior derecha
+    [SerializeField] private Vector2 _screenTarget = new Vector2(0.85f, 0.85f);
 
-    private EnemyHealth _health;
-
-    private void Awake()
+    public void Play(Sprite icon, Vector3 worldStartPosition)
     {
-        _health = GetComponent<EnemyHealth>();
-        _iconImage.gameObject.SetActive(false);
-    }
-
-    private void OnEnable()
-    {
-        _upgradeSystem.OnUpgradeApplied += HandleUpgradeApplied;
-    }
-
-    private void OnDisable()
-    {
-        _upgradeSystem.OnUpgradeApplied -= HandleUpgradeApplied;
-    }
-
-    private void HandleUpgradeApplied(Sprite icon)
-    {
-        // Solo reacciona si es este enemigo el que muri�
-        if (!_health.IsDying) return;
-
         _iconImage.sprite = icon;
-        StartCoroutine(FloatAndFade());
+        StartCoroutine(FlyToCorner(worldStartPosition));
+    }
+    private void Update()
+    {
+        transform.LookAt(Camera.main.transform);
     }
 
-    private IEnumerator FloatAndFade()
+    private IEnumerator FlyToCorner(Vector3 worldStartPosition)
     {
-        _iconImage.gameObject.SetActive(true);
+        // inicio: posicion del enemigo en pantalla, capturada UNA vez
+        Vector2 startScreen = Camera.main.WorldToScreenPoint(worldStartPosition);
 
-        RectTransform rt = _iconImage.rectTransform;
-        Vector2 startPos = rt.anchoredPosition;
-        Vector2 endPos = startPos + Vector2.up * _floatDistance;
+        // destino: punto fijo en pantalla, nunca cambia
+        Vector2 endScreen = new Vector2(
+            Screen.width * _screenTarget.x,
+            Screen.height * _screenTarget.y
+        );
 
-        Color startColor = _iconImage.color;
+        Vector3 startScale = Vector3.one;
+        Vector3 endScale = Vector3.zero;
         float elapsed = 0f;
 
         while (elapsed < _duration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / _duration;
+            float t = Mathf.Pow(elapsed / _duration, 2f);
 
-            rt.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
-            _iconImage.color = new Color(startColor.r, startColor.g, startColor.b, 1f - t);
+            // mover en screen space
+            Vector2 currentScreen = Vector2.Lerp(startScreen, endScreen, t);
+            transform.position = Camera.main.ScreenToWorldPoint(
+                new Vector3(currentScreen.x, currentScreen.y,
+                Camera.main.WorldToScreenPoint(worldStartPosition).z));
+
+            transform.localScale = Vector3.Lerp(startScale, endScale, t);
 
             yield return null;
         }
 
-        _iconImage.gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 }

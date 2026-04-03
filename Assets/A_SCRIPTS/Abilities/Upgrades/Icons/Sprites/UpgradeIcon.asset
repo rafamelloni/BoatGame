@@ -15,7 +15,10 @@ MonoBehaviour:
   _icons:
   - abilityId: Cannon
     stat: 0
-    icon: {fileID: 0}
-  - abilityId: 
-    stat: 0
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 8f609e0a037895c4eb8ea2420418e109, type: 3}
+  - abilityId: Cannon
+    stat: 1
+    icon: {fileID: 21300000, guid: 3b8dd542c7cbc78489f3b6bbe31be39b, type: 3}
+  - abilityId: Cannon
+    stat: 2
+    icon: {fileID: 21300000, guid: a57e71942ecf82b459a2cfc09ff9242d, type: 3}
