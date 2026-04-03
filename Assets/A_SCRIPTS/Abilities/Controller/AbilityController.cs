@@ -6,7 +6,7 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private SO_CannonData _cannonsData;
     [SerializeField] private SO_MorterData _morterData;
     [SerializeField] private CooldownRadialUI cannonCooldownUI;
-   // [SerializeField] private ParticleSystem[] _smokeParticle; //Bad done Particle sistem, not supposed to be here
+    [SerializeField] private AbilityUpgradeSystem _upgradeSystem;
 
 
 
@@ -34,6 +34,7 @@ public class AbilityController : MonoBehaviour
 
         // crear estrategia
         _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory);
+        _upgradeSystem.RegisterAbility(_abilityE);
         _abilityE.OnCooldownStarted += cannonCooldownUI.PlayCooldown;
 
         _abilityQ = new MorterStrategy(_morterData, _mortarShootPointReal, _mortarShootPoint, runner, _barrelFactory);
@@ -51,4 +52,10 @@ public class AbilityController : MonoBehaviour
             _abilityQ.TryExecute();
         }
     }
+
+    private void OnDestroy()
+    {
+        _upgradeSystem.UnregisterAbility(_abilityE);
+    }
+
 }

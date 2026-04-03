@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
-public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
+public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
 {
     //No se modifica. Se usa para cosas que no van a cambiar como los VFX
     private readonly SO_CannonData _baseData;
@@ -30,6 +30,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         }
     }
     public bool IsOnCooldown => Time.time < nextFireTime;
+    public RT_CannonData RuntimeData => _rtData;
 
     public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet)
     {
@@ -85,4 +86,24 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         if (cb != null)
             cb.Setup(pointSH, _rtData, sideSH);
     }
+
+    public void ApplyUpgrade(StatType stat, float value)
+    {
+        switch (stat)
+        {
+            case StatType.Damage:
+                _rtData.damage += value;
+                break;
+            case StatType.Cooldown:
+                _rtData.cooldown = Mathf.Max(0.1f, _rtData.cooldown - value);
+                break;
+            case StatType.BulletSpeed:
+                _rtData.bulletSpeed += value;
+                break;
+            case StatType.ShotsPerBurst:
+                _rtData.shotsPerBurst += (int)value;
+                break;
+        }
+    }
 }
+
