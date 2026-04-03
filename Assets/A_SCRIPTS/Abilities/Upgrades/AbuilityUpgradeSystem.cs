@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 public class AbilityUpgradeSystem : MonoBehaviour
@@ -12,8 +13,11 @@ public class AbilityUpgradeSystem : MonoBehaviour
 
     [SerializeField] private List<UpgradeRule> _upgradeRules;
 
-    private readonly List<IUpgradeable> _abilities = new();
+    //data para icons upgrades
+    [SerializeField] private UpgradeIconLibrary _iconLibrary;
+    public event Action<Sprite> OnUpgradeApplied;
 
+    private readonly List<IUpgradeable> _abilities = new();
 
     private void Start()
     {
@@ -23,6 +27,7 @@ public class AbilityUpgradeSystem : MonoBehaviour
             enemy.OnDeath += HandleEnemyDied;
         }
     }
+
     public void RegisterAbility(IUpgradeable ability)
     {
         if (!_abilities.Contains(ability))
@@ -38,12 +43,15 @@ public class AbilityUpgradeSystem : MonoBehaviour
     {
         if (_abilities.Count == 0 || _upgradeRules.Count == 0) return;
 
-        int abilityIndex = Random.Range(0, _abilities.Count);
+        int abilityIndex = UnityEngine.Random.Range(0, _abilities.Count);
         IUpgradeable chosenAbility = _abilities[abilityIndex];
 
-        int ruleIndex = Random.Range(0, _upgradeRules.Count);
+        int ruleIndex = UnityEngine.Random.Range(0, _upgradeRules.Count);
         UpgradeRule chosenRule = _upgradeRules[ruleIndex];
 
         chosenAbility.ApplyUpgrade(chosenRule.stat, chosenRule.valuePerKill);
+
+        Sprite icon = _iconLibrary.GetIcon(chosenAbility.AbilityId, chosenRule.stat);
+        OnUpgradeApplied?.Invoke(icon);
     }
 }

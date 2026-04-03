@@ -11,6 +11,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     //Notifyers
     public event Action OnDeath;
     public event Action<float> OnDamage; // para UI o feedback
+    public bool IsDying { get; private set; }
 
 
     public void InitializeComponent(SO_EnemyData baseData)
@@ -38,11 +39,13 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private void Die()
     {
         OnDeath?.Invoke();
+        IsDying = true;
         if (_rtData.woodExplosion != null)
         {
             ParticlePool.Instance.GetParticle(_rtData.woodExplosion, transform.position);
         }
         gameObject.SetActive(false);
+        IsDying = false;
     }
 
     public float GetHealthNormalized()

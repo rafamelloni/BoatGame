@@ -17,7 +17,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
 
     private float nextFireTime = 0f;
 
-
+    //COOLDOWN
     //Data de la interfaz de cooldown
     public event Action<float> OnCooldownStarted; //Delegate que se llama cuando arrranca el cooldown de la abilidad
     public float CooldownDuration => _rtData.cooldown;
@@ -30,7 +30,11 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
         }
     }
     public bool IsOnCooldown => Time.time < nextFireTime;
+    //COOLDOWNOVER
+
     public RT_CannonData RuntimeData => _rtData;
+    //ID para icono IUpgradeable
+    public string AbilityId => "Cannon";
 
     public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet)
     {
