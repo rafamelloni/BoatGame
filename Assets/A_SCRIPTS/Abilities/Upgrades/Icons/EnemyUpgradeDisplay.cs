@@ -9,11 +9,16 @@ public class EnemyUpgradeDisplay : MonoBehaviour
     [SerializeField] private float _duration = 1.5f;
     // valor entre 0 y 1, ajustás en inspector. (0.85, 0.85) = esquina superior derecha
     [SerializeField] private Vector2 _screenTarget = new Vector2(0.85f, 0.85f);
+    [SerializeField] private Vector3 _spawnOffset = new Vector3(0f, 1f, 0f);
 
+    private void Awake()
+    {
+        GetComponentInChildren<Canvas>().worldCamera = Camera.main;
+    }
     public void Play(Sprite icon, Vector3 worldStartPosition)
     {
         _iconImage.sprite = icon;
-        StartCoroutine(FlyToCorner(worldStartPosition));
+        StartCoroutine(FlyToCorner(worldStartPosition + _spawnOffset));
     }
     private void Update()
     {

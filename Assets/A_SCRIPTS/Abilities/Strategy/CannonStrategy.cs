@@ -7,7 +7,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
     private readonly SO_CannonData _baseData;
 
     //Realtime si se modifica.
-    private readonly RT_CannonData _rtData;
+    public readonly RT_CannonData _rtData;
 
     //factory de balas
     private BulletFactory _cannonBullet;

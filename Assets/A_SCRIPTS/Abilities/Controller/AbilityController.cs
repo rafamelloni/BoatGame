@@ -19,7 +19,7 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private BulletFactory _barrelFactory;
 
 
-
+    public bool wasUpgraded = false;
 
     private CannonStrategy _abilityE;
     private MorterStrategy _abilityQ;
@@ -45,9 +45,10 @@ public class AbilityController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             _abilityE.TryExecute();
+            
         }
 
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q) && wasUpgraded)
         {
             _abilityQ.TryExecute();
         }
@@ -56,6 +57,11 @@ public class AbilityController : MonoBehaviour
     private void OnDestroy()
     {
         _upgradeSystem.UnregisterAbility(_abilityE);
+    }
+
+    public void upgrade()
+    {
+        _abilityE._rtData.shotsPerBurst = 3;
     }
 
 }
