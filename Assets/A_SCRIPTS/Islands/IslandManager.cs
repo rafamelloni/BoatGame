@@ -15,7 +15,11 @@ public class IslandManager : MonoBehaviour
     [SerializeField] private GameObject _canvasExample;
 
     public event Action OnIslandDefeated;
+    private void Start()
+    {
+        _totalDefenses = GetComponentsInChildren<IslandDefense>().Length;
 
+    }
     public void RegisterDefenseDestroyed()
     {
         if (_wasDefeated) return;

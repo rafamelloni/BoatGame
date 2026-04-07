@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IslandDecorationProfile
   vegetationPrefabs:
   - prefab: {fileID: 7235236960015494512, guid: e2346c1679fff42b89171240bc31918b, type: 3}
-    weight: 22
-  - prefab: {fileID: 2171910043858127304, guid: fe7981022766d4ace8bc760fcf299bff, type: 3}
     weight: 26
+  - prefab: {fileID: 2171910043858127304, guid: fe7981022766d4ace8bc760fcf299bff, type: 3}
+    weight: 10
+  - prefab: {fileID: 3827620136860429507, guid: 158ba97e2af5c664a9b8ee974a6923e4, type: 3}
+    weight: 5
+  - prefab: {fileID: 6089491855752656660, guid: 69422a348312a814e921279e8d98f41c, type: 3}
+    weight: 4
   decorationPrefabs:
   - prefab: {fileID: 2128513675763148913, guid: cea215a552e8b4098b10e7502f1e1701, type: 3}
     weight: 11
-  - prefab: {fileID: 3784616012241633686, guid: 86bf33a11b98bd545af8c9e061941350, type: 3}
-    weight: 11
   defensePrefabs:
-  - prefab: {fileID: 6239451527189094922, guid: 98421938bb3abba45abdcff776108e90, type: 3}
-    weight: 100
   - prefab: {fileID: 6239451527189094922, guid: 98421938bb3abba45abdcff776108e90, type: 3}
     weight: 100
   globalSpawnChance: 0.85

@@ -19,7 +19,7 @@ public class IslandDefense : MonoBehaviour
         if (_islandHealth != null) 
         {
             _islandHealth.OnDeath += HandleDeath;
-            _islandManager._totalDefenses++;
+            
         }
     }
 

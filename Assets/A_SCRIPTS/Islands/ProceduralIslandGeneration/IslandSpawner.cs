@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 [System.Serializable]
 public class IslandEntry
@@ -14,6 +15,7 @@ public class IslandSpawner : MonoBehaviour
     public List<IslandEntry> islands;
     public List<Transform> spawnLocations;
     [SerializeField] private GameObject _canvasExample;
+
     private void Start()
     {
         SpawnAllIslands();
@@ -28,24 +30,36 @@ public class IslandSpawner : MonoBehaviour
 
             GameObject instance = Instantiate(entry.islandPrefab, location.position, location.rotation);
 
-            //temporal solo de pruieba
+            // temporal
             IslandManager manager = instance.GetComponent<IslandManager>();
             if (manager != null)
             {
                 manager.SetCanvas(_canvasExample);
                 print("no null");
             }
-            //temporal solo de pruieba
+            // temporal
 
-            // Busca los spawn points y asigna prefabs random
-            var points = instance.GetComponentsInChildren<IslandSpawnPoint>();
-            foreach (var point in points)
+            var allPoints = instance.GetComponentsInChildren<IslandSpawnPoint>();
+
+            // Puntos que NO son defensa, se spawnean todos
+            var normalPoints = allPoints.Where(p => p.pointType != SpawnPointType.Defense);
+
+            // Puntos de defensa, solo 2 random
+            var defensePoints = allPoints
+                .Where(p => p.pointType == SpawnPointType.Defense)
+                .OrderBy(_ => Random.value)
+                .Take(2);
+
+            foreach (var point in normalPoints.Concat(defensePoints))
             {
                 GameObject prefab = entry.profile.GetRandom(point.pointType);
                 if (prefab == null) continue;
 
-                GameObject spawned = Instantiate(prefab, point.transform.position, point.transform.rotation, point.transform);
-                spawned.transform.localScale = prefab.transform.localScale * 75; // <- esto
+                GameObject spawned = Instantiate(prefab, point.transform.position,
+                                                 point.transform.rotation, instance.transform);
+                float parentScale = instance.transform.lossyScale.x;
+                float prefabScale = prefab.transform.localScale.x;
+                spawned.transform.localScale = Vector3.one * (prefabScale / parentScale);
             }
         }
     }
