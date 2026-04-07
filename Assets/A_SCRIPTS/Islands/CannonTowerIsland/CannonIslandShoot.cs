@@ -3,15 +3,14 @@ using UnityEngine.UI;
 
 public class CannonIslandShoot : Enemy
 {
-    [Header("Target")]
-    [SerializeField] private Transform _player;
+    private Transform _player;
 
     [Header("Shoot")]
     [SerializeField] private FOV _fov;
     [SerializeField] private Transform _shootPoint;
     [SerializeField] private float _fireRate = 2f;
     [SerializeField] private float _fireRange = 20f;
-    [SerializeField] private BulletFactory _bullets;
+    private BulletFactory _bullets;
 
     private RT_CannonData _rtIsland;
     public SO_CannonData so_island;
@@ -25,6 +24,8 @@ public class CannonIslandShoot : Enemy
     {
         base.Awake();
         _rtIsland = new RT_CannonData(so_island);
+        _player = GameObject.FindWithTag("Player").transform;
+        _bullets = GameObject.FindWithTag("IslandBulletFactory").GetComponent<BulletFactory>();
     }
 
     private void Update()

@@ -1,9 +1,9 @@
 using UnityEngine;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class FOV : MonoBehaviour
 {
     [Header("Data")]
-    [SerializeField] private Transform _target;
     [SerializeField] private float _viewDistance = 20f;
     [SerializeField] private float _viewAngle = 90f;
     [SerializeField] private LayerMask _obstacleMask;
@@ -11,6 +11,13 @@ public class FOV : MonoBehaviour
     [Header("Canvas")]
     [SerializeField] private GameObject _uiHealth;
 
+    private Transform _target;
+
+    private void Start()
+    {
+        _target = GameObject.FindWithTag("Player").transform;
+
+    }
     private void Update()
     {
         if(CanSeeTarget())
@@ -43,6 +50,8 @@ public class FOV : MonoBehaviour
 
         if (Physics.Raycast(rayOrigin, dirToTarget.normalized, distance, _obstacleMask))
             return false;
+
+        print("true");
 
         return true;
     }

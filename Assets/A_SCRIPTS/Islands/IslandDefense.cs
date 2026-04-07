@@ -2,19 +2,25 @@ using UnityEngine;
 
 public class IslandDefense : MonoBehaviour
 {
-    [SerializeField] IslandManager _islandManager;
+    //cuando muere una defensa script//
+
+    [SerializeField]IslandManager _islandManager;
     EnemyHealth _islandHealth;
 
     private void Awake()
     {
         _islandHealth = GetComponent<EnemyHealth>();
+        _islandManager = GetComponentInParent<IslandManager>();
     }
 
     //se subscribe a cuando muere 
     private void OnEnable()
     {
-        if (_islandHealth != null)
+        if (_islandHealth != null) 
+        {
             _islandHealth.OnDeath += HandleDeath;
+            _islandManager._totalDefenses++;
+        }
     }
 
     //se desubscribe a cuando muere 

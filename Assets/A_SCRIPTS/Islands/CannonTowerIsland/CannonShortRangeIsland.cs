@@ -3,7 +3,7 @@ using UnityEngine;
 public class CannonShortRangeIsland : MonoBehaviour
 {
     [SerializeField] FOV _fov;
-    [SerializeField] Transform  _player;
+     Transform  _player;
 
 
     public BulletFactory enemyBullet;
@@ -15,6 +15,11 @@ public class CannonShortRangeIsland : MonoBehaviour
 
     private float _nextFireTime;
 
+    private void Start()
+    {
+        _player = GameObject.FindWithTag("Player").transform;
+        enemyBullet = GameObject.FindWithTag("IslandHeavyBulletFactory").GetComponent<BulletFactory>();
+    }
     void Update()
     {
         if (!_fov.CanSeeTarget())

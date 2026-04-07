@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fb1c5713f971e64996e1b0c4da6ba8a, type: 3}
+  m_Name: IslandProfileS
+  m_EditorClassIdentifier: Assembly-CSharp::IslandDecorationProfile
+  vegetationPrefabs:
+  - prefab: {fileID: 7235236960015494512, guid: e2346c1679fff42b89171240bc31918b, type: 3}
+    weight: 22
+  - prefab: {fileID: 2171910043858127304, guid: fe7981022766d4ace8bc760fcf299bff, type: 3}
+    weight: 26
+  decorationPrefabs:
+  - prefab: {fileID: 2128513675763148913, guid: cea215a552e8b4098b10e7502f1e1701, type: 3}
+    weight: 11
+  - prefab: {fileID: 3784616012241633686, guid: 86bf33a11b98bd545af8c9e061941350, type: 3}
+    weight: 11
+  defensePrefabs:
+  - prefab: {fileID: 6239451527189094922, guid: 98421938bb3abba45abdcff776108e90, type: 3}
+    weight: 100
+  - prefab: {fileID: 6239451527189094922, guid: 98421938bb3abba45abdcff776108e90, type: 3}
+    weight: 100
+  globalSpawnChance: 0.85
