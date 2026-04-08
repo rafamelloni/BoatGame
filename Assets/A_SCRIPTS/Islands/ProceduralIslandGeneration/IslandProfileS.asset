@@ -21,9 +21,15 @@ MonoBehaviour:
     weight: 5
   - prefab: {fileID: 6089491855752656660, guid: 69422a348312a814e921279e8d98f41c, type: 3}
     weight: 4
+  - prefab: {fileID: 919132149155446097, guid: fdffed1da9bd5cc449a1ae129a25ef3e, type: 3}
+    weight: 15
+  - prefab: {fileID: 919132149155446097, guid: c8e9bf856fdf4a441b27b72f89f9ea55, type: 3}
+    weight: 15
   decorationPrefabs:
   - prefab: {fileID: 2128513675763148913, guid: cea215a552e8b4098b10e7502f1e1701, type: 3}
     weight: 11
+  - prefab: {fileID: 919132149155446097, guid: 21ca055ced627ad43932ba16ba7d8bee, type: 3}
+    weight: 100
   defensePrefabs:
   - prefab: {fileID: 6239451527189094922, guid: 98421938bb3abba45abdcff776108e90, type: 3}
     weight: 100
