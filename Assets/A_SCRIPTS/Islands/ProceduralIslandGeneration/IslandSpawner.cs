@@ -13,7 +13,6 @@ public class IslandEntry
 public class IslandSpawner : MonoBehaviour
 {
     public List<IslandEntry> islands;
-    public List<Transform> spawnLocations;
     [SerializeField] private GameObject _canvasExample;
     [SerializeField] private int _poolSizePerType = 3;
 
