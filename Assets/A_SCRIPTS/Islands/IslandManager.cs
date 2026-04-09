@@ -3,8 +3,6 @@ using System;
 
 public class IslandManager : MonoBehaviour
 {
-
-    //scropot que se usa para detectar si la isla murioo y activar canvas
     private bool _wasDefeated = false;
     private int _destroyedDefenses;
 
@@ -15,11 +13,22 @@ public class IslandManager : MonoBehaviour
     [SerializeField] private GameObject _canvasExample;
 
     public event Action OnIslandDefeated;
+
     private void Start()
     {
-        _totalDefenses = GetComponentsInChildren<IslandDefense>().Length;
-
+        Init();
     }
+
+    public void Init()
+    {
+        _totalDefenses = GetComponentsInChildren<IslandDefense>().Length;
+        _wasDefeated = false;
+        _destroyedDefenses = 0;
+
+        if (_canvasExample != null)
+            _canvasExample.SetActive(false);
+    }
+
     public void RegisterDefenseDestroyed()
     {
         if (_wasDefeated) return;
@@ -30,17 +39,18 @@ public class IslandManager : MonoBehaviour
         {
             _wasDefeated = true;
             IslandDefeated();
-
         }
     }
 
-    public void IslandDefeated() 
+    public void IslandDefeated()
     {
-        print("activate canvas, sfx etc");
         _canvasExample.SetActive(true);
         OnIslandDefeated?.Invoke();
+    }
 
-
+    public void ResetIsland()
+    {
+        Init();
     }
 
     public void SetCanvas(GameObject canvas)

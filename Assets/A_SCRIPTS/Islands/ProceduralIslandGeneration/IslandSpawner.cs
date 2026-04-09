@@ -15,53 +15,83 @@ public class IslandSpawner : MonoBehaviour
     public List<IslandEntry> islands;
     public List<Transform> spawnLocations;
     [SerializeField] private GameObject _canvasExample;
+    [SerializeField] private int _poolSizePerType = 3;
 
-    private void Start()
+    private Dictionary<GameObject, ObjectPool<GameObject>> _islandPools = new();
+    private Dictionary<GameObject, IslandEntry> _prefabToEntry = new();
+
+    private void Awake()
     {
-        SpawnAllIslands();
+        foreach (var entry in islands)
+        {
+            var prefab = entry.islandPrefab;
+            _prefabToEntry[prefab] = entry;
+
+            var pool = new ObjectPool<GameObject>(
+                () => Instantiate(prefab),
+                obj => obj.SetActive(true),
+                obj => obj.SetActive(false),
+                _poolSizePerType
+            );
+
+            _islandPools[prefab] = pool;
+        }
     }
 
-    private void SpawnAllIslands()
+    public void SpawnIslandAt(Vector3 position)
     {
-        foreach (var location in spawnLocations)
+        IslandEntry entry = PickWeighted();
+        if (entry == null) return;
+
+        GameObject instance = _islandPools[entry.islandPrefab].Get();
+        instance.transform.SetPositionAndRotation(position, Quaternion.Euler(0, Random.Range(0, 360f), 0));
+
+        IslandManager manager = instance.GetComponent<IslandManager>();
+        if (manager != null)
         {
-            IslandEntry entry = PickWeighted();
-            if (entry == null) continue;
-
-            GameObject instance = Instantiate(entry.islandPrefab, location.position, location.rotation);
-
-            // temporal
-            IslandManager manager = instance.GetComponent<IslandManager>();
-            if (manager != null)
-            {
-                manager.SetCanvas(_canvasExample);
-                print("no null");
-            }
-            // temporal
-
-            var allPoints = instance.GetComponentsInChildren<IslandSpawnPoint>();
-
-            // Puntos que NO son defensa, se spawnean todos
-            var normalPoints = allPoints.Where(p => p.pointType != SpawnPointType.Defense);
-
-            // Puntos de defensa, solo 2 random
-            var defensePoints = allPoints
-                .Where(p => p.pointType == SpawnPointType.Defense)
-                .OrderBy(_ => Random.value)
-                .Take(2);
-
-            foreach (var point in normalPoints.Concat(defensePoints))
-            {
-                GameObject prefab = entry.profile.GetRandom(point.pointType);
-                if (prefab == null) continue;
-
-                GameObject spawned = Instantiate(prefab, point.transform.position,
-                                                 point.transform.rotation, instance.transform);
-                float parentScale = instance.transform.lossyScale.x;
-                float prefabScale = prefab.transform.localScale.x;
-                spawned.transform.localScale = Vector3.one * (prefabScale / parentScale);
-            }
+            manager.SetCanvas(_canvasExample);
+            manager.Init();
         }
+
+        SpawnDecorations(instance, entry);
+    }
+
+    private void SpawnDecorations(GameObject instance, IslandEntry entry)
+    {
+        var allPoints = instance.GetComponentsInChildren<IslandSpawnPoint>();
+
+        var normalPoints = allPoints.Where(p => p.pointType != SpawnPointType.Defense);
+        var defensePoints = allPoints
+            .Where(p => p.pointType == SpawnPointType.Defense)
+            .OrderBy(_ => Random.value)
+            .Take(2);
+
+        foreach (var point in normalPoints.Concat(defensePoints))
+        {
+            GameObject prefab = entry.profile.GetRandom(point.pointType);
+            if (prefab == null) continue;
+
+            GameObject spawned = Instantiate(prefab, point.transform.position,
+                                             point.transform.rotation, instance.transform);
+            float parentScale = instance.transform.lossyScale.x;
+            float prefabScale = prefab.transform.localScale.x;
+            spawned.transform.localScale = Vector3.one * (prefabScale / parentScale);
+        }
+    }
+
+    public void ReturnIsland(GameObject prefab, GameObject instance)
+    {
+        // Limpia decoraciones
+        foreach (var point in instance.GetComponentsInChildren<IslandSpawnPoint>())
+        {
+            foreach (Transform child in point.transform)
+                Destroy(child.gameObject);
+        }
+
+        instance.GetComponent<IslandManager>()?.ResetIsland();
+
+        
+        _islandPools[prefab].Return(instance);
     }
 
     private IslandEntry PickWeighted()
