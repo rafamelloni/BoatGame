@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RT_EnemyStats : MonoBehaviour
+public class RT_EnemyStats 
 {
 
     //RunetimeStats Enemigo

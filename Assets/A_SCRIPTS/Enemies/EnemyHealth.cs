@@ -11,6 +11,8 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     //Notifyers
     public event Action OnDeath;
     public event Action<float> OnDamage; // para UI o feedback
+    public static event Action<Vector3> OnAnyEnemyDied;
+
     public bool IsDying { get; private set; }
 
 
@@ -39,6 +41,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private void Die()
     {
         OnDeath?.Invoke();
+        OnAnyEnemyDied?.Invoke(transform.position);
         IsDying = true;
         if (_rtData.woodExplosion != null)
         {

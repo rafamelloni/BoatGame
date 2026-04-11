@@ -10,12 +10,12 @@ public class BasicEnemy : Enemy
 
     private Vector3 formationOffset;
 
-    private void Start()
+    public void SetPlayer(Transform player)
     {
+        this.player = player;
+
         if (leader != null)
-        {
             formationOffset = transform.position - leader.position;
-        }
     }
 
     private void Update()

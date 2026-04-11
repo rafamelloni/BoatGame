@@ -101,12 +101,10 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
             case StatType.Cooldown:
                 _rtData.cooldown = Mathf.Max(0.1f, _rtData.cooldown - value);
                 break;
-            case StatType.BulletSpeed:
-                _rtData.bulletSpeed += value;
+            case StatType.FireRate:
+                _rtData.timeBetweenShots -= value;
                 break;
-            case StatType.ShotsPerBurst:
-                _rtData.shotsPerBurst += (int)value;
-                break;
+            
         }
     }
 }

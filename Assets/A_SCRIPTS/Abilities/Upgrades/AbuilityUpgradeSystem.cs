@@ -13,18 +13,19 @@ public class AbilityUpgradeSystem : MonoBehaviour
     [SerializeField] private List<UpgradeRule> _upgradeRules;
     [SerializeField] private UpgradeIconLibrary _iconLibrary;
     [SerializeField] private EnemyUpgradeDisplay _popupPrefab;
-    [SerializeField] private Transform _target;
+    [SerializeField] private UpgradeStatsUI _statsUI; 
+
 
     private readonly List<IUpgradeable> _abilities = new();
 
-    private void Start()
+    private void OnEnable()
     {
-        var enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
-        foreach (var enemy in enemies)
-        {
-            EnemyHealth captured = enemy;
-            captured.OnDeath += () => HandleEnemyDied(captured.transform.position);
-        }
+        EnemyHealth.OnAnyEnemyDied += HandleEnemyDied;
+    }
+
+    private void OnDisable()
+    {
+        EnemyHealth.OnAnyEnemyDied -= HandleEnemyDied;
     }
 
     public void RegisterAbility(IUpgradeable ability)
@@ -49,6 +50,7 @@ public class AbilityUpgradeSystem : MonoBehaviour
         UpgradeRule chosenRule = _upgradeRules[ruleIndex];
 
         chosenAbility.ApplyUpgrade(chosenRule.stat, chosenRule.valuePerKill);
+        _statsUI.OnUpgradeApplied(chosenRule.stat, chosenRule.valuePerKill);
        
 
         Sprite icon = _iconLibrary.GetIcon(chosenAbility.AbilityId, chosenRule.stat);

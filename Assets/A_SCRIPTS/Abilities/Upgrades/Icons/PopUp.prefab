@@ -224,4 +224,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyUpgradeDisplay
   _iconImage: {fileID: 4299529090495319823}
   _duration: 1.5
-  _screenTarget: {x: 0.85, y: 0.85}
+  _screenTarget: {x: 0.5, y: 0.1}
+  _spawnOffset: {x: 0, y: 1, z: 0}

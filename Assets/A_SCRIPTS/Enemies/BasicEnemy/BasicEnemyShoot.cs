@@ -1,4 +1,4 @@
-using UnityEngine;
+ using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
 public class BasicEnemyShoot : MonoBehaviour
@@ -24,6 +24,12 @@ public class BasicEnemyShoot : MonoBehaviour
             Shoot();
             _nextFireTime = Time.time + fireRate;
         }
+    }
+
+    public void SetTarget(Transform target, BulletFactory enemyBullet)
+    {
+        this.target = target;
+        this.enemyBullet = enemyBullet;
     }
 
     private void Shoot()
