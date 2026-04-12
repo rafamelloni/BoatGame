@@ -102,7 +102,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
                 _rtData.cooldown = Mathf.Max(0.1f, _rtData.cooldown - value);
                 break;
             case StatType.FireRate:
-                _rtData.timeBetweenShots -= value;
+                _rtData.timeBetweenShots -= Mathf.Max(0.1f, _rtData.timeBetweenShots - value);
                 break;
             
         }
