@@ -48,7 +48,11 @@ public class UpgradeStatsUI : MonoBehaviour
     public void OnUpgradeApplied(StatType stat, float value)
     {
         // Acumular y mostrar
-        _totals[stat] += value;
+        if (stat == StatType.Cooldown || stat == StatType.FireRate)
+            _totals[stat] -= value;
+        else
+            _totals[stat] += value;
+
         if (_textMap.TryGetValue(stat, out TMP_Text text) && text != null)
         {
             text.text = _totals[stat].ToString("F1");

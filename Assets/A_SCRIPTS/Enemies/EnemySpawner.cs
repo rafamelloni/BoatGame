@@ -22,6 +22,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private Vector2 _spawnAreaSize = new Vector2(200f, 200f);
     [SerializeField] private float _spawnHeight = 0f;
     [SerializeField] private float _spawnYOffset = 5.3f; // <-- esto
+    [SerializeField] private float _spawnRangeAroundPlayer = 40f;
 
 
     [Header("Placement")]
@@ -81,9 +82,8 @@ public class EnemySpawner : MonoBehaviour
         {
             Vector3 candidate = GetRandomPosition();
 
-            if (IsTooCloseToPlayer(candidate)) continue;
             if (IsOverlappingSomething(candidate)) continue;
-            if (IsVisibleByCamera(candidate, planes)) continue;
+            if (IsVisibleByCamera(candidate)) continue;
 
             return candidate;
         }
@@ -94,11 +94,18 @@ public class EnemySpawner : MonoBehaviour
 
     private Vector3 GetRandomPosition()
     {
-        float x = _spawnCenter.position.x + Random.Range(-_spawnAreaSize.x * 0.5f, _spawnAreaSize.x * 0.5f);
-        float z = _spawnCenter.position.z + Random.Range(-_spawnAreaSize.y * 0.5f, _spawnAreaSize.y * 0.5f);
+        float halfX = _spawnAreaSize.x * 0.5f;
+        float halfZ = _spawnAreaSize.y * 0.5f;
+
+        Vector2 randomCircle = Random.insideUnitCircle * _spawnRangeAroundPlayer;
+
+        float x = Mathf.Clamp(_player.position.x + randomCircle.x,
+            _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
+        float z = Mathf.Clamp(_player.position.z + randomCircle.y,
+            _spawnCenter.position.z - halfZ, _spawnCenter.position.z + halfZ);
+
         return new Vector3(x, _spawnHeight, z);
     }
-
     private bool IsTooCloseToPlayer(Vector3 candidate)
     {
         return Vector3.Distance(candidate, _player.position) < _minDistanceFromPlayer;
@@ -109,14 +116,18 @@ public class EnemySpawner : MonoBehaviour
         return Physics.CheckSphere(candidate, _overlapCheckRadius, _overlapCheckMask);
     }
 
-    private bool IsVisibleByCamera(Vector3 candidate, Plane[] planes)
+    private bool IsVisibleByCamera(Vector3 candidate)
     {
-        var testBounds = new Bounds(candidate, Vector3.one * 4f);
-        return GeometryUtility.TestPlanesAABB(planes, testBounds);
+        Vector3 viewportPoint = _camera.WorldToViewportPoint(candidate);
+        return viewportPoint.x >= 0f && viewportPoint.x <= 1f &&
+               viewportPoint.y >= 0f && viewportPoint.y <= 1f &&
+               viewportPoint.z > 0f;
     }
 
     private void Spawn(Vector3 position)
     {
+        Debug.Log($"Spawning at {position}, player at {_player.position}");
+
         int randomIndex = Random.Range(0, _pools.Length);
         var group = _pools[randomIndex].Get();
         group.transform.position = position + new Vector3(0f, _spawnYOffset, 0f);
