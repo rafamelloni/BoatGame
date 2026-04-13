@@ -25,8 +25,8 @@ public class IslandManager : MonoBehaviour
         _wasDefeated = false;
         _destroyedDefenses = 0;
 
-        if (_canvasExample != null)
-            _canvasExample.SetActive(false);
+        //if (_canvasExample != null)
+        //    _canvasExample.SetActive(false);
     }
 
     public void RegisterDefenseDestroyed()

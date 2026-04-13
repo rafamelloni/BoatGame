@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3223898325846262942}
   - component: {fileID: 7241798992164844024}
   - component: {fileID: 2217540475553048704}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: RealBarrell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -259,10 +259,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.49751556
-  m_Height: 1.0526438
+  m_Radius: 1.2129846
+  m_Height: 3.91009
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0.1034559, y: -0.19274497, z: 0.1805737}
 --- !u!114 &2217540475553048704
 MonoBehaviour:
   m_ObjectHideFlags: 0

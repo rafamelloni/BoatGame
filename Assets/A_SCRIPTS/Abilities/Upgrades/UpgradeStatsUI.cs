@@ -56,8 +56,8 @@ public class UpgradeStatsUI : MonoBehaviour
         if (_textMap.TryGetValue(stat, out TMP_Text text) && text != null)
         {
             text.text = _totals[stat].ToString("F1");
-            StopCoroutine(nameof(FlashGreen)); // por si estaba corriendo
-            StartCoroutine(FlashGreen(text));
+            //StopCoroutine(nameof(FlashGreen)); // por si estaba corriendo
+            //StartCoroutine(FlashGreen(text));
         }
 
         // Barra: siempre +1 por mejora aplicada
