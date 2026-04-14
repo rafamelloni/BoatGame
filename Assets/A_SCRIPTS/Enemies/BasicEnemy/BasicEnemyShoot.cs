@@ -1,90 +1,71 @@
- using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+using UnityEngine;
 
 public class BasicEnemyShoot : MonoBehaviour
 {
-
     public BulletFactory enemyBullet;
-
     [SerializeField] private Transform shootPoint;
-    [SerializeField] private float fireRate = 2f;
 
     [Header("FOV")]
     [SerializeField] private Transform target;
     [SerializeField] private float viewDistance = 15f;
     [SerializeField] private float viewAngle = 90f;
     [SerializeField] private LayerMask obstacleMask;
+    [SerializeField] private float _aimRadius = 2f;
 
-    private float _nextFireTime;
+    [Header("Data")]
+    public SO_EnemyData SO_EnemyData;
+    private RT_EnemyStats RT_EnemyData;
 
-    void Update()
+    private void Awake()
     {
-        if (Time.time >= _nextFireTime && CanSeeTarget())
-        {
-            Shoot();
-            _nextFireTime = Time.time + fireRate;
-        }
+        RT_EnemyData = new RT_EnemyStats(SO_EnemyData);
     }
-
     public void SetTarget(Transform target, BulletFactory enemyBullet)
     {
         this.target = target;
         this.enemyBullet = enemyBullet;
     }
 
-    private void Shoot()
+    public void ForceShoot()
     {
+        if (!CanSeeTarget()) return;
+        Vector3 randomOffset = new Vector3(
+            Random.Range(-_aimRadius, _aimRadius),
+            0f,
+            Random.Range(-_aimRadius, _aimRadius)
+        );
+        Vector3 aimPoint = target.position + randomOffset;
         var bullet = enemyBullet.Create();
-
-        bullet.transform.position = shootPoint.position;
-        bullet.transform.rotation = shootPoint.rotation;
+        bullet.GetComponent<BasicEnemyBullet>().SetTarget(aimPoint, RT_EnemyData, shootPoint);
     }
-    private bool CanSeeTarget()
+
+    public bool CanSeeTarget()
     {
         if (target == null) return false;
-
         Vector3 dir = (target.position - transform.position);
         dir.y = 0f;
-
         float distance = dir.magnitude;
         if (distance > viewDistance) return false;
-
         float angle = Vector3.Angle(transform.right, dir.normalized);
         if (angle > viewAngle * 0.5f) return false;
-
-        // Line of sight (opcional pero recomendado)
         if (Physics.Raycast(transform.position, dir.normalized, distance, obstacleMask))
             return false;
-
         return true;
     }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-
-        // Radio de visión
         Gizmos.DrawWireSphere(transform.position, viewDistance);
-
         if (target == null) return;
-
         Vector3 forward = transform.right;
         float halfAngle = viewAngle * 0.5f;
-
-        // Direcciones del cono
         Vector3 leftDir = Quaternion.Euler(0, -halfAngle, 0) * forward;
         Vector3 rightDir = Quaternion.Euler(0, halfAngle, 0) * forward;
-
-        // Líneas del cono
         Gizmos.color = Color.blue;
         Gizmos.DrawLine(transform.position, transform.position + leftDir * viewDistance);
         Gizmos.DrawLine(transform.position, transform.position + rightDir * viewDistance);
-
-        // Línea al target
-        if (CanSeeTarget())
-            Gizmos.color = Color.green;
-        else
-            Gizmos.color = Color.red;
-
+        Gizmos.color = CanSeeTarget() ? Color.green : Color.red;
         Gizmos.DrawLine(transform.position, target.position);
     }
 }

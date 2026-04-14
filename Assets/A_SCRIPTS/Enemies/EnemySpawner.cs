@@ -106,10 +106,7 @@ public class EnemySpawner : MonoBehaviour
 
         return new Vector3(x, _spawnHeight, z);
     }
-    private bool IsTooCloseToPlayer(Vector3 candidate)
-    {
-        return Vector3.Distance(candidate, _player.position) < _minDistanceFromPlayer;
-    }
+
 
     private bool IsOverlappingSomething(Vector3 candidate)
     {
@@ -139,16 +136,22 @@ public class EnemySpawner : MonoBehaviour
     private void ReturnToPool(EnemyGroup group)
     {
         group.OnGroupDead -= ReturnToPool;
+        Debug.Log($"ReturnToPool called for {group.gameObject.name}");
+        bool found = false;
 
         // Necesitamos saber a qué pool devolver — buscamos por nombre de prefab
         for (int i = 0; i < _enemyGroupPrefabs.Length; i++)
         {
+            Debug.Log($"Comparing '{group.gameObject.name}' with '{_enemyGroupPrefabs[i].name}'");
+
             if (group.gameObject.name.Contains(_enemyGroupPrefabs[i].name))
             {
                 _pools[i].Return(group);
+                found = true;
                 break;
             }
         }
+        if (!found) Debug.LogError($"Pool not found for: {group.gameObject.name}");
 
         _activeGroupCount--;
     }

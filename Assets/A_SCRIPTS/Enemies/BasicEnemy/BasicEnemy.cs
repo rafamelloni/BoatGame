@@ -9,6 +9,7 @@ public class BasicEnemy : Enemy
     [SerializeField] private float rotationSpeed = 5f;
 
     private Vector3 formationOffset;
+    private bool _stopped;
 
     public void SetPlayer(Transform player)
     {
@@ -18,40 +19,40 @@ public class BasicEnemy : Enemy
             formationOffset = transform.position - leader.position;
     }
 
+    public void SetStopped(bool stopped)
+    {
+        _stopped = stopped;
+    }
+
     private void Update()
     {
         if (player == null) return;
 
         if (leader != null && !leader.gameObject.activeInHierarchy)
-        {
             leader = null;
-        }
 
-        Vector3 targetPos;
-
-        if (leader != null)
-            targetPos = leader.position + formationOffset;
-        else
-            targetPos = player.position;
+        Vector3 targetPos = leader != null
+            ? leader.position + formationOffset
+            : player.position;
 
         Vector3 dir = targetPos - transform.position;
         dir.y = 0f;
 
-        if (dir.sqrMagnitude > 0.01f)
+        // Siempre rotar hacia el player cuando esta parado
+        Vector3 rotDir = _stopped
+            ? player.position - transform.position
+            : dir;
+
+        rotDir.y = 0f;
+
+        if (rotDir.sqrMagnitude > 0.01f)
         {
-            transform.position += dir.normalized * speed * Time.deltaTime;
-
-            Quaternion targetRot = Quaternion.LookRotation(dir);
-
-            // Como el frente de tu modelo es el eje rojo (X+) y no el azul (Z+),
-            // corregimos con un offset de 90 grados.
+            Quaternion targetRot = Quaternion.LookRotation(rotDir);
             targetRot *= Quaternion.Euler(0f, -90f, 0f);
-
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                targetRot,
-                rotationSpeed * Time.deltaTime
-            );
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
         }
+
+        if (!_stopped && dir.sqrMagnitude > 0.01f)
+            transform.position += dir.normalized * speed * Time.deltaTime;
     }
 }

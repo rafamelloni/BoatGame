@@ -7,20 +7,67 @@ public class EnemyGroup : MonoBehaviour
     private int _aliveCount;
     public event Action<EnemyGroup> OnGroupDead;
 
+    [Header("Movement")]
+    [SerializeField] private float stopDistance = 12f;
+
+    [Header("Shoot")]
+    [SerializeField] private float fireRate = 2f;
+    private float _nextFireTime;
+
+    private Transform _player;
+    private BasicEnemy[] _enemies;
+    private BasicEnemyShoot[] _shooters;
+
     public void Init(Transform player, BulletFactory enemyBullet)
     {
+        _player = player;
         _aliveCount = _members.Length;
-
         foreach (var member in _members)
         {
-            member.ResetHealth();
+            member.Revive();
             member.OnDeath += OnMemberDied;
         }
-
-        foreach (var enemy in GetComponentsInChildren<BasicEnemy>())
+        _enemies = GetComponentsInChildren<BasicEnemy>();
+        _shooters = GetComponentsInChildren<BasicEnemyShoot>();
+        foreach (var enemy in _enemies)
             enemy.SetPlayer(player);
-        foreach (var shooter in GetComponentsInChildren<BasicEnemyShoot>())
+        foreach (var shooter in _shooters)
             shooter.SetTarget(player, enemyBullet);
+    }
+
+    private void Update()
+    {
+        if (_player == null) return;
+
+        // Usar la posicion de un miembro vivo en vez del transform del grupo
+        Transform reference = GetAliveMember();
+        if (reference == null) return;
+
+        Vector3 toPlayer = _player.position - reference.position;
+        toPlayer.y = 0f;
+        float dist = toPlayer.magnitude;
+
+        bool shouldStop = dist <= stopDistance;
+
+        foreach (var enemy in _enemies)
+            enemy.SetStopped(shouldStop);
+
+        if (Time.time >= _nextFireTime)
+        {
+            foreach (var shooter in _shooters)
+                shooter.ForceShoot();
+            _nextFireTime = Time.time + fireRate;
+        }
+    }
+
+    private Transform GetAliveMember()
+    {
+        foreach (var member in _members)
+        {
+            if (member != null && member.gameObject.activeInHierarchy)
+                return member.transform;
+        }
+        return null;
     }
 
     public void Cleanup()
@@ -31,12 +78,17 @@ public class EnemyGroup : MonoBehaviour
             if (member == null) continue;
             member.OnDeath -= OnMemberDied;
         }
+        _aliveCount = 0;
     }
 
     private void OnMemberDied()
     {
         _aliveCount--;
-        if (_aliveCount <= 0)
+
+        Debug.Log($"Member died, aliveCount: {_aliveCount}");
+        if (_aliveCount <= 0) {
             OnGroupDead?.Invoke(this);
+        }
+            
     }
 }

@@ -50,6 +50,12 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         gameObject.SetActive(false);
         IsDying = false;
     }
+    public void Revive()
+    {
+        gameObject.SetActive(true);
+        _rtData.Reset();
+        IsDying = false;
+    }
 
     public float GetHealthNormalized()
     {
