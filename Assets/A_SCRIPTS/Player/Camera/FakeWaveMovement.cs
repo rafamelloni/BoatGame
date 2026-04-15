@@ -11,15 +11,16 @@ public class FakeWaveMovement : MonoBehaviour
     public float tiltFrequency = 1f;
 
     [Header("Forward Tilt")]
-    public float manualTiltAmount = 10f;
-    public float tiltSmoothSpeed = 5f;
+    public float manualTiltAmount = 25f;   // más exagerado
+    public float tiltSmoothSpeed = 10f;    // entra rápido
     public float tiltReturnSpeed = 3f;
+
     public Animator anim;
 
     private float baseHeight;
-
     private float _currentExtraTiltX = 0f;
     private float _targetExtraTiltX = 0f;
+    private float _tiltHoldTimer = 0f;
 
     void Start()
     {
@@ -35,6 +36,17 @@ public class FakeWaveMovement : MonoBehaviour
         pos.y = baseHeight + Mathf.Sin(t * frequency) * amplitude;
         transform.position = pos;
 
+        // --- HOLD TIMER ---
+        if (_tiltHoldTimer > 0f)
+        {
+            _tiltHoldTimer -= Time.deltaTime;
+            _targetExtraTiltX = -manualTiltAmount;
+        }
+        else
+        {
+            _targetExtraTiltX = 0f;
+        }
+
         // --- INTERPOLAR TILT EXTRA ---
         float smooth = _targetExtraTiltX != 0 ? tiltSmoothSpeed : tiltReturnSpeed;
         _currentExtraTiltX = Mathf.Lerp(
@@ -46,33 +58,15 @@ public class FakeWaveMovement : MonoBehaviour
         // --- TILT DE OLAS ---
         float tiltX = Mathf.Sin(t * tiltFrequency) * tiltAmplitude;
         float tiltZ = Mathf.Cos(t * tiltFrequency * 0.8f) * tiltAmplitude;
-
         tiltX += _currentExtraTiltX;
 
         float currentYaw = transform.rotation.eulerAngles.y;
-
-        transform.rotation = Quaternion.Euler(
-            tiltX,
-            currentYaw,
-            tiltZ
-        );
-
-        // si nadie llamó al método este frame, vuelve a 0 suavemente
-        _targetExtraTiltX = 0f;
-        if (anim != null)
-        {
-            anim.SetBool("IsSprinting", false);
-        }
-        
-
+        transform.rotation = Quaternion.Euler(tiltX, currentYaw, tiltZ);
     }
 
-    public void ApplyForwardTilt()
+    // Llamalo desde Movement pasándole la duración del dash
+    public void ApplyForwardTilt(float duration)
     {
-        _targetExtraTiltX = -manualTiltAmount;
-        if (anim != null)
-        {
-            anim.SetBool("IsSprinting", true);
-        }
+        _tiltHoldTimer = duration;
     }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8935729938216563360}
   - component: {fileID: 2687655925807181148}
   - component: {fileID: 5504256415272995474}
-  - component: {fileID: 5174460607396526633}
+  - component: {fileID: -4329453396294713392}
   m_Layer: 7
   m_Name: BasicEnemyBullet
   m_TagString: Untagged
@@ -115,7 +115,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5174460607396526633
+--- !u!114 &-4329453396294713392
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -124,7 +124,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 4168834434036702301}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34a662c91da07584baba8e3d08e4b1e2, type: 3}
+  m_Script: {fileID: 11500000, guid: 9069957bb6d9c914aa2d94c0b535ceb0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BasicEnemyBullet
-  _speed: 5
+  m_EditorClassIdentifier: Assembly-CSharp::HeavyIslandBullet
+  _speed: 3
+  _lifeTime: 5

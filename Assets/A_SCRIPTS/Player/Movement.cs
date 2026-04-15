@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
 
 public class Movement : MonoBehaviour
 {
@@ -7,13 +6,26 @@ public class Movement : MonoBehaviour
     public ParticleSystem trail;
     public ParticleSystem trail1;
     public ParticleSystem trail2;
-
     public ParticleSystem trailSprint;
     public ParticleSystem trailSprint1;
     public FakeWaveMovement fakeWaveMomenent;
 
+    [Header("Dash")]
+    public float dashSpeed = 20f;
+    public float dashDuration = 0.2f;
+    public float dashCooldown = 1.5f;
+    public float shiftTapThreshold = 0.2f;
+    public float dashDecelerationMultiplier = 0.3f;
+
     private float _currentSpeed = 0f;
     private float _smoothTurn = 0f;
+
+    private bool _isDashing = false;
+    private float _dashTimer = 0f;
+    private float _cooldownTimer = 0f;
+
+    private float _shiftHeldTime = 0f;
+    private bool _shiftWasDown = false;
 
     private void Awake()
     {
@@ -22,27 +34,17 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        float vertical = Input.GetAxisRaw("Vertical");
-        float horizontal = Input.GetAxisRaw("Horizontal");
+        HandleDashInput();
 
-        vertical = Mathf.Clamp01(vertical);
-
-        //sprint prototype
-        bool sprint = Input.GetKey(KeyCode.LeftShift);
-
-        float moveSpeed = _stats.moveSpeed;
-        if (sprint && vertical > 0)
+        if (_isDashing)
         {
-            moveSpeed *= _stats.sprintMultiplier;
-            trailSprint.Play();
-            trailSprint1.Play();
-            fakeWaveMomenent.ApplyForwardTilt();
-        }else if (!sprint)
-        {
-            trailSprint.Stop();
-            trailSprint1.Stop();
+            UpdateDash();
+            return;
         }
 
+        float vertical = Input.GetAxisRaw("Vertical");
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        vertical = Mathf.Clamp01(vertical);
 
         // --- ACELERACIÓN ---
         if (vertical != 0)
@@ -50,10 +52,9 @@ public class Movement : MonoBehaviour
             trail.Play();
             trail1.Play();
             trail2.Play();
-
             _currentSpeed = Mathf.Lerp(
                 _currentSpeed,
-                vertical * moveSpeed,
+                vertical * _stats.moveSpeed,
                 Time.deltaTime * _stats.acceleration
             );
         }
@@ -62,11 +63,10 @@ public class Movement : MonoBehaviour
             trail.Stop();
             trail1.Stop();
             trail2.Stop();
-
             _currentSpeed = Mathf.Lerp(
                 _currentSpeed,
                 0f,
-                Time.deltaTime * _stats.deceleration
+                Time.deltaTime * _stats.deceleration * (_currentSpeed > _stats.moveSpeed ? dashDecelerationMultiplier : 1f)
             );
         }
 
@@ -77,5 +77,57 @@ public class Movement : MonoBehaviour
         float targetTurn = horizontal * _stats.turnSpeed;
         _smoothTurn = Mathf.Lerp(_smoothTurn, targetTurn, Time.deltaTime * 5f);
         transform.Rotate(0f, _smoothTurn * Time.deltaTime, 0f);
+    }
+
+    void HandleDashInput()
+    {
+        if (_cooldownTimer > 0f)
+            _cooldownTimer -= Time.deltaTime;
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            _shiftHeldTime = 0f;
+            _shiftWasDown = true;
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && _shiftWasDown)
+            _shiftHeldTime += Time.deltaTime;
+
+        if (Input.GetKeyUp(KeyCode.LeftShift) && _shiftWasDown)
+        {
+            if (_shiftHeldTime <= shiftTapThreshold && _cooldownTimer <= 0f && !_isDashing)
+                StartDash();
+
+            _shiftWasDown = false;
+            _shiftHeldTime = 0f;
+        }
+    }
+
+    void StartDash()
+    {
+        _isDashing = true;
+        _dashTimer = dashDuration;
+        _cooldownTimer = dashCooldown;
+
+        trail.Stop();
+        trail1.Stop();
+        trail2.Stop();
+        trailSprint.Play();
+        trailSprint1.Play();
+        fakeWaveMomenent.ApplyForwardTilt(dashDuration);
+    }
+
+    void UpdateDash()
+    {
+        _dashTimer -= Time.deltaTime;
+        transform.position += transform.forward * dashSpeed * Time.deltaTime;
+
+        if (_dashTimer <= 0f)
+        {
+            _isDashing = false;
+            _currentSpeed = dashSpeed;
+            trailSprint.Stop();
+            trailSprint1.Stop();
+        }
     }
 }
