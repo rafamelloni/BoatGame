@@ -7,6 +7,7 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private SO_MorterData _morterData;
     [SerializeField] private CooldownRadialUI cannonCooldownUI;
     [SerializeField] private AbilityUpgradeSystem _upgradeSystem;
+    [SerializeField] private followPlayer _camera;
 
 
 
@@ -33,7 +34,7 @@ public class AbilityController : MonoBehaviour
         if (runner == null) runner = gameObject.AddComponent<CoroutineRunner>();
 
         // crear estrategia
-        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory);
+        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory, _camera);
         _upgradeSystem.RegisterAbility(_abilityE);
         _abilityE.OnCooldownStarted += cannonCooldownUI.PlayCooldown;
 
@@ -46,6 +47,9 @@ public class AbilityController : MonoBehaviour
         {
             _abilityE.TryExecute();
             
+
+
+
         }
 
         if (Input.GetKeyDown(KeyCode.Q) && wasUpgraded)

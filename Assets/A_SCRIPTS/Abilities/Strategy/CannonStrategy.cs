@@ -17,6 +17,8 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
 
     private float nextFireTime = 0f;
 
+    followPlayer _camera;
+
     //COOLDOWN
     //Data de la interfaz de cooldown
     public event Action<float> OnCooldownStarted; //Delegate que se llama cuando arrranca el cooldown de la abilidad
@@ -36,13 +38,14 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
     //ID para icono IUpgradeable
     public string AbilityId => "Cannon";
 
-    public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet)
+    public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet, followPlayer camera)
     {
         this._baseData = data;
         _rtData = new RT_CannonData(_baseData);
         this.hardpoints = hardpoints;
         this.runner = runner;
         this._cannonBullet = cannonBullet;
+        this._camera = camera;
     }
 
     public void TryExecute()
@@ -63,6 +66,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
             foreach (Transform p in hardpoints.rightShootPoints)
             {
                 FireFromPoint(p, 1f);
+                _camera.ApplyCannonImpact();
                 hardpoints._cannonSmokeShootR.Play();
             }
                 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RT_CannonData : MonoBehaviour
+public class RT_CannonData 
 {
     public float bulletSpeed;
     public float verticalArc;

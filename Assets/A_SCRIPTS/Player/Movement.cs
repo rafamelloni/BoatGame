@@ -36,15 +36,20 @@ public class Movement : MonoBehaviour
     {
         HandleDashInput();
 
+        float vertical = Input.GetAxisRaw("Vertical");
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        vertical = Mathf.Clamp01(vertical);
+
+        // --- GIRO (siempre activo, incluso durante dash) ---
+        float targetTurn = horizontal * _stats.turnSpeed;
+        _smoothTurn = Mathf.Lerp(_smoothTurn, targetTurn, Time.deltaTime * 5f);
+        transform.Rotate(0f, _smoothTurn * Time.deltaTime, 0f);
+
         if (_isDashing)
         {
             UpdateDash();
             return;
         }
-
-        float vertical = Input.GetAxisRaw("Vertical");
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        vertical = Mathf.Clamp01(vertical);
 
         // --- ACELERACIÓN ---
         if (vertical != 0)
@@ -72,11 +77,6 @@ public class Movement : MonoBehaviour
 
         // --- MOVIMIENTO ---
         transform.position += transform.forward * _currentSpeed * Time.deltaTime;
-
-        // --- GIRO SUAVIZADO ---
-        float targetTurn = horizontal * _stats.turnSpeed;
-        _smoothTurn = Mathf.Lerp(_smoothTurn, targetTurn, Time.deltaTime * 5f);
-        transform.Rotate(0f, _smoothTurn * Time.deltaTime, 0f);
     }
 
     void HandleDashInput()
