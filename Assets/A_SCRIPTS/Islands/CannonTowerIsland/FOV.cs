@@ -16,21 +16,21 @@ public class FOV : MonoBehaviour
         _target = GameObject.FindWithTag("Player").transform;
 
     }
-    private void Update()
-    {
-        if(CanSeeTarget())
-        {
-            //acttiva el canvas de vida, feedback de que te puede atacar
-            _uiHealth.SetActive(true);
+    //private void Update()
+    //{
+    //    if(CanSeeTarget())
+    //    {
+    //        //acttiva el canvas de vida, feedback de que te puede atacar
+    //        _uiHealth.SetActive(true);
             
-        }
-        else
-        {
-            _uiHealth.SetActive(false);
+    //    }
+    //    else
+    //    {
+    //        _uiHealth.SetActive(false);
 
-        }
+    //    }
 
-    }
+    //}
     public bool CanSeeTarget()
     {
         if (_target == null) return false;
