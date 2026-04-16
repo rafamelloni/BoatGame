@@ -115,6 +115,7 @@ public class Movement : MonoBehaviour
         trailSprint.Play();
         trailSprint1.Play();
         fakeWaveMomenent.ApplyForwardTilt(dashDuration);
+
     }
 
     void UpdateDash()
