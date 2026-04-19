@@ -51,8 +51,12 @@ public class EnemyGroup : MonoBehaviour
             shooter.SetStopped(shouldStop);
         if (Time.time >= _nextFireTime)
         {
-            foreach (var shooter in _shooters)
-                shooter.ForceShoot();
+            foreach (var shooter in _shooters){
+
+                if (shooter.gameObject.activeInHierarchy)
+                    shooter.ForceShoot();
+            }
+                
             _nextFireTime = Time.time + fireRate;
         }
     }
