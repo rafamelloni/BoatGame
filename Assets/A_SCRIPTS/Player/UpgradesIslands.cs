@@ -7,6 +7,7 @@ public class UpgradesIslands : MonoBehaviour
     public GameObject bnner;
 
     public GameObject mortargo;
+    public GameObject mortargoAbility;
 
     public GameObject canvas;
     
@@ -19,6 +20,7 @@ public class UpgradesIslands : MonoBehaviour
     {
         ability.wasUpgraded = true;
         mortargo.SetActive(true);
+        mortargoAbility.SetActive(true);
         canvas.SetActive(false);
     }
     public void OnButtonClick2()

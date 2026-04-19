@@ -67,7 +67,7 @@ public class AbilityController : MonoBehaviour
 
     public void upgrade()
     {
-        _abilityE._rtData.shotsPerBurst = 3;
+        _abilityE._rtData.shotsPerBurst = 4;
     }
 
 }
