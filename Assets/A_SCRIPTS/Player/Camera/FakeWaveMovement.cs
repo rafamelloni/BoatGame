@@ -18,6 +18,7 @@ public class FakeWaveMovement : MonoBehaviour
     public Animator anim;
 
     private float baseHeight;
+    private float _phaseOffset;
     private float _currentExtraTiltX = 0f;
     private float _targetExtraTiltX = 0f;
     private float _tiltHoldTimer = 0f;
@@ -25,11 +26,12 @@ public class FakeWaveMovement : MonoBehaviour
     void Start()
     {
         baseHeight = transform.position.y;
+        _phaseOffset = Random.Range(0f, Mathf.PI * 2f);  // <-- NUEVO
     }
 
     void LateUpdate()
     {
-        float t = Time.time;
+        float t = Time.time + _phaseOffset;
 
         // --- ALTURA ---
         Vector3 pos = transform.position;
