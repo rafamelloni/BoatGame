@@ -33,25 +33,22 @@ public class EnemyGroup : MonoBehaviour
             enemy.SetPlayer(player);
         foreach (var shooter in _shooters)
             shooter.SetTarget(player, enemyBullet);
+
     }
 
     private void Update()
     {
         if (_player == null) return;
-
-        // Usar la posicion de un miembro vivo en vez del transform del grupo
         Transform reference = GetAliveMember();
         if (reference == null) return;
-
         Vector3 toPlayer = _player.position - reference.position;
         toPlayer.y = 0f;
         float dist = toPlayer.magnitude;
-
         bool shouldStop = dist <= stopDistance;
-
         foreach (var enemy in _enemies)
             enemy.SetStopped(shouldStop);
-
+        foreach (var shooter in _shooters)
+            shooter.SetStopped(shouldStop);
         if (Time.time >= _nextFireTime)
         {
             foreach (var shooter in _shooters)

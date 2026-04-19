@@ -94,16 +94,14 @@ public class BasicEnemyBullet : BulletsBase
         {
             Explode(explosionPoint);
             ParticlePool.Instance.GetParticle(_rtData.explosionVFX, explosionPoint);
-            print("player");
         }
         if (other.CompareTag("Floor"))
         {
             Vector3 explosionPoint0 = other.ClosestPoint(transform.position);
             ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint0);
-            print("floor");
 
         }
-
+        Debug.Log("collisiono con: " + other.gameObject.name);
         Pool.Return(this);
     }
 

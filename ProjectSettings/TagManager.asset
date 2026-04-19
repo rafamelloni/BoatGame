@@ -19,8 +19,8 @@ TagManager:
   - BulletLayer
   - Player
   - EnemyBulletLayer
-  - 
-  - 
+  - EnemyGroupLayer
+  - Islas
   - 
   - 
   - 

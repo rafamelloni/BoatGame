@@ -28,6 +28,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage)
     {
+        
         _rtData.currentHealth -= damage;
         OnDamage?.Invoke(_rtData.currentHealth);
         if (_rtData.currentHealth <= 0)

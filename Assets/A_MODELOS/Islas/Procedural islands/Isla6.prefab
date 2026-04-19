@@ -231,7 +231,8 @@ GameObject:
   - component: {fileID: 2750344450173203712}
   - component: {fileID: 8134149294603921228}
   - component: {fileID: 2987474990240036599}
-  m_Layer: 0
+  - component: {fileID: -3356588191632747803}
+  m_Layer: 11
   m_Name: Isla6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -328,6 +329,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IslandManager
   _totalDefenses: 0
   _canvasExample: {fileID: 0}
+--- !u!135 &-3356588191632747803
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3074807843132588962}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 956.2401
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3328247736937286630
 GameObject:
   m_ObjectHideFlags: 0
