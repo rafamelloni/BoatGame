@@ -524,6 +524,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6250279791005447423}
     m_Modifications:
+    - target: {fileID: 3249694635651439294, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    - target: {fileID: 3249694635651439294, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
+      propertyPath: m_UseCustomVertexStreams
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4484414801861894653, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
+      propertyPath: stopAction
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4484414801861894653, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
       propertyPath: playOnAwake
       value: 1
@@ -534,15 +546,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7284333568125945638, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.10080996
+      value: 0.15338236
       objectReference: {fileID: 0}
     - target: {fileID: 7284333568125945638, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.108890876
+      value: 0.16567747
       objectReference: {fileID: 0}
     - target: {fileID: 7284333568125945638, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.36519793
+      value: 0.5556486
       objectReference: {fileID: 0}
     - target: {fileID: 7284333568125945638, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
       propertyPath: m_LocalPosition.x

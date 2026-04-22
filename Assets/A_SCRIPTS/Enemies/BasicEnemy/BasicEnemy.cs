@@ -48,7 +48,8 @@ public class BasicEnemy : Enemy
 
         Vector3 dir = targetPos - transform.position;
         dir.y = 0f;
-        _trailP.Play();
+        if(_trailP != null)
+            _trailP.Play();
 
         if (!_stopped && dir.sqrMagnitude > 0.01f)
         {
@@ -92,7 +93,8 @@ public class BasicEnemy : Enemy
         }
         else if (_stopped)
         {
-            _trailP.Stop();
+            if(_trailP !=null)
+                _trailP.Stop();
             // Parado, rota hacia el player
             Vector3 rotDir = player.position - transform.position;
             rotDir.y = 0f;
