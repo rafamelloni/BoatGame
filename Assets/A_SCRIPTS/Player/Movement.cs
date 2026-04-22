@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class Movement : MonoBehaviour
 {
@@ -10,48 +11,41 @@ public class Movement : MonoBehaviour
     public ParticleSystem trailSprint1;
     public FakeWaveMovement fakeWaveMomenent;
 
-    [Header("Dash")]
-    public float dashSpeed = 20f;
-    public float dashDuration = 0.2f;
-    public float dashCooldown = 1.5f;
-    public float shiftTapThreshold = 0.2f;
-    public float dashDecelerationMultiplier = 0.3f;
+    [Header("Sprint")]
+    public float sprintSpeedMultiplier = 1.5f;
+    public float sprintMaxDuration = 5f;
+    public float sprintRechargeRate = 1f;   // segundos que recarga por segundo
+    public float sprintDrainRate = 1f;      // segundos que consume por segundo
+    public Image sprintBarImage;            // Image con Fill Method: Horizontal
+
+    private float _sprintStamina;           // valor actual (0 a sprintMaxDuration)
+    private bool _isSprinting = false;
 
     private float _currentSpeed = 0f;
     private float _smoothTurn = 0f;
 
-    private bool _isDashing = false;
-    private float _dashTimer = 0f;
-    private float _cooldownTimer = 0f;
-
-    private float _shiftHeldTime = 0f;
-    private bool _shiftWasDown = false;
-
     private void Awake()
     {
         _stats = GetComponent<RT_PlayerStats>();
+        _sprintStamina = sprintMaxDuration;
     }
 
     void Update()
     {
-        HandleDashInput();
+        HandleSprint();
 
         float vertical = Input.GetAxisRaw("Vertical");
         float horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Mathf.Clamp01(vertical);
 
-        // --- GIRO (siempre activo, incluso durante dash) ---
+        // --- GIRO ---
         float targetTurn = horizontal * _stats.turnSpeed;
         _smoothTurn = Mathf.Lerp(_smoothTurn, targetTurn, Time.deltaTime * 5f);
         transform.Rotate(0f, _smoothTurn * Time.deltaTime, 0f);
 
-        if (_isDashing)
-        {
-            UpdateDash();
-            return;
-        }
+        float targetSpeed = _stats.moveSpeed * (_isSprinting ? sprintSpeedMultiplier : 1f);
 
-        // --- ACELERACI�N ---
+        // --- ACELERACIÓN ---
         if (vertical != 0)
         {
             trail.Play();
@@ -59,7 +53,7 @@ public class Movement : MonoBehaviour
             trail2.Play();
             _currentSpeed = Mathf.Lerp(
                 _currentSpeed,
-                vertical * _stats.moveSpeed,
+                vertical * targetSpeed,
                 Time.deltaTime * _stats.acceleration
             );
         }
@@ -71,64 +65,58 @@ public class Movement : MonoBehaviour
             _currentSpeed = Mathf.Lerp(
                 _currentSpeed,
                 0f,
-                Time.deltaTime * _stats.deceleration * (_currentSpeed > _stats.moveSpeed ? dashDecelerationMultiplier : 1f)
+                Time.deltaTime * _stats.deceleration
             );
         }
 
         // --- MOVIMIENTO ---
         transform.position += transform.forward * _currentSpeed * Time.deltaTime;
+
+        // --- UI ---
+        if (sprintBarImage != null)
+            sprintBarImage.fillAmount = _sprintStamina / sprintMaxDuration;
     }
 
-    void HandleDashInput()
+    void HandleSprint()
     {
-        if (_cooldownTimer > 0f)
-            _cooldownTimer -= Time.deltaTime;
+        bool shiftHeld = Input.GetKey(KeyCode.LeftShift);
+        bool canSprint = _sprintStamina > 0f;
 
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (shiftHeld && canSprint)
         {
-            _shiftHeldTime = 0f;
-            _shiftWasDown = true;
+            // Activar sprint
+            if (!_isSprinting)
+            {
+                _isSprinting = true;
+                trailSprint.Play();
+                trailSprint1.Play();
+                fakeWaveMomenent.ApplyForwardTilt(0.2f);
+            }
+
+            // Consumir stamina
+            _sprintStamina -= sprintDrainRate * Time.deltaTime;
+            _sprintStamina = Mathf.Max(_sprintStamina, 0f);
+
+            // Se acabó la stamina → cortar sprint
+            if (_sprintStamina <= 0f)
+                StopSprint();
         }
-
-        if (Input.GetKey(KeyCode.LeftShift) && _shiftWasDown)
-            _shiftHeldTime += Time.deltaTime;
-
-        if (Input.GetKeyUp(KeyCode.LeftShift) && _shiftWasDown)
+        else
         {
-            if (_shiftHeldTime <= shiftTapThreshold && _cooldownTimer <= 0f && !_isDashing)
-                StartDash();
+            // Soltar Shift o sin stamina → cortar sprint
+            if (_isSprinting)
+                StopSprint();
 
-            _shiftWasDown = false;
-            _shiftHeldTime = 0f;
+            // Recargar stamina cuando no está sprintando
+            _sprintStamina += sprintRechargeRate * Time.deltaTime;
+            _sprintStamina = Mathf.Min(_sprintStamina, sprintMaxDuration);
         }
     }
 
-    void StartDash()
+    void StopSprint()
     {
-        _isDashing = true;
-        _dashTimer = dashDuration;
-        _cooldownTimer = dashCooldown;
-
-        trail.Stop();
-        trail1.Stop();
-        trail2.Stop();
-        trailSprint.Play();
-        trailSprint1.Play();
-        fakeWaveMomenent.ApplyForwardTilt(dashDuration);
-
-    }
-
-    void UpdateDash()
-    {
-        _dashTimer -= Time.deltaTime;
-        transform.position += transform.forward * dashSpeed * Time.deltaTime;
-
-        if (_dashTimer <= 0f)
-        {
-            _isDashing = false;
-            _currentSpeed = dashSpeed;
-            trailSprint.Stop();
-            trailSprint1.Stop();
-        }
+        _isSprinting = false;
+        trailSprint.Stop();
+        trailSprint1.Stop();
     }
 }

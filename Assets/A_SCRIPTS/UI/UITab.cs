@@ -16,7 +16,7 @@ public class TabUI : MonoBehaviour
     {
         containerStartPos = container.localPosition;
         containerUpPos = containerStartPos + new Vector3(0f, moveAmount, 0f);
-        panel.SetActive(false);
+        //panel.SetActive(false);
     }
 
     void Update()
@@ -42,7 +42,7 @@ public class TabUI : MonoBehaviour
     {
         isAnimating = true;
         yield return MoveContainer(containerUpPos, containerStartPos);
-        panel.SetActive(false);
+        //panel.SetActive(false);
         isAnimating = false;
     }
 
