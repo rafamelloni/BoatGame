@@ -5,9 +5,11 @@ public class DashTelegraph : MonoBehaviour
 {
     [SerializeField] private LineRenderer _lineA;
     [SerializeField] private LineRenderer _lineB;
-    [SerializeField] private float _separation = 1f; // distancia inicial entre las dos líneas
-    [SerializeField] private float _height; // distancia inicial entre las dos líneas
-    [SerializeField] private Transform _startPoint; // distancia inicial entre las dos líneas
+    [SerializeField] private LineRenderer _lineAStatic;
+    [SerializeField] private LineRenderer _lineBStatic;
+    [SerializeField] private float _separation = 1f;
+    [SerializeField] private float _height;
+    [SerializeField] private Transform _startPoint;
 
     private void Awake()
     {
@@ -18,6 +20,8 @@ public class DashTelegraph : MonoBehaviour
     {
         _lineA.enabled = true;
         _lineB.enabled = true;
+        _lineAStatic.enabled = true;
+        _lineBStatic.enabled = true;
         StopAllCoroutines();
         Vector3 origin = _startPoint != null ? _startPoint.position : from;
         StartCoroutine(Animate(origin, to, telegraphDuration));
@@ -27,6 +31,8 @@ public class DashTelegraph : MonoBehaviour
     {
         if (_lineA != null) _lineA.enabled = false;
         if (_lineB != null) _lineB.enabled = false;
+        if (_lineAStatic != null) _lineAStatic.enabled = false;
+        if (_lineBStatic != null) _lineBStatic.enabled = false;
         StopAllCoroutines();
     }
 
@@ -35,16 +41,17 @@ public class DashTelegraph : MonoBehaviour
         Vector3 dir = (to - from).normalized;
         Vector3 perp = Vector3.Cross(dir, Vector3.up).normalized;
 
+        SetLine(_lineAStatic, from + perp * _separation, to + perp * _separation);
+        SetLine(_lineBStatic, from - perp * _separation, to - perp * _separation);
+
         float elapsed = 0f;
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
             float offset = Mathf.Lerp(_separation, 0f, t);
-
             SetLine(_lineA, from + perp * offset, to + perp * offset);
             SetLine(_lineB, from - perp * offset, to - perp * offset);
-
             yield return null;
         }
     }
