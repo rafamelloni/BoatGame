@@ -57,19 +57,16 @@ public class DashBossController : Enemy
         _shoot.SetCanShoot(false);
         _movement.LockRotation(true);
         Vector3 playerPos = _player.position;
-        yield return _movement.RotateToFace(playerPos);
-
         Vector3 dir = (playerPos - transform.position);
         dir.y = 0f;
         Vector3 destination = playerPos + dir.normalized * _movement.StopDistance;
         destination.y = transform.position.y;
-
+        yield return _movement.RotateToFace(destination);
         _telegraph.Show(transform.position, destination, _telegraphDuration);
         yield return new WaitForSeconds(_telegraphDuration);
         _telegraph.Hide();
         yield return _movement.ExecuteDash(destination);
         _movement.LockRotation(false);
-
         _nextDashTime = Time.time + _timeBetweenDashes;
         _isBusy = false;
         _shoot.SetCanShoot(true);
@@ -82,13 +79,11 @@ public class DashBossController : Enemy
         {
             Vector3 playerPos = _player.position;
             _movement.LockRotation(true);
-            yield return _movement.RotateToFace(playerPos);
-
             Vector3 dir = (playerPos - transform.position);
             dir.y = 0f;
             Vector3 destination = playerPos + dir.normalized * _movement.StopDistance;
             destination.y = transform.position.y;
-
+            yield return _movement.RotateToFace(destination);
             _telegraph.Show(transform.position, destination, _telegraphDuration);
             yield return new WaitForSeconds(_telegraphDuration);
             _telegraph.Hide();
