@@ -62,11 +62,12 @@ public class DashBossController : Enemy
         yield return _movement.RotateToFace(_player.position);
 
         Vector3 destination = _player.position;
+        _movement.LockRotation(true); // 
         _telegraph.Show(transform.position, destination, _telegraphDuration);
         yield return new WaitForSeconds(_telegraphDuration);
         _telegraph.Hide();
-
         yield return _movement.ExecuteDash(destination);
+        _movement.LockRotation(false); // 
 
         _nextDashTime = Time.time + _timeBetweenDashes;
         _isBusy = false;
@@ -76,23 +77,20 @@ public class DashBossController : Enemy
     private IEnumerator DoSpecialAttack()
     {
         _isBusy = true;
-
         for (int i = 0; i < _specialDashCount; i++)
         {
             yield return _movement.RotateToFace(_player.position);
             Vector3 dir = (_player.position - transform.position);
             dir.y = 0f;
             Vector3 destination = _player.position + dir.normalized * _movement.StopDistance;
+            _movement.LockRotation(true);
             _telegraph.Show(transform.position, destination, _telegraphDuration);
-
             yield return new WaitForSeconds(_telegraphDuration);
             _telegraph.Hide();
-
             yield return _movement.ExecuteDash(destination);
-
-            yield return new WaitForSeconds(0.15f); // pequeña pausa entre dashes
+            _movement.LockRotation(false);
+            yield return new WaitForSeconds(0.15f);
         }
-
         _nextSpecialTime = Time.time + _specialCooldown;
         _nextDashTime = Time.time + _timeBetweenDashes;
         _isBusy = false;

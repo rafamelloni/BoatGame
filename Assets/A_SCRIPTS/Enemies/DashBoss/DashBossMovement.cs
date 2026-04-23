@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading;
 using UnityEngine;
 
 public class DashBossMovement : MonoBehaviour
@@ -18,9 +19,13 @@ public class DashBossMovement : MonoBehaviour
 
     public void SetPlayer(Transform player) => _player = player;
 
+    private bool _isLocked;
+    public void LockRotation(bool value) => _isLocked = value;
+
     private void Update()
     {
         if (_player == null) return;
+        if (_isLocked) return;
         RotateTowardsPlayer();
     }
 
@@ -57,14 +62,18 @@ public class DashBossMovement : MonoBehaviour
         transform.position = destination;
     }
 
-    public IEnumerator RotateToFace(Vector3 target, float tolerance = 5f)
+    public IEnumerator RotateToFace(Vector3 target, float tolerance = 5f, float timeout = 2f)
     {
+        float elapsed = 0f;
         Vector3 dir = target - transform.position;
         dir.y = 0f;
         Quaternion targetRot = Quaternion.LookRotation(dir.normalized);
 
         while (Quaternion.Angle(transform.rotation, targetRot) > tolerance)
         {
+            elapsed += Time.deltaTime;
+            if (elapsed >= timeout) break;
+
             dir = target - transform.position; // actualiza por si el player se mueve
             dir.y = 0f;
             targetRot = Quaternion.LookRotation(dir.normalized);
