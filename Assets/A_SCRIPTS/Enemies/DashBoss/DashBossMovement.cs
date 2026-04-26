@@ -11,6 +11,7 @@ public class DashBossMovement : MonoBehaviour
     [SerializeField] private float _dashDuration = 0.2f;
     [SerializeField] private AnimationCurve _dashCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [SerializeField] private float _stopDistanceFromPlayer = 3f;
+    [SerializeField] private ParticleSystem _dashParticles;
     public float StopDistance => _stopDistanceFromPlayer;
 
     private Transform _player;
@@ -35,23 +36,25 @@ public class DashBossMovement : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
     }
 
-    public IEnumerator ExecuteDash(Vector3 destination)
+    public IEnumerator ExecuteDash(Vector3 destination, float durationOverride = -1f)
     {
+        _dashParticles.Play();
+        float duration = durationOverride > 0f ? durationOverride : _dashDuration;
         destination.y = transform.position.y;
         Vector3 origin = transform.position;
         float elapsed = 0f;
-        while (elapsed < _dashDuration)
+        while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            float t = _dashCurve.Evaluate(elapsed / _dashDuration);
+            float t = _dashCurve.Evaluate(elapsed / duration);
             transform.position = Vector3.LerpUnclamped(origin, destination, t);
             yield return null;
         }
         transform.position = destination;
     }
-
-    public IEnumerator RotateToFace(Vector3 target, float tolerance = 5f, float timeout = 2f)
+    public IEnumerator RotateToFace(Vector3 target, float tolerance = 5f, float timeout = 2f, float speedOverride = -1f)
     {
+        float speed = speedOverride > 0f ? speedOverride : _rotationSpeed;
         float elapsed = 0f;
         Vector3 dir = target - transform.position;
         dir.y = 0f;
@@ -60,7 +63,7 @@ public class DashBossMovement : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             if (elapsed >= timeout) break;
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, speed * Time.deltaTime);
             yield return null;
         }
     }
@@ -71,6 +74,7 @@ public class DashBossMovement : MonoBehaviour
         Vector3 dir = _player.position - transform.position;
         dir.y = 0f;
         Quaternion targetRot = Quaternion.LookRotation(dir.normalized) * Quaternion.Euler(0f, _rotationAngle, 0f);
+        if (Quaternion.Angle(transform.rotation, targetRot) < 2f) return;
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
     }
 }

@@ -38,22 +38,26 @@ public class DashTelegraph : MonoBehaviour
 
     private IEnumerator Animate(Vector3 from, Vector3 to, float duration)
     {
+        float distance = Vector3.Distance(from, to);
+        float separation = Mathf.Min(_separation, distance * 0.1f);
+        Debug.Log($"Telegraph separation: {separation}, distance: {distance}");
+
         Vector3 dir = (to - from).normalized;
         Vector3 perp = Vector3.Cross(dir, Vector3.up).normalized;
-
-        SetLine(_lineAStatic, from + perp * _separation, to + perp * _separation);
-        SetLine(_lineBStatic, from - perp * _separation, to - perp * _separation);
-
+        SetLine(_lineAStatic, from + perp * separation, to + perp * separation);
+        SetLine(_lineBStatic, from - perp * separation, to - perp * separation);
         float elapsed = 0f;
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
-            float offset = Mathf.Lerp(_separation, 0f, t);
+            float offset = Mathf.Lerp(separation, 0f, t);
             SetLine(_lineA, from + perp * offset, to + perp * offset);
             SetLine(_lineB, from - perp * offset, to - perp * offset);
             yield return null;
         }
+        _lineA.enabled = false;
+        _lineB.enabled = false;
     }
 
     private void SetLine(LineRenderer lr, Vector3 start, Vector3 end)

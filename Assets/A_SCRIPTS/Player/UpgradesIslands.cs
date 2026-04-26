@@ -10,11 +10,21 @@ public class UpgradesIslands : MonoBehaviour
     public GameObject mortargoAbility;
 
     public GameObject canvas;
+
+
+
+    public GameObject bordesa;
+    public GameObject bordes1;
+    public GameObject bordes2;
     
     public void OnButtonClick()
     {
         ability.upgrade();
         canvas.SetActive(false);
+
+        bordesa.SetActive(false);
+        bordes1.SetActive(false);
+        bordes2.SetActive(false);
     }
     public void OnButtonClick1()
     {
@@ -22,10 +32,18 @@ public class UpgradesIslands : MonoBehaviour
         mortargo.SetActive(true);
         mortargoAbility.SetActive(true);
         canvas.SetActive(false);
+
+        bordesa.SetActive(false);
+        bordes1.SetActive(false);
+        bordes2.SetActive(false);
     }
     public void OnButtonClick2()
     {
         bnner.SetActive(true);
         canvas.SetActive(false);
+
+        bordesa.SetActive(false);
+        bordes1.SetActive(false);
+        bordes2.SetActive(false);
     }
 }
