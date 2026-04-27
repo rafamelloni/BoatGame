@@ -544,6 +544,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TrailPartices
       objectReference: {fileID: 0}
+    - target: {fileID: 4489588693831894998, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7284333568125945638, guid: 65ed14249bc2b404c882ac066f89f21c, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.15338236
