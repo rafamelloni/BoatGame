@@ -11,9 +11,10 @@ public class FakeWaveMovement : MonoBehaviour
     public float tiltFrequency = 1f;
 
     [Header("Forward Tilt")]
-    public float manualTiltAmount = 25f;   // más exagerado
-    public float tiltSmoothSpeed = 10f;    // entra rápido
+    public float manualTiltAmount = 25f;
+    public float tiltSmoothSpeed = 10f;
     public float tiltReturnSpeed = 3f;
+    private Rigidbody _rb;
 
     public Animator anim;
 
@@ -26,47 +27,31 @@ public class FakeWaveMovement : MonoBehaviour
     void Start()
     {
         baseHeight = transform.position.y;
-        _phaseOffset = Random.Range(0f, Mathf.PI * 2f);  // <-- NUEVO
+        _phaseOffset = Random.Range(0f, Mathf.PI * 2f);
+        _rb = GetComponent<Rigidbody>();
     }
 
+    public float GetWaveY()
+    {
+        return baseHeight + Mathf.Sin((Time.fixedTime + _phaseOffset) * frequency) * amplitude;
+    }
     void LateUpdate()
     {
         float t = Time.time + _phaseOffset;
 
-        // --- ALTURA ---
-        Vector3 pos = transform.position;
-        pos.y = baseHeight + Mathf.Sin(t * frequency) * amplitude;
-        transform.position = pos;
+        if (_tiltHoldTimer > 0f) { _tiltHoldTimer -= Time.deltaTime; _targetExtraTiltX = -manualTiltAmount; }
+        else { _targetExtraTiltX = 0f; }
 
-        // --- HOLD TIMER ---
-        if (_tiltHoldTimer > 0f)
-        {
-            _tiltHoldTimer -= Time.deltaTime;
-            _targetExtraTiltX = -manualTiltAmount;
-        }
-        else
-        {
-            _targetExtraTiltX = 0f;
-        }
-
-        // --- INTERPOLAR TILT EXTRA ---
         float smooth = _targetExtraTiltX != 0 ? tiltSmoothSpeed : tiltReturnSpeed;
-        _currentExtraTiltX = Mathf.Lerp(
-            _currentExtraTiltX,
-            _targetExtraTiltX,
-            Time.deltaTime * smooth
-        );
+        _currentExtraTiltX = Mathf.Lerp(_currentExtraTiltX, _targetExtraTiltX, Time.deltaTime * smooth);
 
-        // --- TILT DE OLAS ---
-        float tiltX = Mathf.Sin(t * tiltFrequency) * tiltAmplitude;
+        float tiltX = Mathf.Sin(t * tiltFrequency) * tiltAmplitude + _currentExtraTiltX;
         float tiltZ = Mathf.Cos(t * tiltFrequency * 0.8f) * tiltAmplitude;
-        tiltX += _currentExtraTiltX;
 
-        float currentYaw = transform.rotation.eulerAngles.y;
-        transform.rotation = Quaternion.Euler(tiltX, currentYaw, tiltZ);
+        // Tomar el yaw actual del rb, no del transform
+        float currentYaw = _rb.rotation.eulerAngles.y;
+        _rb.MoveRotation(Quaternion.Euler(tiltX, currentYaw, tiltZ));
     }
-
-    // Llamalo desde Movement pasándole la duración del dash
     public void ApplyForwardTilt(float duration)
     {
         _tiltHoldTimer = duration;

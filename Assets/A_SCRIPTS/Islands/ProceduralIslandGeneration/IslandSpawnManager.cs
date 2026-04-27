@@ -30,6 +30,13 @@ public class IslandSpawnManager : MonoBehaviour
         _player = GameObject.FindWithTag("Player").transform;
         StartCoroutine(SpawnRoutine());
     }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P)) 
+        {
+            ResetIslands();
+        }
+    }
 
     private IEnumerator SpawnRoutine()
     {
@@ -102,7 +109,15 @@ public class IslandSpawnManager : MonoBehaviour
         _currentIslandCount--;
     }
 
-   
+    public void ResetIslands()
+    {
+        StopAllCoroutines();
+        _islandSpawner.DespawnAll();
+        _spawnedPositions.Clear();
+        _currentIslandCount = 0;
+        StartCoroutine(SpawnRoutine());
+    }
+
     private void OnDrawGizmos()
     {
         if (_spawnCenter == null) return;

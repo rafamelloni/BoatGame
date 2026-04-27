@@ -18,6 +18,7 @@ public class IslandSpawner : MonoBehaviour
 
     private Dictionary<GameObject, ObjectPool<GameObject>> _islandPools = new();
     private Dictionary<GameObject, IslandEntry> _prefabToEntry = new();
+    private Dictionary<GameObject, (GameObject prefab, GameObject instance)> _activeIslands = new();
 
     private void Awake()
     {
@@ -41,18 +42,16 @@ public class IslandSpawner : MonoBehaviour
     {
         IslandEntry entry = PickWeighted();
         if (entry == null) return;
-
         GameObject instance = _islandPools[entry.islandPrefab].Get();
         instance.transform.SetPositionAndRotation(position, Quaternion.Euler(0, Random.Range(0, 360f), 0));
-
         IslandManager manager = instance.GetComponent<IslandManager>();
         if (manager != null)
         {
             manager.SetCanvas(_canvasExample);
             manager.Init();
         }
-
         SpawnDecorations(instance, entry);
+        _activeIslands[instance] = (entry.islandPrefab, instance); // <-- trackear
     }
 
     private void SpawnDecorations(GameObject instance, IslandEntry entry)
@@ -80,17 +79,24 @@ public class IslandSpawner : MonoBehaviour
 
     public void ReturnIsland(GameObject prefab, GameObject instance)
     {
-        // Limpia decoraciones
+        if (!instance.activeSelf) return;
+
         foreach (var point in instance.GetComponentsInChildren<IslandSpawnPoint>())
         {
             foreach (Transform child in point.transform)
                 Destroy(child.gameObject);
         }
-
         instance.GetComponent<IslandManager>()?.ResetIsland();
-
-        
         _islandPools[prefab].Return(instance);
+        _activeIslands.Remove(instance); // <-- limpiar tracking
+    }
+
+    public void DespawnAll()
+    {
+        var toRemove = new List<(GameObject prefab, GameObject instance)>(_activeIslands.Values);
+        _activeIslands.Clear();
+        foreach (var kvp in toRemove)
+            ReturnIsland(kvp.prefab, kvp.instance);
     }
 
     private IslandEntry PickWeighted()

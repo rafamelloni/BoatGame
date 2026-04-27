@@ -88,24 +88,28 @@ public class BasicEnemyBullet : BulletsBase
     private void OnTriggerEnter(Collider other)
     {
         Vector3 explosionPoint = other.ClosestPoint(transform.position);
-        if (other.CompareTag("Enemy")) return;
 
         if (other.CompareTag("Player"))
         {
-            Explode(explosionPoint);
+            other.GetComponent<RT_PlayerHealth>()?.TakeDamage(_rtData.damage);
             ParticlePool.Instance.GetParticle(_rtData.explosionVFX, explosionPoint);
+            Pool.Return(this);
+            return;
         }
+
         if (other.CompareTag("Floor"))
         {
-            Vector3 explosionPoint0 = other.ClosestPoint(transform.position);
-            ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint0);
-
+            ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint);
+            Pool.Return(this);
+            return;
         }
-        Debug.Log("collisiono con: " + other.gameObject.name);
+
+        if (other.CompareTag("Enemy")) return;
+
         Pool.Return(this);
     }
 
- 
+
 
     private void Explode(Vector3 center)
     {

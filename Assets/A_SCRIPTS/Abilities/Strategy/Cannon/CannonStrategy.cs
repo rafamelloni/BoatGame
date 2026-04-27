@@ -117,5 +117,14 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
             
         }
     }
+
+    public void ResetUpgrades()
+    {
+        _rtData.damage = _baseData.damage;
+        _rtData.cooldown = _baseData.cooldown;
+        _rtData.timeBetweenShots = _baseData.timeBetweenShots;
+        _rtData.shotsPerBurst = _baseData.shotsPerBurst;
+        nextFireTime = 0f;
+    }
 }
 

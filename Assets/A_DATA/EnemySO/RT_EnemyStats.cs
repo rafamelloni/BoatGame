@@ -7,6 +7,7 @@ public class RT_EnemyStats
     public float currentHealth;
     public float maxHealth;
     public float fireRate;
+    public float damage;
     [HideInInspector]public GameObject woodExplosion;
 
     //[[Header("Bullet")]
@@ -23,6 +24,7 @@ public class RT_EnemyStats
         woodExplosion = baseData.woodExplosionVFX;
         fireRate = baseData.fireRate;
         currentHealth = maxHealth;
+        damage = baseData.damage;
 
         bulletSpeed = baseData.bulletSpeed;
         bulletVerticalArc = baseData.bulletVerticalArc;

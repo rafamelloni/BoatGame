@@ -13,4 +13,7 @@ public class SO_BASESTATS : ScriptableObject
 
     [Header("Sprint")]
     public float sprintMultiplier = 1.6f;
+
+    [Header("Health")]
+    public float maxHealth = 100f;
 }

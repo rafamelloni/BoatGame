@@ -18,6 +18,9 @@ public class UpgradeStatsUI : MonoBehaviour
     [Header("Flash")]
     [SerializeField] private float _flashDuration = 0.5f;
 
+    [Header("Base Data")]
+    [SerializeField] private SO_CannonData _cannonData;
+
     private readonly Dictionary<StatType, float> _totals = new();
     private readonly Dictionary<StatType, TMP_Text> _textMap = new();
 
@@ -27,15 +30,13 @@ public class UpgradeStatsUI : MonoBehaviour
         _textMap[StatType.Cooldown] = _cooldownText;
         _textMap[StatType.FireRate] = _fireRateText;
 
-        // Leer el valor base que ya tiene cada texto en escena
-        foreach (StatType stat in System.Enum.GetValues(typeof(StatType)))
-        {
-            if (_textMap.TryGetValue(stat, out TMP_Text text) && text != null
-                && float.TryParse(text.text, out float baseValue))
-                _totals[stat] = baseValue;
-            else
-                _totals[stat] = 0f;
-        }
+        _totals[StatType.Damage] = _cannonData.damage;
+        _totals[StatType.Cooldown] = _cannonData.cooldown;
+        _totals[StatType.FireRate] = _cannonData.timeBetweenShots;
+
+        foreach (var kvp in _textMap)
+            if (kvp.Value != null)
+                kvp.Value.text = _totals[kvp.Key].ToString("F1");
 
         if (_progressBar != null)
         {
@@ -47,22 +48,29 @@ public class UpgradeStatsUI : MonoBehaviour
 
     public void OnUpgradeApplied(StatType stat, float value)
     {
-        // Acumular y mostrar
         if (stat == StatType.Cooldown || stat == StatType.FireRate)
             _totals[stat] -= value;
         else
             _totals[stat] += value;
 
         if (_textMap.TryGetValue(stat, out TMP_Text text) && text != null)
-        {
             text.text = _totals[stat].ToString("F1");
-            //StopCoroutine(nameof(FlashGreen)); // por si estaba corriendo
-            //StartCoroutine(FlashGreen(text));
-        }
 
-        // Barra: siempre +1 por mejora aplicada
         if (_progressBar != null)
             _progressBar.value = Mathf.Min(_progressBar.value + 1f, _barMax);
+    }
+
+    public void ResetStats()
+    {
+        _totals[StatType.Damage] = _cannonData.damage;
+        _totals[StatType.Cooldown] = _cannonData.cooldown;
+        _totals[StatType.FireRate] = _cannonData.timeBetweenShots;
+
+        foreach (var kvp in _textMap)
+            if (kvp.Value != null)
+                kvp.Value.text = _totals[kvp.Key].ToString("F1");
+
+        if (_progressBar != null) _progressBar.value = 0f;
     }
 
     private IEnumerator FlashGreen(TMP_Text text)

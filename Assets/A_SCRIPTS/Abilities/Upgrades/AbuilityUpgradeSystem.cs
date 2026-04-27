@@ -13,8 +13,7 @@ public class AbilityUpgradeSystem : MonoBehaviour
     [SerializeField] private List<UpgradeRule> _upgradeRules;
     [SerializeField] private UpgradeIconLibrary _iconLibrary;
     [SerializeField] private EnemyUpgradeDisplay _popupPrefab;
-    [SerializeField] private UpgradeStatsUI _statsUI; 
-
+    [SerializeField] private UpgradeStatsUI _statsUI;
 
     private readonly List<IUpgradeable> _abilities = new();
 
@@ -39,26 +38,29 @@ public class AbilityUpgradeSystem : MonoBehaviour
         _abilities.Remove(ability);
     }
 
+    public void ResetAllUpgrades()
+    {
+        foreach (var ability in _abilities)
+            ability.ResetUpgrades();
+    }
+
     private void HandleEnemyDied(Vector3 position)
     {
         if (_abilities.Count == 0 || _upgradeRules.Count == 0) return;
 
-        int abilityIndex = UnityEngine.Random.Range(0, _abilities.Count);
+        int abilityIndex = Random.Range(0, _abilities.Count);
         IUpgradeable chosenAbility = _abilities[abilityIndex];
 
-        int ruleIndex = UnityEngine.Random.Range(0, _upgradeRules.Count);
+        int ruleIndex = Random.Range(0, _upgradeRules.Count);
         UpgradeRule chosenRule = _upgradeRules[ruleIndex];
 
         chosenAbility.ApplyUpgrade(chosenRule.stat, chosenRule.valuePerKill);
         _statsUI.OnUpgradeApplied(chosenRule.stat, chosenRule.valuePerKill);
-       
 
         Sprite icon = _iconLibrary.GetIcon(chosenAbility.AbilityId, chosenRule.stat);
         if (icon == null) return;
 
         EnemyUpgradeDisplay popup = Instantiate(_popupPrefab, position, Quaternion.identity);
         popup.Play(icon, position);
-        print("abiltiy stat : " + chosenRule.stat + "valuexkill: " + chosenRule.valuePerKill);
-        print("abiltiy: " + chosenAbility.AbilityId + "value: " + chosenRule.stat);
     }
 }
