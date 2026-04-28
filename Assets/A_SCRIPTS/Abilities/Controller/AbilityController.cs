@@ -21,6 +21,7 @@ public class AbilityController : MonoBehaviour
 
     [Header("Systems")]
     [SerializeField] private AbilityUpgradeSystem _upgradeSystem;
+    [SerializeField] private UpgradeStatsUI _statsUI;
 
     private CannonStrategy _abilityE;
     private MorterStrategy _abilityQ;
@@ -40,6 +41,10 @@ public class AbilityController : MonoBehaviour
         _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory, _camera, _recoilCannonR, _recoilCannonL);
         _upgradeSystem.RegisterAbility(_abilityE);
         _abilityE.OnCooldownStarted += _cannonCooldownUI.PlayCooldown;
+
+        _statsUI.RegisterBase("Cannon", StatType.Damage, _cannonsData.damage);
+        _statsUI.RegisterBase("Cannon", StatType.Cooldown, _cannonsData.cooldown);
+        _statsUI.RegisterBase("Cannon", StatType.FireRate, _cannonsData.timeBetweenShots);
     }
 
     private void SetupMortar(CoroutineRunner runner)
@@ -47,6 +52,9 @@ public class AbilityController : MonoBehaviour
         _abilityQ = new MorterStrategy(_morterData, _mortarShootPointReal, _mortarShootPoint, runner, _barrelFactory);
         _mortarChargeUI.Init(_morterData.cooldown, () => _abilityQ.RestoreCharge());
         _abilityQ.OnChargeConsumed += _ => _mortarChargeUI.OnShot();
+        _upgradeSystem.RegisterAbility(_abilityQ);
+
+        _statsUI.RegisterBase("Mortar", StatType.Damage, _morterData.damage);
     }
 
     private void Update()
@@ -61,9 +69,8 @@ public class AbilityController : MonoBehaviour
     private void OnDestroy()
     {
         _upgradeSystem.UnregisterAbility(_abilityE);
-        //_upgradeSystem.UnregisterAbility(_abilityQ);
+        _upgradeSystem.UnregisterAbility(_abilityQ);
     }
-
     public void Upgrade()
     {
         _abilityE._rtData.shotsPerBurst = 4;

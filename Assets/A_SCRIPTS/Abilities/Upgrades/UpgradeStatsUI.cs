@@ -6,10 +6,16 @@ using System.Collections.Generic;
 
 public class UpgradeStatsUI : MonoBehaviour
 {
-    [Header("Stat Texts")]
-    [SerializeField] private TMP_Text _damageText;
-    [SerializeField] private TMP_Text _cooldownText;
-    [SerializeField] private TMP_Text _fireRateText;
+    [System.Serializable]
+    public struct AbilityStatDisplay
+    {
+        public string abilityId;
+        public StatType stat;
+        public TMP_Text text;
+    }
+
+    [Header("Stat Displays")]
+    [SerializeField] private List<AbilityStatDisplay> _displays;
 
     [Header("Progress Bar")]
     [SerializeField] private Slider _progressBar;
@@ -18,26 +24,9 @@ public class UpgradeStatsUI : MonoBehaviour
     [Header("Flash")]
     [SerializeField] private float _flashDuration = 0.5f;
 
-    [Header("Base Data")]
-    [SerializeField] private SO_CannonData _cannonData;
-
-    private readonly Dictionary<StatType, float> _totals = new();
-    private readonly Dictionary<StatType, TMP_Text> _textMap = new();
-
+    private readonly Dictionary<(string, StatType), float> _baseValues = new();
     private void Awake()
     {
-        _textMap[StatType.Damage] = _damageText;
-        _textMap[StatType.Cooldown] = _cooldownText;
-        _textMap[StatType.FireRate] = _fireRateText;
-
-        _totals[StatType.Damage] = _cannonData.damage;
-        _totals[StatType.Cooldown] = _cannonData.cooldown;
-        _totals[StatType.FireRate] = _cannonData.timeBetweenShots;
-
-        foreach (var kvp in _textMap)
-            if (kvp.Value != null)
-                kvp.Value.text = _totals[kvp.Key].ToString("F1");
-
         if (_progressBar != null)
         {
             _progressBar.minValue = 0f;
@@ -45,16 +34,26 @@ public class UpgradeStatsUI : MonoBehaviour
             _progressBar.value = 0f;
         }
     }
-
-    public void OnUpgradeApplied(StatType stat, float value)
+    public void RegisterBase(string abilityId, StatType stat, float baseValue)
     {
-        if (stat == StatType.Cooldown || stat == StatType.FireRate)
-            _totals[stat] -= value;
-        else
-            _totals[stat] += value;
+        _baseValues[(abilityId, stat)] = baseValue;
+    }
 
-        if (_textMap.TryGetValue(stat, out TMP_Text text) && text != null)
-            text.text = _totals[stat].ToString("F1");
+
+
+    public void OnUpgradeApplied(string abilityId, StatType stat, float value)
+    {
+        var displays = _displays.FindAll(d => d.abilityId == abilityId && d.stat == stat);
+
+        foreach (var display in displays)
+        {
+            if (display.text == null) continue;
+
+            float current = float.TryParse(display.text.text, out float parsed) ? parsed : 0f;
+            display.text.text = (current + value).ToString("F1");
+
+            StartCoroutine(FlashGreen(display.text));
+        }
 
         if (_progressBar != null)
             _progressBar.value = Mathf.Min(_progressBar.value + 1f, _barMax);
@@ -62,15 +61,18 @@ public class UpgradeStatsUI : MonoBehaviour
 
     public void ResetStats()
     {
-        _totals[StatType.Damage] = _cannonData.damage;
-        _totals[StatType.Cooldown] = _cannonData.cooldown;
-        _totals[StatType.FireRate] = _cannonData.timeBetweenShots;
+        foreach (var display in _displays)
+        {
+            if (display.text == null) continue;
 
-        foreach (var kvp in _textMap)
-            if (kvp.Value != null)
-                kvp.Value.text = _totals[kvp.Key].ToString("F1");
+            if (_baseValues.TryGetValue((display.abilityId, display.stat), out float baseVal))
+                display.text.text = baseVal.ToString("F1");
+            else
+                display.text.text = "0.0";
+        }
 
-        if (_progressBar != null) _progressBar.value = 0f;
+        if (_progressBar != null)
+            _progressBar.value = 0f;
     }
 
     private IEnumerator FlashGreen(TMP_Text text)

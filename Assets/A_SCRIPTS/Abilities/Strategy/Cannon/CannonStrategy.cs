@@ -1,44 +1,32 @@
 using System;
 using System.Collections;
 using UnityEngine;
+
 public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
 {
-    //No se modifica. Se usa para cosas que no van a cambiar como los VFX
     private readonly SO_CannonData _baseData;
-
-    //Realtime si se modifica.
     public readonly RT_CannonData _rtData;
-
-    //factory de balas
     private BulletFactory _cannonBullet;
-
     private readonly ShipHardpoints hardpoints;
     private readonly CoroutineRunner runner;
-
     private float nextFireTime = 0f;
 
     followPlayer _camera;
     CannonRecoil _recoilLeft;
     CannonRecoil _recoilRight;
 
-    //COOLDOWN
-    //Data de la interfaz de cooldown
-    public event Action<float> OnCooldownStarted; //Delegate que se llama cuando arrranca el cooldown de la abilidad
+    // IcooldownAbilities
+    public event Action<float> OnCooldownStarted;
     public float CooldownDuration => _rtData.cooldown;
-    public float RemainingCooldown
-    {
-        get
-        {
-            float remaining = nextFireTime - Time.time;
-            return Mathf.Max(0f, remaining);
-        }
-    }
+    public float RemainingCooldown => Mathf.Max(0f, nextFireTime - Time.time);
     public bool IsOnCooldown => Time.time < nextFireTime;
-    //COOLDOWNOVER
+
+    // IUpgradeable
+    public string AbilityId => "Cannon";
+    public bool IsUnlocked { get; private set; } = true;
+    public void SetUnlocked(bool unlocked) => IsUnlocked = unlocked;
 
     public RT_CannonData RuntimeData => _rtData;
-    //ID para icono IUpgradeable
-    public string AbilityId => "Cannon";
 
     public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner, BulletFactory cannonBullet, followPlayer camera, CannonRecoil recoilR, CannonRecoil recoilL)
     {
@@ -56,10 +44,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
     {
         if (Time.time < nextFireTime) return;
         nextFireTime = Time.time + _rtData.cooldown;
-
-        //LLamamos delegate, ejecutamos todo lo que este suscrito a cuando arranca el cooldown de la abilidad
         OnCooldownStarted?.Invoke(_rtData.cooldown);
-
         runner.StartCoroutine(FireBurst());
     }
 
@@ -75,15 +60,12 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
                 _recoilLeft.Fire(_rtData.timeBetweenShots);
                 hardpoints._cannonSmokeShootR.Play();
             }
-                
 
             foreach (Transform p in hardpoints.leftShootPoints)
             {
                 FireFromPoint(p, -1f);
                 hardpoints._cannonSmokeShootL.Play();
-
             }
-
 
             if (i < _rtData.shotsPerBurst - 1)
                 yield return new WaitForSeconds(_rtData.timeBetweenShots);
@@ -93,28 +75,18 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
     private void FireFromPoint(Transform point, float side)
     {
         var b = _cannonBullet.Create();
-        
-        Transform pointSH = point;
-        float sideSH = side;
         var cb = b.GetComponent<CannonBullet>();
         if (cb != null)
-            cb.Setup(pointSH, _rtData, sideSH);
+            cb.Setup(point, _rtData, side);
     }
 
     public void ApplyUpgrade(StatType stat, float value)
     {
         switch (stat)
         {
-            case StatType.Damage:
-                _rtData.damage += value;
-                break;
-            case StatType.Cooldown:
-                _rtData.cooldown = Mathf.Max(0.1f, _rtData.cooldown - value);
-                break;
-            case StatType.FireRate:
-                _rtData.timeBetweenShots -= Mathf.Max(0.1f, _rtData.timeBetweenShots - value);
-                break;
-            
+            case StatType.Damage: _rtData.damage += value; break;
+            case StatType.Cooldown: _rtData.cooldown = Mathf.Max(0.1f, _rtData.cooldown - value); break;
+            case StatType.FireRate: _rtData.timeBetweenShots = Mathf.Max(0.1f, _rtData.timeBetweenShots - value); break;
         }
     }
 
@@ -127,4 +99,3 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
         nextFireTime = 0f;
     }
 }
-

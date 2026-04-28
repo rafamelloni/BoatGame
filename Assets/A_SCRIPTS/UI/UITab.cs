@@ -10,44 +10,37 @@ public class TabUI : MonoBehaviour
 
     Vector3 containerStartPos;
     Vector3 containerUpPos;
-    bool isAnimating;
+    bool isOpen = false;
+    Coroutine currentRoutine;
 
     void Start()
     {
         containerStartPos = container.localPosition;
         containerUpPos = containerStartPos + new Vector3(0f, moveAmount, 0f);
-        //panel.SetActive(false);
     }
 
     void Update()
     {
-        if (isAnimating) return;
-
-        if (Input.GetKeyDown(KeyCode.Tab) && !isAnimating)
-            StartCoroutine(OpenUI());
-
-        if (Input.GetKeyUp(KeyCode.Tab) && !isAnimating)
-            StartCoroutine(CloseUI());
+        if (Input.GetKeyDown(KeyCode.Tab))
+            Animate(true);
+        if (Input.GetKeyUp(KeyCode.Tab))
+            Animate(false);
     }
 
-    IEnumerator OpenUI()
+    void Animate(bool open)
     {
-        isAnimating = true;
-        panel.SetActive(true);
-        yield return MoveContainer(containerStartPos, containerUpPos);
-        isAnimating = false;
+        if (currentRoutine != null)
+            StopCoroutine(currentRoutine);
+        currentRoutine = StartCoroutine(MoveContainer(
+            container.localPosition,
+            open ? containerUpPos : containerStartPos,
+            open
+        ));
     }
 
-    IEnumerator CloseUI()
+    IEnumerator MoveContainer(Vector3 from, Vector3 to, bool open)
     {
-        isAnimating = true;
-        yield return MoveContainer(containerUpPos, containerStartPos);
-        //panel.SetActive(false);
-        isAnimating = false;
-    }
-
-    IEnumerator MoveContainer(Vector3 from, Vector3 to)
-    {
+        if (open) panel.SetActive(true);
         float t = 0f;
         while (t < 1f)
         {
@@ -56,5 +49,6 @@ public class TabUI : MonoBehaviour
             yield return null;
         }
         container.localPosition = to;
+        currentRoutine = null;
     }
 }

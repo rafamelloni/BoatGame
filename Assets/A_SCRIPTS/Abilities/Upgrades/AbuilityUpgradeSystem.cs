@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class AbilityUpgradeSystem : MonoBehaviour
 {
@@ -48,14 +49,16 @@ public class AbilityUpgradeSystem : MonoBehaviour
     {
         if (_abilities.Count == 0 || _upgradeRules.Count == 0) return;
 
-        int abilityIndex = Random.Range(0, _abilities.Count);
-        IUpgradeable chosenAbility = _abilities[abilityIndex];
+        var unlocked = _abilities.Where(a => a.IsUnlocked).ToList();
+        if (unlocked.Count == 0) return;
+
+        IUpgradeable chosenAbility = unlocked[Random.Range(0, unlocked.Count)];
 
         int ruleIndex = Random.Range(0, _upgradeRules.Count);
         UpgradeRule chosenRule = _upgradeRules[ruleIndex];
 
         chosenAbility.ApplyUpgrade(chosenRule.stat, chosenRule.valuePerKill);
-        _statsUI.OnUpgradeApplied(chosenRule.stat, chosenRule.valuePerKill);
+        _statsUI.OnUpgradeApplied(chosenAbility.AbilityId, chosenRule.stat, chosenRule.valuePerKill);
 
         Sprite icon = _iconLibrary.GetIcon(chosenAbility.AbilityId, chosenRule.stat);
         if (icon == null) return;

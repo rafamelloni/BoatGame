@@ -69,6 +69,9 @@ public class UIHealthBarDashBoss : MonoBehaviour
         // brillo más tardío (solo cuando está bastante dañado)
         float emissionValue = Mathf.Pow(smoothDamage, 2.5f) * _maxEmissionStrength;
 
+        Debug.Log($"damagePercent={damagePercent:F2} crack={crackValue:F2} emission={emissionValue:F2}");
+        Debug.Log($"Material: {_materialInstance.name}, shader: {_materialInstance.shader.name}");
+
         _materialInstance.SetFloat(_grietaStrengthProperty, crackValue);
         _materialInstance.SetFloat(_emissionStrengthProperty, emissionValue);
     }

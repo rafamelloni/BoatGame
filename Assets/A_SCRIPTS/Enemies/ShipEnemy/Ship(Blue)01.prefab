@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6426069862182431880}
   - component: {fileID: 8154749399199304049}
   - component: {fileID: 4180368435906540631}
+  - component: {fileID: -2750679881207628670}
   m_Layer: 6
   m_Name: Ship(Blue)01
   m_TagString: Enemy
@@ -159,6 +160,33 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 9.980621, y: 34.246807, z: 63.136402}
   m_Center: {x: 0.041573312, y: 12.668292, z: -9.13423}
+--- !u!54 &-2750679881207628670
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1198856605732852742}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 84
+  m_CollisionDetection: 0
 --- !u!1 &6212077347874016881
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.ParticleSystem;
 
@@ -30,16 +31,17 @@ public class ShipEnemy : Enemy
     private int _broadsideSide = 1;
     private enum State { Approach, Broadside }
     private State _state;
+    private Rigidbody _rb;
 
     public event Action<ShipEnemy> OnDead;
 
     private void Awake()
     {
-        base.Awake(); // <- esto faltaba
+        base.Awake();
+        _rb = GetComponent<Rigidbody>();
         _rtCannonDataEnemy = new RT_CannonData(so_island);
         _bullets = GameObject.FindWithTag("IslandBulletFactory").GetComponent<BulletFactory>();
         _enemyHealth.OnDeath += () => OnDead?.Invoke(this);
-
     }
 
     public void SetPlayer(Transform player, Transform aimPoint)
@@ -80,7 +82,7 @@ public class ShipEnemy : Enemy
     {
         Quaternion targetRot = Quaternion.LookRotation(toPlayer.normalized);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
-        transform.position += transform.forward * speed * Time.deltaTime;
+        _rb.MovePosition(_rb.position + transform.forward * speed * Time.deltaTime);
     }
 
     private void HandleBroadside(Vector3 toPlayer)
@@ -92,14 +94,24 @@ public class ShipEnemy : Enemy
         Quaternion targetRot = Quaternion.LookRotation(targetDir.normalized)
             * Quaternion.Euler(0f, -90f * _broadsideSide, 0f);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, broadSideRotationSpeed * Time.deltaTime);
-        transform.position += transform.forward * orbitSpeed * Time.deltaTime;
+        _rb.MovePosition(_rb.position + transform.forward * orbitSpeed * Time.deltaTime);
         TryShoot();
     }
+
     private void TryShoot()
     {
         if (Time.time < _nextFireTime) return;
         _nextFireTime = Time.time + fireRate;
         Shoot();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            collision.gameObject.GetComponent<EnemyHealth>().TakeDamage(999f);
+            print("cool");
+        }
     }
 
     private void Shoot()

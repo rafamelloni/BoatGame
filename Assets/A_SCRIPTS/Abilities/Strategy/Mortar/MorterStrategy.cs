@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class MorterStrategy : IAbilityStrategy
+public class MorterStrategy : IAbilityStrategy, IUpgradeable
 {
     private readonly SO_MorterData _baseData;
     private readonly RT_MortarData _rt;
@@ -14,7 +14,11 @@ public class MorterStrategy : IAbilityStrategy
     private const float DispersionRadius = 3f;
 
     private int _currentCharges;
-    
+
+    public string AbilityId => "Mortar";
+
+    public bool IsUnlocked { get; private set; } = false;
+    public void SetUnlocked(bool unlocked) => IsUnlocked = unlocked;
 
     //[Header("DATA RELOAD")]
     public event System.Action<int> OnChargeConsumed;  // currentCharges, cooldown
@@ -87,4 +91,23 @@ public class MorterStrategy : IAbilityStrategy
     }
     public int GetCurrentCharges() => _currentCharges;
     public int GetMaxCharges() => MaxCharges;
+
+
+
+    public void ApplyUpgrade(StatType stat, float value)
+    {
+        switch (stat)
+        {
+            case StatType.Damage: _rt.damage += value; break;
+            case StatType.Cooldown: _rt.cooldown = Mathf.Max(0.1f, _rt.cooldown - value); break;
+            
+        }
+    }
+
+    public void ResetUpgrades()
+    {
+        _rt.damage = _baseData.damage;
+        _rt.cooldown = _baseData.cooldown;
+        
+    }
 }

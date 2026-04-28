@@ -22,3 +22,6 @@ MonoBehaviour:
   - abilityId: Cannon
     stat: 2
     icon: {fileID: 21300000, guid: 7692cb45223c9054d84d7a929a41ecf9, type: 3}
+  - abilityId: Mortar
+    stat: 0
+    icon: {fileID: 21300000, guid: 0ca43f081467c4b4c8cfa454f0e7e511, type: 3}
