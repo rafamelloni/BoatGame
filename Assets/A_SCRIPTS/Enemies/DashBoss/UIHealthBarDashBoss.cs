@@ -9,10 +9,15 @@ public class UIHealthBarDashBoss : MonoBehaviour
 
     [Header("Shader Grietas (BOSS)")]
     [SerializeField] private Renderer _bossRenderer;
+
+    [Header("Propiedades Shader")]
     [SerializeField] private string _grietaStrengthProperty = "_grietaStrength";
+    [SerializeField] private string _emissionStrengthProperty = "_EmissionStrength";
 
     [Header("Ajustes Visuales")]
-    [SerializeField] private float _curvaGrietas = 0.55f;
+    [SerializeField] private float _curvaGrietas = 0.6f;        // más bajo = más progresivo
+    [SerializeField] private float _maxGrietaStrength = 1f;
+    [SerializeField] private float _maxEmissionStrength = 2f;
 
     private Material _materialInstance;
 
@@ -52,8 +57,19 @@ public class UIHealthBarDashBoss : MonoBehaviour
         if (_materialInstance == null)
             return;
 
-        float value = Mathf.Pow(healthNormalized, _curvaGrietas);
+        // 0 = sin daño, 1 = daño total
+        float damagePercent = 1f - healthNormalized;
 
-        _materialInstance.SetFloat(_grietaStrengthProperty, value);
+        // suaviza la transición (clave para que sea progresivo)
+        float smoothDamage = Mathf.SmoothStep(0f, 1f, damagePercent);
+
+        // grietas progresivas
+        float crackValue = Mathf.Pow(smoothDamage, _curvaGrietas) * _maxGrietaStrength;
+
+        // brillo más tardío (solo cuando está bastante dañado)
+        float emissionValue = Mathf.Pow(smoothDamage, 2.5f) * _maxEmissionStrength;
+
+        _materialInstance.SetFloat(_grietaStrengthProperty, crackValue);
+        _materialInstance.SetFloat(_emissionStrengthProperty, emissionValue);
     }
 }
