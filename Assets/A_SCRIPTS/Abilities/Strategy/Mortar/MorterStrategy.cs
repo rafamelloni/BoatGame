@@ -3,37 +3,56 @@ using System.Collections;
 
 public class MorterStrategy : IAbilityStrategy
 {
-    // SO: referencias base (NO se modifican)
     private readonly SO_MorterData _baseData;
-
-    // Runtime: números modificables (SÍ se modifican)
     private readonly RT_MortarData _rt;
-
     private readonly Transform _ownerTransform;
     private readonly Transform _shootPoint;
     private readonly CoroutineRunner _runner;
     private BulletFactory _barrelFactory;
 
-    private float nextFireTime = 0f;
+    private const int MaxCharges = 3;
+    private const float DispersionRadius = 3f;
 
-    public MorterStrategy(SO_MorterData baseData , Transform ownerTransform, Transform shootPoint, CoroutineRunner runner, BulletFactory barrelFactory)
+    private int _currentCharges;
+    
+
+    //[Header("DATA RELOAD")]
+    public event System.Action<int> OnChargeConsumed;  // currentCharges, cooldown
+    
+    
+    public MorterStrategy(SO_MorterData baseData, Transform ownerTransform, Transform shootPoint, CoroutineRunner runner, BulletFactory barrelFactory)
     {
-        this._baseData = baseData;
+        _baseData = baseData;
         _rt = new RT_MortarData(_baseData);
-        this._ownerTransform = ownerTransform;
-        this._shootPoint = shootPoint;
-        this._runner = runner;
+        _ownerTransform = ownerTransform;
+        _shootPoint = shootPoint;
+        _runner = runner;
         _barrelFactory = barrelFactory;
+
+        _currentCharges = MaxCharges;
     }
 
     public void TryExecute()
     {
-        if (Time.time < nextFireTime) return;
-        nextFireTime = Time.time + _rt.cooldown;
-
-        VisualShoot();
+        if (_currentCharges <= 0) return;
+        _currentCharges--;
+        OnChargeConsumed?.Invoke(_currentCharges);
+        Shoot();
     }
 
+    private void Shoot()
+    {
+        Vector2 rand = Random.insideUnitCircle * DispersionRadius;
+        Vector3 offset = new Vector3(rand.x, 0f, rand.y);
+        VisualShoot();
+        SpawnRealProjectile(offset);
+    }
+
+    public void RestoreCharge()
+    {
+        if (_currentCharges < MaxCharges)
+            _currentCharges++;
+    }
     private void VisualShoot()
     {
         if (_baseData.visualProjectilePrefab == null || _shootPoint == null) return;
@@ -46,18 +65,9 @@ public class MorterStrategy : IAbilityStrategy
 
         Rigidbody rb = proj.GetComponent<Rigidbody>();
         if (rb != null)
-        {
-            // Si estás en Unity normal es rb.velocity; rb.linearVelocity es DOTS/Unity Physics
             rb.linearVelocity = Vector3.up * _rt.visualShootForce;
-        }
 
-        if (_runner != null)
-            _runner.StartCoroutine(DisableAfterSeconds(proj, _rt.visualLifetime));
-        else
-            Object.Destroy(proj, _rt.visualLifetime); // fallback si no tenés runner
-
-        SpawnRealProjectile();
-
+        _runner.StartCoroutine(DisableAfterSeconds(proj, _rt.visualLifetime));
     }
 
     private IEnumerator DisableAfterSeconds(GameObject go, float seconds)
@@ -66,18 +76,15 @@ public class MorterStrategy : IAbilityStrategy
         if (go != null) go.SetActive(false);
     }
 
-    private void SpawnRealProjectile()
+    private void SpawnRealProjectile(Vector3 spawnOffset)
     {
-        if (_baseData.realProjectilePrefab == null) return;
-        if (_ownerTransform == null) return;
-
-        Transform spawnPos = _ownerTransform;
+        if (_baseData.realProjectilePrefab == null || _ownerTransform == null) return;
 
         var b = _barrelFactory.Create();
         var cb = b.GetComponent<BarrelExplosion>();
         if (cb != null)
-        {
-            cb.Setup(spawnPos, _rt);
-        }
+            cb.Setup(_ownerTransform, _rt, spawnOffset);
     }
+    public int GetCurrentCharges() => _currentCharges;
+    public int GetMaxCharges() => MaxCharges;
 }

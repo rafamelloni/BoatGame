@@ -19,7 +19,7 @@ public class UpgradesIslands : MonoBehaviour
     
     public void OnButtonClick()
     {
-        ability.upgrade();
+        ability.Upgrade();
         canvas.SetActive(false);
 
         bordesa.SetActive(false);
@@ -28,7 +28,7 @@ public class UpgradesIslands : MonoBehaviour
     }
     public void OnButtonClick1()
     {
-        ability.wasUpgraded = true;
+        //ability.wasUpgraded = true;
         mortargo.SetActive(true);
         mortargoAbility.SetActive(true);
         canvas.SetActive(false);

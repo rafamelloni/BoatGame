@@ -21,6 +21,7 @@ public class BarrelExplosion : BulletsBase
 
     private Vector3 _lastExplosionPoint;
     private bool _showLastExplosion;
+    private Vector3 _spawnOffset;
 
     private void Awake()
     {
@@ -36,35 +37,28 @@ public class BarrelExplosion : BulletsBase
             
 
     }
-    public void Setup( Transform pos, RT_MortarData rtData)
+    public void Setup(Transform pos, RT_MortarData rtData, Vector3 spawnOffset = default)
     {
         _pos = pos;
         _rtData = rtData;
-
-
+        _spawnOffset = spawnOffset;
         Launch();
     }
 
     void Launch()
     {
         if (_hasSpawned) return;
-
         transform.position = _pos.position;
         transform.rotation = Quaternion.identity;
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
-
         _rb.AddForce(Vector3.down * _rtData.fallingSpeed, ForceMode.Acceleration);
 
-
-        Ray ray = new Ray(transform.position, Vector3.down);
+        Vector3 rayOrigin = _pos.position + _spawnOffset; // <-- acá la dispersión
+        Ray ray = new Ray(rayOrigin, Vector3.down);
         if (Physics.Raycast(ray, out RaycastHit hit, rayDistance, floorLayer))
         {
-            _circleInstance = Instantiate(
-                _rtData.circleVFX,
-                hit.point,
-                Quaternion.identity
-            );
+            _circleInstance = Instantiate(_rtData.circleVFX, hit.point, Quaternion.identity);
             _hasSpawned = true;
         }
     }
