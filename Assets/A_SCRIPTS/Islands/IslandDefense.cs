@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 public class IslandDefense : MonoBehaviour
 {
@@ -11,7 +12,9 @@ public class IslandDefense : MonoBehaviour
     [SerializeField]GameObject _normalMeshCatapult;
     [SerializeField] GameObject _lowMesh;
     [SerializeField] GameObject _lowMeshCatapult;
-    [SerializeField] ParticleSystem _particles;
+    [SerializeField] ParticleSystem _particlesRocks;
+    [SerializeField] ParticleSystem _particlesSmoke;
+    [SerializeField] ParticleSystem _particlesFire;
 
     EnemyHealth _islandHealth;
 
@@ -58,24 +61,27 @@ public class IslandDefense : MonoBehaviour
     {
         if (_islandManager != null)
             _islandManager.RegisterDefenseDestroyed();
-        _particles.Play();
+        _particlesRocks.Play();
+
 
     }
 
     private void HandleDamage(float currentHealth)
     {
         if (_thresholdTriggered) return;
+        _particlesRocks.Play();
+
         if (_islandHealth.GetHealthNormalized() <= thresholdPercent)
         {
             _thresholdTriggered = true;
             // lo que quieras que pase acá
-            _normalMesh.SetActive(false);
-            _lowMesh.SetActive(true);
-            _particles.Play();
+            
+            _particlesRocks.Play();
+            _particlesSmoke.Play();
+            _particlesFire.Play();
 
             //Catapult
-            _lowMeshCatapult.SetActive(true);
-            _normalMeshCatapult.SetActive(false);
+            
 
         }
     }

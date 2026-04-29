@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90e00291d32278e4e8a219a2537c8b47, type: 3}
   m_Name: IslandEnemyStats
   m_EditorClassIdentifier: Assembly-CSharp::SO_EnemyData
-  maxHealth: 150
+  maxHealth: 300
   fireRate: 0
   woodExplosionVFX: {fileID: 0}
   bulletSpeed: 15
   bulletVerticalArc: 1.2
   lifeTime: 3
+  damage: 7
   explosionVfx: {fileID: 0}
   waterSplash: {fileID: 0}
   trasilRederer: {fileID: 0}
