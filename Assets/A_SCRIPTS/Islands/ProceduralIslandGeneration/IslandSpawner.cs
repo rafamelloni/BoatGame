@@ -49,6 +49,7 @@ public class IslandSpawner : MonoBehaviour
         {
             manager.SetCanvas(_canvasExample);
             manager.Init();
+            manager.OnReadyToReturn += HandleIslandReturn;
         }
         SpawnDecorations(instance, entry);
         _activeIslands[instance] = (entry.islandPrefab, instance); // <-- trackear
@@ -98,7 +99,12 @@ public class IslandSpawner : MonoBehaviour
         foreach (var kvp in toRemove)
             ReturnIsland(kvp.prefab, kvp.instance);
     }
-
+    private void HandleIslandReturn(GameObject instance)
+    {
+        if (!_activeIslands.TryGetValue(instance, out var entry)) return;
+        _activeIslands.Remove(instance);
+        ReturnIsland(entry.prefab, instance);
+    }
     private IslandEntry PickWeighted()
     {
         int total = 0;

@@ -25,6 +25,8 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities, IUpgradeable
     public string AbilityId => "Cannon";
     public bool IsUnlocked { get; private set; } = true;
     public void SetUnlocked(bool unlocked) => IsUnlocked = unlocked;
+    public StatType[] ValidStats => new[] { StatType.Damage, StatType.FireRate, StatType.Cooldown };
+
 
     public RT_CannonData RuntimeData => _rtData;
 

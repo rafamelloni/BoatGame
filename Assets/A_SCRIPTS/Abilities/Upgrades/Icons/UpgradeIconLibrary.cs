@@ -8,20 +8,15 @@ public class UpgradeIconLibrary : ScriptableObject
     [System.Serializable]
     public struct UpgradeIcon
     {
-        public string abilityId;   // "Cannon", "Morter"
-        public StatType stat;
+        public string abilityId;
         public Sprite icon;
     }
-
     [SerializeField] private List<UpgradeIcon> _icons;
 
-    public Sprite GetIcon(string abilityId, StatType stat)
+    public Sprite GetIcon(string abilityId)
     {
         foreach (var entry in _icons)
-        {
-            if (entry.abilityId == abilityId && entry.stat == stat)
-                return entry.icon;
-        }
+            if (entry.abilityId == abilityId) return entry.icon;
         return null;
     }
 }

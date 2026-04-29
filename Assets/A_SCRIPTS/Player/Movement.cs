@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class Movement : MonoBehaviour
 {
@@ -18,6 +19,9 @@ public class Movement : MonoBehaviour
     public float sprintRechargeRate = 1f;
     public float sprintDrainRate = 1f;
     public Image sprintBarImage;
+
+    private bool _isKnockedBack = false;
+    private Vector3 _knockbackVelocity;
 
     private float _sprintStamina;
     private bool _isSprinting = false;
@@ -65,12 +69,20 @@ public class Movement : MonoBehaviour
     {
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
-
         _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0f, _smoothTurn * Time.fixedDeltaTime, 0f));
 
-        Vector3 move = transform.forward * _currentSpeed * Time.fixedDeltaTime;
+        Vector3 move;
+        if (_isKnockedBack)
+        {
+            move = _knockbackVelocity * Time.fixedDeltaTime;
+        }
+        else
+        {
+            move = transform.forward * _currentSpeed * Time.fixedDeltaTime;
+        }
+
         Vector3 newPos = _rb.position + move;
-        newPos.y = fakeWaveMomenent.GetWaveY(); // asignación directa, no suma
+        newPos.y = fakeWaveMomenent.GetWaveY();
         _rb.MovePosition(newPos);
     }
 
@@ -100,6 +112,24 @@ public class Movement : MonoBehaviour
             _sprintStamina += sprintRechargeRate * Time.deltaTime;
             _sprintStamina = Mathf.Min(_sprintStamina, sprintMaxDuration);
         }
+    }
+
+    public void ApplyKnockback(Vector3 direction, float force, float duration)
+    {
+        StartCoroutine(KnockbackRoutine(direction * force, duration));
+    }
+
+    private IEnumerator KnockbackRoutine(Vector3 velocity, float duration)
+    {
+        _isKnockedBack = true;
+        _knockbackVelocity = velocity;
+        _currentSpeed = 0f;
+        if (_isSprinting) StopSprint();
+
+        yield return new WaitForSeconds(duration);
+        _knockbackVelocity = Vector3.zero;
+        yield return new WaitForSeconds(0.2f);
+        _isKnockedBack = false;
     }
 
     void StopSprint()

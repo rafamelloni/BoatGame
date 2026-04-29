@@ -16,10 +16,10 @@ public class MorterStrategy : IAbilityStrategy, IUpgradeable
     private int _currentCharges;
 
     public string AbilityId => "Mortar";
-
+    
     public bool IsUnlocked { get; private set; } = false;
     public void SetUnlocked(bool unlocked) => IsUnlocked = unlocked;
-
+    public StatType[] ValidStats => new[] { StatType.Damage};
     //[Header("DATA RELOAD")]
     public event System.Action<int> OnChargeConsumed;  // currentCharges, cooldown
     

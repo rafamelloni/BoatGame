@@ -1,7 +1,5 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
 
 public class ShipEnemy : Enemy
 {
@@ -9,12 +7,27 @@ public class ShipEnemy : Enemy
     [SerializeField] private float speed = 4f;
     [SerializeField] private float rotationSpeed = 3f;
     [SerializeField] private Transform playerAimPoint;
+
     [Header("Distances")]
     [SerializeField] private float broadSideDistance = 15f;
     [SerializeField] private float broadSideExitDistance = 20f;
+
     [Header("Broadside")]
     [SerializeField] private float broadSideRotationSpeed = 5f;
     [SerializeField] private float orbitSpeed = 6f;
+
+    [Header("Obstacle Avoidance")]
+    [SerializeField] private LayerMask obstacleLayer;
+    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private float obstacleRadius = 8f;
+    [SerializeField] private float separationRadius = 4f;
+    [SerializeField] private float avoidanceWeight = 3f;
+    [SerializeField] private float separationWeight = 1.5f;
+
+    [Header("Broadside Obstacle")]
+    [SerializeField] private float broadsideRayLength = 6f;
+    [SerializeField] private float broadsideFlipCooldown = 1.5f;
+
     [Header("Shoot")]
     private BulletFactory _bullets;
     private RT_CannonData _rtCannonDataEnemy;
@@ -29,6 +42,8 @@ public class ShipEnemy : Enemy
     private Transform _player;
     [SerializeField] private Transform player;
     private int _broadsideSide = 1;
+    private float _lastFlipTime = -99f;
+
     private enum State { Approach, Broadside }
     private State _state;
     private Rigidbody _rb;
@@ -55,6 +70,7 @@ public class ShipEnemy : Enemy
     private void Update()
     {
         if (_player == null) return;
+
         Vector3 toPlayer = _player.position - transform.position;
         toPlayer.y = 0f;
         float dist = toPlayer.magnitude;
@@ -80,21 +96,49 @@ public class ShipEnemy : Enemy
 
     private void HandleApproach(Vector3 toPlayer)
     {
-        Quaternion targetRot = Quaternion.LookRotation(toPlayer.normalized);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
-        _rb.MovePosition(_rb.position + transform.forward * speed * Time.deltaTime);
-    }
+        Vector3 avoidance = Vector3.zero;
+        Collider[] obstacles = Physics.OverlapSphere(transform.position, obstacleRadius, obstacleLayer);
+        foreach (var col in obstacles)
+        {
+            Vector3 away = transform.position - col.ClosestPoint(transform.position);
+            away.y = 0f;
+            float d = away.magnitude;
+            if (d > 0.001f)
+                avoidance += away.normalized / d;
+        }
 
+        Vector3 desiredDir = toPlayer.normalized + avoidance * avoidanceWeight;
+        desiredDir.y = 0f;
+
+        if (desiredDir.sqrMagnitude < 0.001f)
+            desiredDir = toPlayer.normalized;
+
+        Quaternion targetRot = Quaternion.LookRotation(desiredDir.normalized);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+        transform.position += transform.forward * speed * Time.deltaTime;
+    }
     private void HandleBroadside(Vector3 toPlayer)
     {
+        // --- Raycast hacia adelante: si hay isla, flip de lado ---
+        if (Time.time > _lastFlipTime + broadsideFlipCooldown)
+        {
+            if (Physics.Raycast(transform.position, transform.forward, broadsideRayLength, obstacleLayer))
+            {
+                _broadsideSide *= -1;
+                _lastFlipTime = Time.time;
+            }
+        }
+
         Vector3 targetDir = playerAimPoint != null
             ? playerAimPoint.position - transform.position
             : toPlayer;
         targetDir.y = 0f;
+
         Quaternion targetRot = Quaternion.LookRotation(targetDir.normalized)
             * Quaternion.Euler(0f, -90f * _broadsideSide, 0f);
+
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, broadSideRotationSpeed * Time.deltaTime);
-        _rb.MovePosition(_rb.position + transform.forward * orbitSpeed * Time.deltaTime);
+        transform.position += transform.forward * orbitSpeed * Time.deltaTime;
         TryShoot();
     }
 
@@ -107,7 +151,7 @@ public class ShipEnemy : Enemy
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("ShipEnemy"))
         {
             collision.gameObject.GetComponent<EnemyHealth>().TakeDamage(999f);
             print("cool");

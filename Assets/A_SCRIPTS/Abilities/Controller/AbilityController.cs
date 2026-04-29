@@ -26,6 +26,8 @@ public class AbilityController : MonoBehaviour
     private CannonStrategy _abilityE;
     private MorterStrategy _abilityQ;
 
+    public bool _wasU = false;
+
     private void Awake()
     {
         var hardpoints = GetComponent<ShipHardpoints>();
@@ -62,7 +64,7 @@ public class AbilityController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
             _abilityE.TryExecute();
 
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q) && _wasU)
             _abilityQ.TryExecute();
     }
 
@@ -74,5 +76,11 @@ public class AbilityController : MonoBehaviour
     public void Upgrade()
     {
         _abilityE._rtData.shotsPerBurst = 4;
+    }
+
+    public void LetMortarBeUpgraded()
+    {
+        _abilityQ.SetUnlocked(true);
+        Debug.Log($"Mortar unlocked: {_abilityQ.IsUnlocked}");
     }
 }

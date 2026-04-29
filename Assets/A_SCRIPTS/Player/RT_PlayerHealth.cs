@@ -19,6 +19,7 @@ public class RT_PlayerHealth : MonoBehaviour
     void Awake()
     {
         _stats = GetComponent<RT_PlayerStats>();
+        _vignetteMaterial.SetFloat(VignetteIntensityID, 0f);
     }
 
     public void TakeDamage(float amount)

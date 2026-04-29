@@ -49,7 +49,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _default: 0.8
-    - _valorScroll: -0.037523627
+    - _valorScroll: -0.046128318
     m_Colors:
     - White: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 
 public class IslandManager : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class IslandManager : MonoBehaviour
     [SerializeField] private GameObject _canvasExample;
 
     public event Action OnIslandDefeated;
+    public event Action<GameObject> OnReadyToReturn;
+
+    [SerializeField] float _tiempoDesactivarIslas = 15f;
 
     private void Start()
     {
@@ -46,6 +50,7 @@ public class IslandManager : MonoBehaviour
     {
         _canvasExample.SetActive(true);
         OnIslandDefeated?.Invoke();
+        StartCoroutine(DeactivateIsland());
     }
 
     public void ResetIsland()
@@ -56,5 +61,11 @@ public class IslandManager : MonoBehaviour
     public void SetCanvas(GameObject canvas)
     {
         _canvasExample = canvas;
+    }
+
+    private IEnumerator DeactivateIsland()
+    {
+        yield return new WaitForSeconds(_tiempoDesactivarIslas);
+        OnReadyToReturn?.Invoke(gameObject);
     }
 }

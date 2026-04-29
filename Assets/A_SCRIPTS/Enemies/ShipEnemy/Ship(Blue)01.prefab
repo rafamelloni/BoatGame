@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: -2750679881207628670}
   m_Layer: 6
   m_Name: Ship(Blue)01
-  m_TagString: Enemy
+  m_TagString: ShipEnemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -120,6 +120,18 @@ MonoBehaviour:
   broadSideExitDistance: 22
   broadSideRotationSpeed: 10
   orbitSpeed: 4
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 6144
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  obstacleRadius: 8
+  separationRadius: 4
+  avoidanceWeight: 3
+  separationWeight: 1.5
+  broadsideRayLength: 6
+  broadsideFlipCooldown: 1.5
   fireRate: 1.2
   _SP: {fileID: 3742831935208817879}
   _SP1: {fileID: 4850923292545216497}
@@ -183,7 +195,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 84
   m_CollisionDetection: 0

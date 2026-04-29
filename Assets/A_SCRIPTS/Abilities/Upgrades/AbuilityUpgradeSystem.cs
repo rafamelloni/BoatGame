@@ -47,20 +47,28 @@ public class AbilityUpgradeSystem : MonoBehaviour
 
     private void HandleEnemyDied(Vector3 position)
     {
-        if (_abilities.Count == 0 || _upgradeRules.Count == 0) return;
-
+        if (_abilities.Count == 0) return;
         var unlocked = _abilities.Where(a => a.IsUnlocked).ToList();
         if (unlocked.Count == 0) return;
 
         IUpgradeable chosenAbility = unlocked[Random.Range(0, unlocked.Count)];
 
-        int ruleIndex = Random.Range(0, _upgradeRules.Count);
-        UpgradeRule chosenRule = _upgradeRules[ruleIndex];
+        StatType[] validStats = chosenAbility.ValidStats;
+        if (validStats == null || validStats.Length == 0) return;
+        StatType chosenStat = validStats[Random.Range(0, validStats.Length)];
 
-        chosenAbility.ApplyUpgrade(chosenRule.stat, chosenRule.valuePerKill);
-        _statsUI.OnUpgradeApplied(chosenAbility.AbilityId, chosenRule.stat, chosenRule.valuePerKill);
+        // buscar valuePerKill en las reglas
+        float value = 0f;
+        foreach (var rule in _upgradeRules)
+        {
+            if (rule.stat == chosenStat) { value = rule.valuePerKill; break; }
+        }
+        if (value == 0f) return;
 
-        Sprite icon = _iconLibrary.GetIcon(chosenAbility.AbilityId, chosenRule.stat);
+        chosenAbility.ApplyUpgrade(chosenStat, value);
+        _statsUI.OnUpgradeApplied(chosenAbility.AbilityId, chosenStat, value);
+
+        Sprite icon = _iconLibrary.GetIcon(chosenAbility.AbilityId);
         if (icon == null) return;
 
         EnemyUpgradeDisplay popup = Instantiate(_popupPrefab, position, Quaternion.identity);
