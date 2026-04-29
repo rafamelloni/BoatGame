@@ -69,13 +69,13 @@ public class IslandDefense : MonoBehaviour
         {
             _thresholdTriggered = true;
             // lo que quieras que pase acá
-            _normalMesh.SetActive(false);
-            _lowMesh.SetActive(true);
+            //_normalMesh.SetActive(false);
+            //_lowMesh.SetActive(true);
             _particles.Play();
 
             //Catapult
-            _lowMeshCatapult.SetActive(true);
-            _normalMeshCatapult.SetActive(false);
+            //_lowMeshCatapult.SetActive(true);
+            //_normalMeshCatapult.SetActive(false);
 
         }
     }

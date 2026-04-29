@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8e0092e543038cf47bfc42dce52fac92, type: 2}
+  - {fileID: 2100000, guid: 9211995128f358c468c39103446b6519, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -578,7 +578,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &9075342175244809175
 Transform:
   m_ObjectHideFlags: 0
@@ -627,7 +627,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8e0092e543038cf47bfc42dce52fac92, type: 2}
+  - {fileID: 2100000, guid: 9211995128f358c468c39103446b6519, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -719,6 +719,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca3b1e91467c3be42a7f014922e65120, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  _mesh: {fileID: 4961476364102842223}
+  _grietaStrengthProperty: _grietaStrength
+  _emissionStrengthProperty: _EmissionStrength
+  _curvaGrietas: 2
+  _maxGrietaStrength: 2
+  _maxEmissionStrength: 3
 --- !u!114 &5429901207846464832
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -822,7 +828,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8e0092e543038cf47bfc42dce52fac92, type: 2}
+  - {fileID: 2100000, guid: 9211995128f358c468c39103446b6519, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
