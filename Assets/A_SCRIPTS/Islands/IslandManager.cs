@@ -16,6 +16,8 @@ public class IslandManager : MonoBehaviour
     public event Action OnIslandDefeated;
     public event Action<GameObject> OnReadyToReturn;
 
+    public static event Action OnAnyIslandDefeated;
+
     [SerializeField] float _tiempoDesactivarIslas = 15f;
 
     private void Start()
@@ -50,6 +52,7 @@ public class IslandManager : MonoBehaviour
     {
         _canvasExample.SetActive(true);
         OnIslandDefeated?.Invoke();
+        OnAnyIslandDefeated.Invoke();
         StartCoroutine(DeactivateIsland());
     }
 

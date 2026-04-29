@@ -16,6 +16,7 @@ public class RT_PlayerHealth : MonoBehaviour
     private static readonly int VignetteIntensityID = Shader.PropertyToID("_VignetteIntensity");
 
     [SerializeField] GameObject _vfxDestroyed;
+    [SerializeField] float _vidaParaActivarFuego = 30f;
 
 
     void Awake()
@@ -64,7 +65,7 @@ public class RT_PlayerHealth : MonoBehaviour
         float t = 1f - (_stats.currentHealth / _stats.maxHealth); // 0 = full HP, 1 = muerto
         float intensity = Mathf.Lerp(_vignetteMinIntensity, _vignetteMaxIntensity, t);
         _vignetteMaterial.SetFloat(VignetteIntensityID, intensity);
-        if (intensity >= 1f)
+        if (_stats.currentHealth <= _vidaParaActivarFuego)
         {
             _vfxDestroyed.SetActive(true);
         }

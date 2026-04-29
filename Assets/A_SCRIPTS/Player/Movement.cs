@@ -138,4 +138,9 @@ public class Movement : MonoBehaviour
         trailSprint.Stop();
         trailSprint1.Stop();
     }
+
+    public void SetMovementEnabled(bool enabled)
+    {
+        this.enabled = enabled;
+    }
 }

@@ -15,6 +15,11 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private Transform _mortarShootPointReal;
     [SerializeField] private MortarChargeUI _mortarChargeUI;
 
+    [Header("hardcodeado insta")]
+    [SerializeField] private GameObject _mortarPhoto;
+    [SerializeField] private GameObject _mortarText;
+    [SerializeField] private GameObject _mortarMesh;
+
     [Header("Factories")]
     [SerializeField] private BulletFactory _bulletFactory;
     [SerializeField] private BulletFactory _barrelFactory;
@@ -82,5 +87,13 @@ public class AbilityController : MonoBehaviour
     {
         _abilityQ.SetUnlocked(true);
         Debug.Log($"Mortar unlocked: {_abilityQ.IsUnlocked}");
+    }
+
+    public void ResetAbilities()
+    {
+        _wasU = false;
+        _mortarPhoto.SetActive(false);
+        _mortarText.SetActive(false);
+        _mortarMesh.SetActive(false);
     }
 }

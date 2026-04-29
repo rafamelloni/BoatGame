@@ -76,7 +76,7 @@ public class ObjetivoUIPro : MonoBehaviour
         // Entrada: cae con rebote + balanceo en X
         while (tiempo < duracionEntrada)
         {
-            tiempo += Time.deltaTime;
+            tiempo += Time.unscaledDeltaTime;
             float t = Mathf.Clamp01(tiempo / duracionEntrada);
 
             float curvaY = ElasticEaseOut(t, fuerzaRebote, cantidadOscilaciones);
@@ -108,7 +108,7 @@ public class ObjetivoUIPro : MonoBehaviour
         float idleTiempo = 0f;
         while (idleTiempo < tiempoVisible)
         {
-            idleTiempo += Time.deltaTime;
+            idleTiempo += Time.unscaledDeltaTime;
 
             float offsetX = Mathf.Sin(idleTiempo * idleFrecuenciaX) * idleAmplitudX;
             panelObjetivo.anchoredPosition = new Vector2(posicionFinal.x + offsetX, posicionFinal.y);
@@ -129,7 +129,7 @@ public class ObjetivoUIPro : MonoBehaviour
 
         while (tiempo < duracionSalida)
         {
-            tiempo += Time.deltaTime;
+            tiempo += Time.unscaledDeltaTime;
             float t = Mathf.Clamp01(tiempo / duracionSalida);
 
             float curva = t * t;

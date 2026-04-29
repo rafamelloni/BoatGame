@@ -39,7 +39,7 @@ public class AbilityUpgradeSystem : MonoBehaviour
         _abilities.Remove(ability);
     }
 
-    public void ResetAllUpgrades()
+    public void ResetAllUpgradesStats()
     {
         foreach (var ability in _abilities)
             ability.ResetUpgrades();

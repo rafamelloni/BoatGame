@@ -108,6 +108,7 @@ public class MorterStrategy : IAbilityStrategy, IUpgradeable
     {
         _rt.damage = _baseData.damage;
         _rt.cooldown = _baseData.cooldown;
-        
+        SetUnlocked(false);
+
     }
 }
