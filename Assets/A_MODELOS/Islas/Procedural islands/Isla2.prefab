@@ -1019,6 +1019,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f46389df32169944aaf612fd0a9580e0, type: 3}
+      propertyPath: m_TagString
+      value: Islas
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -1112,6 +1116,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IslandManager
   _totalDefenses: 0
   _canvasExample: {fileID: 0}
+  _tiempoDesactivarIslas: 15
 --- !u!135 &-1253308758778591921
 SphereCollider:
   m_ObjectHideFlags: 0

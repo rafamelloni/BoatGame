@@ -445,7 +445,7 @@ GameObject:
   - component: {fileID: -128659617295121785}
   m_Layer: 11
   m_Name: Isla4
-  m_TagString: Untagged
+  m_TagString: Islas
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -555,6 +555,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IslandManager
   _totalDefenses: 0
   _canvasExample: {fileID: 0}
+  _tiempoDesactivarIslas: 15
 --- !u!135 &-128659617295121785
 SphereCollider:
   m_ObjectHideFlags: 0

@@ -9,6 +9,7 @@ TagManager:
   - IslandHeavyBulletFactory
   - IslandBulletFactory
   - ShipEnemy
+  - Islas
   layers:
   - Default
   - TransparentFX

@@ -1,9 +1,13 @@
+﻿using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class PlayerCollisions : MonoBehaviour
 {
     public string enemyTag = "Enemy";
+    public string IslandTag = "Islas";
     public string enemyShipTag = "ShipEnemy";
+    [SerializeField] ParticleSystem SmokeParticles;
+
     [SerializeField] private float knockbackForce = 10f;
     [SerializeField] private float knockbackDuration = 0.2f;
     [SerializeField] private float damageWhenBumpingEnemies = 15f;
@@ -22,14 +26,13 @@ public class PlayerCollisions : MonoBehaviour
     {
         if (collision.gameObject.CompareTag(enemyTag))
         {
-             collision.gameObject.GetComponent<EnemyHealth>()?.TakeDamage(9999);
+            collision.gameObject.GetComponent<EnemyHealth>()?.TakeDamage(9999);
             _health.TakeDamage(damageWhenBumpingEnemies);
-
-            
         }
 
         if (collision.gameObject.CompareTag(enemyShipTag))
         {
+           
             Vector3 knockbackDir = transform.position - collision.transform.position;
             knockbackDir.y = 0f;
             knockbackDir.Normalize();
@@ -37,5 +40,23 @@ public class PlayerCollisions : MonoBehaviour
             _health.TakeDamage(damageWhenBumpingEnemies);
         }
 
+        if (collision.gameObject.CompareTag(IslandTag))
+        {
+            ContactPoint contact = collision.contacts[0];
+
+            ParticleSystem particles = Instantiate(
+                SmokeParticles,
+                contact.point,                          //  punto exacto
+                Quaternion.LookRotation(contact.normal) //  orientado a la superficie
+            );
+
+            Destroy(particles.gameObject, 2f); // limpiar
+
+
+            Vector3 knockbackDir = transform.position - collision.transform.position;
+            knockbackDir.y = 0f;
+            knockbackDir.Normalize();
+            _movement.ApplyKnockback(knockbackDir, knockbackForce, knockbackDuration);
+        }
     }
 }
