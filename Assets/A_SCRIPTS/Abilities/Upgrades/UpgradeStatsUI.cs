@@ -52,7 +52,7 @@ public class UpgradeStatsUI : MonoBehaviour
             float current = float.TryParse(display.text.text, out float parsed) ? parsed : 0f;
             display.text.text = (current + value).ToString("F1");
 
-            StartCoroutine(FlashGreen(display.text));
+            //StartCoroutine(FlashGreen(display.text));
         }
 
         if (_progressBar != null)

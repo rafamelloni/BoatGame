@@ -87,6 +87,7 @@ public class CannonBulletImpactIndicator : MonoBehaviour
                 {
                     indicatorVisual.SetParent(null, true);
                     indicatorVisual.position = hit.point + Vector3.up * groundOffset;
+                    indicatorVisual.rotation = Quaternion.identity;
                     indicatorVisual.gameObject.SetActive(true);
                 }
 
