@@ -16,5 +16,5 @@ MonoBehaviour:
   turnSpeed: 60
   acceleration: 4
   deceleration: 3
-  sprintMultiplier: 1.2
-  maxHealth: 100
+  sprintMultiplier: 1.3
+  maxHealth: 150

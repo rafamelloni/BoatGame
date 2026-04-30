@@ -12,8 +12,12 @@ public class DashBossMovement : MonoBehaviour
     [SerializeField] private AnimationCurve _dashCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [SerializeField] private float _stopDistanceFromPlayer = 3f;
     [SerializeField] private ParticleSystem _dashParticles;
-    public float StopDistance => _stopDistanceFromPlayer;
+    [SerializeField] private float _tiltAngle = 25f;
+    [SerializeField] private float _tiltSpeed = 8f;
 
+    [SerializeField] private ParticleSystem _dashParticlesSmoke;      
+    [SerializeField] private ParticleSystem _dashParticlesFire;
+    public float StopDistance => _stopDistanceFromPlayer;
     private Transform _player;
     private bool _isLocked;
 
@@ -34,11 +38,17 @@ public class DashBossMovement : MonoBehaviour
         if (dir.sqrMagnitude < 0.01f) return;
         Quaternion targetRot = Quaternion.LookRotation(dir.normalized);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
+        _dashParticlesSmoke.Play();
     }
 
-    public IEnumerator ExecuteDash(Vector3 destination, float durationOverride = -1f)
+    public IEnumerator ExecuteDash(Vector3 destination, float durationOverride = -1f, bool revertTilt = true)
     {
         _dashParticles.Play();
+         
+        //yield return new WaitForSeconds(0.2f); // ajustá según el feel
+        _dashParticlesSmoke.Stop();
+        _dashParticlesFire.Play();
+
         float duration = durationOverride > 0f ? durationOverride : _dashDuration;
         destination.y = transform.position.y;
         Vector3 origin = transform.position;
@@ -51,6 +61,8 @@ public class DashBossMovement : MonoBehaviour
             yield return null;
         }
         transform.position = destination;
+        if (revertTilt)
+            StartCoroutine(TiltX(0f));
     }
     public IEnumerator RotateToFace(Vector3 target, float tolerance = 5f, float timeout = 2f, float speedOverride = -1f)
     {
@@ -66,6 +78,9 @@ public class DashBossMovement : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, speed * Time.deltaTime);
             yield return null;
         }
+
+        _dashParticlesSmoke.Play();
+        StartCoroutine(TiltX(_tiltAngle));
     }
 
     public void RotateBroadside()
@@ -76,5 +91,18 @@ public class DashBossMovement : MonoBehaviour
         Quaternion targetRot = Quaternion.LookRotation(dir.normalized) * Quaternion.Euler(0f, _rotationAngle, 0f);
         if (Quaternion.Angle(transform.rotation, targetRot) < 2f) return;
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, _rotationSpeed * Time.deltaTime);
+    }
+    public IEnumerator TiltX(float targetAngle)
+    {
+        float elapsed = 0f;
+        Quaternion baseRot = transform.rotation;
+        Quaternion tiltRot = baseRot * Quaternion.Euler(targetAngle, 0f, 0f);
+        float duration = 1f / _tiltSpeed;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            transform.rotation = Quaternion.Slerp(baseRot, tiltRot, elapsed / duration);
+            yield return null;
+        }
     }
 }

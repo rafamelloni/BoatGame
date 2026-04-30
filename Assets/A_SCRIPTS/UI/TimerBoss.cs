@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class TimerBoss : MonoBehaviour
@@ -8,6 +9,7 @@ public class TimerBoss : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private TMP_Text textoTimer;
+    [SerializeField] private Image barraTimer;
 
     [Header("Objeto a activar al llegar a 0")]
     [SerializeField] private GameObject objetoAlTerminar;
@@ -51,7 +53,18 @@ public class TimerBoss : MonoBehaviour
     {
         int minutos = Mathf.FloorToInt(tiempoActual / 60f);
         int segundos = Mathf.FloorToInt(tiempoActual % 60f);
-
         textoTimer.text = minutos.ToString("00") + ":" + segundos.ToString("00");
+
+        if (barraTimer != null)
+            barraTimer.fillAmount = tiempoActual / tiempoInicial;
     }
+
+    public void ResetTimer()
+    
+    {
+        tiempoActual = tiempoInicial;
+
+
+    }
+
 }

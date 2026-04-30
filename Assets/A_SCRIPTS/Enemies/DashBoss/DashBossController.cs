@@ -161,7 +161,7 @@ public class DashBossController : Enemy
             dir.y = 0f;
             transform.rotation = Quaternion.LookRotation(dir.normalized);
             _circleTelegraphs[i].Hide();
-            yield return _movement.ExecuteDash(destinations[i], _circleDashDuration);
+            yield return _movement.ExecuteDash(destinations[i], _circleDashDuration, revertTilt: false);
             SpawnDashFire(prevPos, destinations[i]);
             prevPos = destinations[i];
 
@@ -170,6 +170,7 @@ public class DashBossController : Enemy
             yield return new WaitForSeconds(_betweenDashes);
         }
         circle.SetActive(false);
+        yield return _movement.TiltX(0f);
         _movement.LockRotation(false);
         _nextCircleSpecialTime = Time.time + _circleSpecialCooldown;
         _isBusy = false;

@@ -73,6 +73,7 @@ public class CannonBulletIsland : BulletsBase
         {
             Explode(explosionPoint);
             ParticlePool.Instance.GetParticle(_rtData.explosionVFX, explosionPoint);
+            other.gameObject.GetComponent<RT_PlayerHealth>().TakeDamage(20f);
         }
         if (other.CompareTag("Floor"))
         {

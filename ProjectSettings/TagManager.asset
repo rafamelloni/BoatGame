@@ -10,6 +10,7 @@ TagManager:
   - IslandBulletFactory
   - ShipEnemy
   - Islas
+  - DashBoss
   layers:
   - Default
   - TransparentFX
@@ -24,7 +25,7 @@ TagManager:
   - EnemyGroupLayer
   - Islas
   - Limits
-  - 
+  - World
   - 
   - 
   - 

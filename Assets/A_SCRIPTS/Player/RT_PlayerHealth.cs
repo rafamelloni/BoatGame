@@ -15,6 +15,10 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField] private float _vignetteMinIntensity = 0f;
     private static readonly int VignetteIntensityID = Shader.PropertyToID("_VignetteIntensity");
 
+    //vignettetakedaage
+    private static readonly int DamageFlashID = Shader.PropertyToID("_VignetteIntensity");
+    [SerializeField] private Material _damageMaterial;
+
     [SerializeField] GameObject _vfxDestroyed;
     [SerializeField] float _vidaParaActivarFuego = 30f;
 
@@ -30,6 +34,8 @@ public class RT_PlayerHealth : MonoBehaviour
         if (_isDead) return;
         _stats.currentHealth -= amount;
         _stats.currentHealth = Mathf.Max(_stats.currentHealth, 0f);
+        if (_damageMaterial != null)
+            StartCoroutine(DamageFlash());
         UpdateVignette();
         if (_stats.currentHealth <= 0f)
         {
@@ -38,10 +44,37 @@ public class RT_PlayerHealth : MonoBehaviour
         }
     }
 
+    private IEnumerator DamageFlash()
+    {
+        float duration = 0.15f;
+        float t = 0f;
+
+        // sube a 0.9 rápido
+        while (t < 1f)
+        {
+            t += Time.deltaTime / 0.05f;
+            _damageMaterial.SetFloat(DamageFlashID, Mathf.Lerp(0f, 0.9f, t));
+            yield return null;
+        }
+
+        t = 0f;
+
+        // baja gradual
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duration;
+            _damageMaterial.SetFloat(DamageFlashID, Mathf.Lerp(0.9f, 0f, t));
+            yield return null;
+        }
+
+        _damageMaterial.SetFloat(DamageFlashID, 0f);
+    }
+
     public void Heal(float amount)
     {
         if (_isDead) return;
         _stats.currentHealth = Mathf.Min(_stats.currentHealth + amount, _stats.maxHealth);
+        UpdateVignette();
     }
 
     private IEnumerator DeathRoutine()
@@ -68,6 +101,10 @@ public class RT_PlayerHealth : MonoBehaviour
         if (_stats.currentHealth <= _vidaParaActivarFuego)
         {
             _vfxDestroyed.SetActive(true);
+        }
+        else
+        {
+            _vfxDestroyed.SetActive(false);
         }
     }
 

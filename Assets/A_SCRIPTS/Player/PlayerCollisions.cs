@@ -6,11 +6,13 @@ public class PlayerCollisions : MonoBehaviour
     public string enemyTag = "Enemy";
     public string IslandTag = "Islas";
     public string enemyShipTag = "ShipEnemy";
+    public string bossShipTag = "DashBoss";
     [SerializeField] ParticleSystem SmokeParticles;
 
     [SerializeField] private float knockbackForce = 10f;
     [SerializeField] private float knockbackDuration = 0.2f;
     [SerializeField] private float damageWhenBumpingEnemies = 15f;
+    [SerializeField] private float damageWhenBumpingBoss = 25f;
     [SerializeField] private Movement _movement;
 
     RT_PlayerHealth _health;
@@ -57,6 +59,15 @@ public class PlayerCollisions : MonoBehaviour
             knockbackDir.y = 0f;
             knockbackDir.Normalize();
             _movement.ApplyKnockback(knockbackDir, knockbackForce, knockbackDuration);
+        }
+
+        if (collision.gameObject.CompareTag(bossShipTag))
+        {
+
+            //collision.gameObject.GetComponent<EnemyHealth>()?.TakeDamage(9999);
+            _health.TakeDamage(damageWhenBumpingBoss);
+
+
         }
     }
 }

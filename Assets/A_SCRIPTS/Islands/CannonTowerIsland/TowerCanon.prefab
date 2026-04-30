@@ -110,6 +110,8 @@ MonoBehaviour:
   fireRate: 2
   _fireRange: 15.5
   _rotationSpeed: 5
+  _speed: 7
+  so_island: {fileID: 11400000, guid: c5b236f7b25a30d44bc736042dcaef08, type: 2}
 --- !u!1 &1152333405918390480
 GameObject:
   m_ObjectHideFlags: 0

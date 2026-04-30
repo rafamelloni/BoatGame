@@ -32,7 +32,8 @@ public class UIHealthBarDashBoss : MonoBehaviour
         if (_bossHealth != null)
         {
             _bossHealth.OnDamage += UpdateBar;
-            UpdateBar(_bossHealth.GetCurrenHealt());
+            if (_bossHealth.GetCurrenHealt() > 0f) // solo si ya fue inicializado
+                UpdateBar(_bossHealth.GetCurrenHealt());
         }
     }
 

@@ -12,6 +12,10 @@ public class CannonShortRangeIsland : MonoBehaviour
     [SerializeField] private float fireRate = 2f;
     [SerializeField] private float _fireRange = 15.5f;
     [SerializeField] private float _rotationSpeed = 5f;
+    [SerializeField] private float _speed = 5f;
+
+    private RT_CannonData _rtIsland;
+    public SO_CannonData so_island;
 
     private float _nextFireTime;
 
@@ -19,6 +23,7 @@ public class CannonShortRangeIsland : MonoBehaviour
     {
         _player = GameObject.FindWithTag("Player").transform;
         enemyBullet = GameObject.FindWithTag("IslandHeavyBulletFactory").GetComponent<BulletFactory>();
+        _rtIsland = new RT_CannonData(so_island);
     }
     void Update()
     {
@@ -60,10 +65,7 @@ public class CannonShortRangeIsland : MonoBehaviour
     private void Shoot()
     {
         if (!_fov.CanSeeTarget()) return;
-
         var bullet = enemyBullet.Create();
-
-        bullet.transform.position = shootPoint.position;
-        bullet.transform.rotation = shootPoint.rotation;
+        bullet.GetComponent<HeavyIslandBullet>().Setup(shootPoint, _speed, _rtIsland);
     }
 }

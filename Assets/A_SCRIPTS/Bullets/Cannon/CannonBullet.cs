@@ -69,7 +69,7 @@ public class CannonBullet : BulletsBase
     {
         Vector3 explosionPoint = other.ClosestPoint(transform.position);
 
-        if (other.CompareTag("Enemy") || other.CompareTag("ShipEnemy"))
+        if (other.CompareTag("Enemy") || other.CompareTag("ShipEnemy") || other.CompareTag("DashBoss"))
         {
             Explode(explosionPoint);
             ParticlePool.Instance.GetParticle(_rtData.explosionVFX, explosionPoint);

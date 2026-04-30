@@ -11,6 +11,7 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private UpgradeStatsUI _upgradeStatsUI;
     [SerializeField] private EnemySpawner _enemySpawner;
     [SerializeField] private AbilityController _abilityController;
+    [SerializeField] private TimerBoss _timerBoss;
     [SerializeField] private GameObject _Canvas;
     [SerializeField] private GameObject _MESH;
 
@@ -18,6 +19,9 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private Transform _playerTransform;
     [SerializeField] private Vector3 _playerStartPosition;
     [SerializeField] private Quaternion _playerStartRotation;
+
+    [Header("BOISS TEST")]
+    [SerializeField] private GameObject BOSS;
 
     [Header("Circle Vignette")]
     [SerializeField] private UnityEngine.UI.Image _vignetteImage;
@@ -60,6 +64,12 @@ public class SceneResetter : MonoBehaviour
     {
         if (Input.GetKeyUp(KeyCode.L))
             HandlePlayerDeath();
+
+        if (Input.GetKeyUp(KeyCode.B))
+        {
+            BOSS.SetActive(true);
+        }
+           
     }
 
     private void HandlePlayerDeath()
@@ -93,6 +103,7 @@ public class SceneResetter : MonoBehaviour
         _abilityUpgradeSystem.ResetAllUpgradesStats();
         _upgradeStatsUI.ResetStats();
         _abilityController.ResetAbilities();
+        _timerBoss.ResetTimer();
     }
 
     private IEnumerator PlayDeathVignette()
