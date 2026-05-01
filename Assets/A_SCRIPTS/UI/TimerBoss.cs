@@ -13,6 +13,7 @@ public class TimerBoss : MonoBehaviour
 
     [Header("Objeto a activar al llegar a 0")]
     [SerializeField] private GameObject objetoAlTerminar;
+    [SerializeField] private EnemySpawner _enemySpawner;
 
     private float tiempoActual;
     private bool timerActivo = true;
@@ -41,7 +42,12 @@ public class TimerBoss : MonoBehaviour
             ActualizarTexto();
 
             if (objetoAlTerminar != null)
+            {
                 objetoAlTerminar.SetActive(true);
+                _enemySpawner.DespawnAll();
+            }
+               
+
 
             return;
         }

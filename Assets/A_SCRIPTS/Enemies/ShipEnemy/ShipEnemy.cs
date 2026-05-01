@@ -149,11 +149,12 @@ public class ShipEnemy : Enemy
         Shoot();
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("ShipEnemy"))
+
+        if (other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("ShipEnemy"))
         {
-            collision.gameObject.GetComponent<EnemyHealth>().TakeDamage(999f);
+            other.gameObject.GetComponent<EnemyHealth>().TakeDamage(999f);
             print("cool");
         }
     }

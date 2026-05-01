@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -16,6 +17,8 @@ public class UpgradesIslands : MonoBehaviour
     public GameObject mortargoAbilityNumber;
     public GameObject mortargoAbilityStats;
     public GameObject mortargoAbilityKey;
+    public GameObject barra;
+    public GameObject TEXTDamage;
 
     public GameObject canvas;
 
@@ -48,6 +51,8 @@ public class UpgradesIslands : MonoBehaviour
         mortargoAbilityKey.SetActive(true);
         ability.LetMortarBeUpgraded();
         canvas.SetActive(false);
+        barra.SetActive(true);
+        TEXTDamage.SetActive(true);
         OnRouglikeExit();
 
 

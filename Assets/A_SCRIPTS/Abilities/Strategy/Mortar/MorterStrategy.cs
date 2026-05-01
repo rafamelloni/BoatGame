@@ -9,7 +9,7 @@ public class MorterStrategy : IAbilityStrategy, IUpgradeable
     private readonly Transform _shootPoint;
     private readonly CoroutineRunner _runner;
     private BulletFactory _barrelFactory;
-
+    private ParticleSystem explosionShoot;
     private const int MaxCharges = 3;
     private const float DispersionRadius = 3f;
 
@@ -24,7 +24,7 @@ public class MorterStrategy : IAbilityStrategy, IUpgradeable
     public event System.Action<int> OnChargeConsumed;  // currentCharges, cooldown
     
     
-    public MorterStrategy(SO_MorterData baseData, Transform ownerTransform, Transform shootPoint, CoroutineRunner runner, BulletFactory barrelFactory)
+    public MorterStrategy(SO_MorterData baseData, Transform ownerTransform, Transform shootPoint, CoroutineRunner runner, BulletFactory barrelFactory, ParticleSystem explosion)
     {
         _baseData = baseData;
         _rt = new RT_MortarData(_baseData);
@@ -32,6 +32,7 @@ public class MorterStrategy : IAbilityStrategy, IUpgradeable
         _shootPoint = shootPoint;
         _runner = runner;
         _barrelFactory = barrelFactory;
+        explosionShoot = explosion;
 
         _currentCharges = MaxCharges;
     }
@@ -48,6 +49,7 @@ public class MorterStrategy : IAbilityStrategy, IUpgradeable
     {
         Vector2 rand = Random.insideUnitCircle * DispersionRadius;
         Vector3 offset = new Vector3(rand.x, 0f, rand.y);
+        explosionShoot.Play();
         VisualShoot();
         SpawnRealProjectile(offset);
     }

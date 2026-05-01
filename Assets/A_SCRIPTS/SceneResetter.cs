@@ -99,11 +99,14 @@ public class SceneResetter : MonoBehaviour
 
         //Abilityes-Stats
         _islandSpawnManager.ResetIslands();
-        _enemySpawner.DespawnAll();
+        _enemySpawner.DespawnAllAndReset();
         _abilityUpgradeSystem.ResetAllUpgradesStats();
         _upgradeStatsUI.ResetStats();
         _abilityController.ResetAbilities();
         _timerBoss.ResetTimer();
+
+        //boss
+        BOSS.SetActive(false);
     }
 
     private IEnumerator PlayDeathVignette()

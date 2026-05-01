@@ -19,6 +19,7 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private GameObject _mortarPhoto;
     [SerializeField] private GameObject _mortarText;
     [SerializeField] private GameObject _mortarMesh;
+    [SerializeField] private ParticleSystem _mortarE;
 
     [Header("Factories")]
     [SerializeField] private BulletFactory _bulletFactory;
@@ -56,7 +57,7 @@ public class AbilityController : MonoBehaviour
 
     private void SetupMortar(CoroutineRunner runner)
     {
-        _abilityQ = new MorterStrategy(_morterData, _mortarShootPointReal, _mortarShootPoint, runner, _barrelFactory);
+        _abilityQ = new MorterStrategy(_morterData, _mortarShootPointReal, _mortarShootPoint, runner, _barrelFactory, _mortarE);
         _mortarChargeUI.Init(_morterData.cooldown, () => _abilityQ.RestoreCharge());
         _abilityQ.OnChargeConsumed += _ => _mortarChargeUI.OnShot();
         _upgradeSystem.RegisterAbility(_abilityQ);

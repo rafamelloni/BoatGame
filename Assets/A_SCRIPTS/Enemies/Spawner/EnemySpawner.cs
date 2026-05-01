@@ -197,7 +197,7 @@ public class EnemySpawner : MonoBehaviour
         return vp.x >= 0f && vp.x <= 1f && vp.y >= 0f && vp.y <= 1f && vp.z > 0f;
     }
 
-    public void DespawnAll()
+    public void DespawnAllAndReset()
     {
         StopAllCoroutines();
 
@@ -227,9 +227,47 @@ public class EnemySpawner : MonoBehaviour
         _activeShipCount = 0;
 
         // Reiniciar loops
+        ResumeSpawning();
+    }
+
+    public void DespawnAll()
+    {
+        StopAllCoroutines();
+
+        // Despawnear grupos
+        var groups = FindObjectsByType<EnemyGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var group in groups)
+        {
+            group.OnGroupDead -= ReturnGroupToPool;
+            for (int i = 0; i < _enemyGroupPrefabs.Length; i++)
+            {
+                if (group.gameObject.name.Contains(_enemyGroupPrefabs[i].name))
+                {
+                    _pools[i].Return(group);
+                    break;
+                }
+            }
+        }
+        _activeGroupCount = 0;
+
+        // Despawnear ships
+        var ships = FindObjectsByType<ShipEnemy>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var ship in ships)
+        {
+            ship.OnDead -= ReturnShipToPool;
+            _shipPool.Return(ship);
+        }
+        _activeShipCount = 0;
+    }
+
+
+    public void ResumeSpawning()
+    {
         StartCoroutine(GroupSpawnLoop());
         StartCoroutine(ShipSpawnLoop());
     }
+
+
 
     private void OnDrawGizmos()
     {

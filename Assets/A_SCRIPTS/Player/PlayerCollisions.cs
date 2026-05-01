@@ -26,11 +26,7 @@ public class PlayerCollisions : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag(enemyTag))
-        {
-            collision.gameObject.GetComponent<EnemyHealth>()?.TakeDamage(9999);
-            _health.TakeDamage(damageWhenBumpingEnemies);
-        }
+
 
         if (collision.gameObject.CompareTag(enemyShipTag))
         {
@@ -68,6 +64,15 @@ public class PlayerCollisions : MonoBehaviour
             _health.TakeDamage(damageWhenBumpingBoss);
 
 
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag(enemyTag))
+        {
+            other.gameObject.GetComponent<EnemyHealth>()?.TakeDamage(9999);
+            _health.TakeDamage(damageWhenBumpingEnemies);
         }
     }
 }

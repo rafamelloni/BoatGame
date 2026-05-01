@@ -24,18 +24,21 @@ public class CannonShortRangeIsland : MonoBehaviour
         _player = GameObject.FindWithTag("Player").transform;
         enemyBullet = GameObject.FindWithTag("IslandHeavyBulletFactory").GetComponent<BulletFactory>();
         _rtIsland = new RT_CannonData(so_island);
+        _nextFireTime = float.MaxValue;
     }
     void Update()
     {
         if (!_fov.CanSeeTarget())
         {
-           _nextFireTime = 0;
+            _nextFireTime = float.MaxValue;
             return;
         }
         float distance = _fov.DistanceToTarget();
 
         if (distance < _fireRange)
         {
+            if (_nextFireTime == float.MaxValue)
+                _nextFireTime = Time.time + fireRate;
             RotateToPlayer();
 
             if (Time.time >= _nextFireTime)

@@ -26,6 +26,7 @@ public class CannonIslandShoot : Enemy
         _rtIsland = new RT_CannonData(so_island);
         _player = GameObject.FindWithTag("Player").transform;
         _bullets = GameObject.FindWithTag("IslandBulletFactory").GetComponent<BulletFactory>();
+        _nextFireTime = float.MaxValue;
     }
 
     private void Update()
@@ -33,12 +34,16 @@ public class CannonIslandShoot : Enemy
         if (_player == null) return;
         if (!_fov.CanSeeTarget())
         {
+            _nextFireTime = float.MaxValue;
             return;
         }
 
         float distance = _fov.DistanceToTarget();
         if (distance < _fireRange)
         {
+            if (_nextFireTime == float.MaxValue)
+                _nextFireTime = Time.time + _fireRate;
+
             RotateToPlayer();
             TryShoot();
         }

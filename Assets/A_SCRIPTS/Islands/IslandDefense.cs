@@ -68,8 +68,9 @@ public class IslandDefense : MonoBehaviour
 
     private void HandleDamage(float currentHealth)
     {
-        if (_thresholdTriggered) return;
         _particlesRocks.Play();
+        if (_thresholdTriggered) return;
+        
 
         if (_islandHealth.GetHealthNormalized() <= thresholdPercent)
         {

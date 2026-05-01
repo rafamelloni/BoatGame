@@ -214,6 +214,14 @@ public class DashBossController : Enemy
         Vector3 dir = (to - from);
         dir.y = 0f;
         Quaternion rotation = Quaternion.LookRotation(dir.normalized) * Quaternion.Euler(0f, 90f, 0f);
-        Instantiate(_dashFirePrefab, center, rotation);
+        GameObject p = Instantiate(_dashFirePrefab, center, rotation);
+        StartCoroutine( despawnParticles(p));
+    }
+
+    IEnumerator despawnParticles(GameObject fireP)
+    {
+        yield return new WaitForSeconds(3f);
+        fireP.SetActive(false);
+
     }
 }
