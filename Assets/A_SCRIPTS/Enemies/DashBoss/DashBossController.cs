@@ -1,44 +1,45 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class DashBossController : Enemy
 {
     [Header("References")]
     [SerializeField] private DashBossMovement _movement;
-    [SerializeField] private DashTelegraph _telegraph;
     [SerializeField] private DashBossShoot _shoot;
+
     [Header("Dash Settings")]
     [SerializeField] private float _telegraphDuration = 0.8f;
     [SerializeField] private float _timeBetweenDashes = 2f;
+
     [Header("Special Attack")]
     [SerializeField] private int _specialDashCount = 3;
     [SerializeField] private float _specialCooldown = 8f;
+
     [Header("Circle Special")]
-    [SerializeField] private DashTelegraph[] _circleTelegraphs;
-    [SerializeField] private GameObject _finalDashIndicator;
     [SerializeField] private int _circleDashCount = 5;
     [SerializeField] private float _circleDashRadius = 4f;
-    [SerializeField] private float _circleTelegraphSpawnDuration = 1f; // 1 segundo para aparecer todos
+    [SerializeField] private float _circleTelegraphSpawnDuration = 1f;
     [SerializeField] private float _circleSpecialCooldown = 12f;
     [SerializeField] private float _circleDashDuration = 20f;
-    [SerializeField] private float _circleDashRotationSpeed = 20f;
     [SerializeField] private float _circleMinDistance = 6f;
     [SerializeField] private float _betweenDashes;
 
-    [Header("Particle")]
+    [Header("Dash Circle Indicator")]
+    // Prefab con DashCircleIndicator: tiene un círculo outer y un círculo inner (hijo) que se escala
+    [SerializeField] private DashCircleIndicator _dashCirclePrefab;
+
+    [Header("Particles")]
     [SerializeField] private ParticleSystem _dashImpactParticles;
     [SerializeField] private GameObject _dashFirePrefab;
     [SerializeField] private float _fireYOffset = 0.5f;
-    
 
-    private float _nextCircleSpecialTime;
+    [SerializeField] private Transform player;
 
     private Transform _player;
     private float _nextDashTime;
     private float _nextSpecialTime;
+    private float _nextCircleSpecialTime;
     private bool _isBusy;
-
-    [SerializeField] Transform player;
 
     private void Awake()
     {
@@ -46,12 +47,12 @@ public class DashBossController : Enemy
         SetPlayer(player);
     }
 
-    public void SetPlayer(Transform player)
+    public void SetPlayer(Transform p)
     {
-        _player = player;
-        _movement.SetPlayer(player);
+        _player = p;
+        _movement.SetPlayer(p);
+        _shoot.SetPlayer(p);
         _nextSpecialTime = Time.time + _specialCooldown;
-        _shoot.SetPlayer(player);
         _nextCircleSpecialTime = Time.time + _circleSpecialCooldown;
     }
 
@@ -64,6 +65,7 @@ public class DashBossController : Enemy
             _shoot.TryShoot();
         }
         if (_isBusy) return;
+
         if (Time.time >= _nextCircleSpecialTime)
             StartCoroutine(DoCircleDash());
         else if (Time.time >= _nextSpecialTime)
@@ -72,52 +74,103 @@ public class DashBossController : Enemy
             StartCoroutine(DoDash());
     }
 
+    // ─────────────────────────────────────────────
+    //  Helpers para el indicador
+    // ─────────────────────────────────────────────
+
+    /// Spawnea el prefab en <destination>, anima el círculo interno cerrándose,
+    /// y cuando llega a 0 invoca onComplete.
+    /// Devuelve la instancia para que puedas destruirla/desactivarla después.
+    private DashCircleIndicator SpawnIndicator(Vector3 destination, float duration, System.Action onComplete = null)
+    {
+        DashCircleIndicator indicator = Instantiate(_dashCirclePrefab, destination, Quaternion.identity);
+        indicator.Play(duration, onComplete);
+        return indicator;
+    }
+
+    // ─────────────────────────────────────────────
+    //  Dash normal
+    // ─────────────────────────────────────────────
+
     private IEnumerator DoDash()
     {
-
-        GameObject circle = null;
-
         _isBusy = true;
         _shoot.SetCanShoot(false);
         _movement.LockRotation(true);
+
         Vector3 playerPos = _player.position;
         Vector3 dir = (playerPos - transform.position);
         dir.y = 0f;
         Vector3 destination = playerPos + dir.normalized * _movement.StopDistance;
         destination.y = transform.position.y;
+
         yield return _movement.RotateToFace(destination);
-        _telegraph.Show(transform.position, destination, _telegraphDuration);
-        circle = Instantiate(_finalDashIndicator, destination, Quaternion.identity);
-        yield return new WaitForSeconds(_telegraphDuration);
-        _telegraph.Hide();
+
+        // El círculo se cierra en _telegraphDuration y cuando termina dashea
+        bool shouldDash = false;
+        DashCircleIndicator indicator = SpawnIndicator(destination, _telegraphDuration, () => shouldDash = true);
+
+        yield return new WaitUntil(() => shouldDash);
+
+        Destroy(indicator.gameObject);
         yield return _movement.ExecuteDash(destination);
-       
+
         _movement.LockRotation(false);
-        circle.SetActive(false);
         _nextDashTime = Time.time + _timeBetweenDashes;
         _isBusy = false;
         _shoot.SetCanShoot(true);
     }
+
+    // ─────────────────────────────────────────────
+    //  Special attack (solo círculo en el último dash)
+    // ─────────────────────────────────────────────
+    private IEnumerator DoSpecialAttack()
+    {
+        _isBusy = true;
+        for (int i = 0; i < _specialDashCount; i++)
+        {
+            Vector3 playerPos = _player.position;
+            _movement.LockRotation(true);
+            Vector3 dir = (playerPos - transform.position);
+            dir.y = 0f;
+            Vector3 destination = playerPos + dir.normalized * _movement.StopDistance;
+            destination.y = transform.position.y;
+            yield return _movement.RotateToFace(destination);
+            bool shouldDash = false;
+            DashCircleIndicator indicator = SpawnIndicator(destination, _telegraphDuration, () => shouldDash = true);
+            yield return new WaitUntil(() => shouldDash);
+            Destroy(indicator.gameObject);
+            yield return _movement.ExecuteDash(destination);
+            _movement.LockRotation(false);
+            yield return new WaitForSeconds(0.15f);
+        }
+
+        _nextSpecialTime = Time.time + _specialCooldown;
+        _nextDashTime = Time.time + _timeBetweenDashes;
+        _isBusy = false;
+        _shoot.SetCanShoot(true);
+    }
+
+    // ─────────────────────────────────────────────
+    //  Circle special
+    // ─────────────────────────────────────────────
+
     private IEnumerator DoCircleDash()
     {
         _isBusy = true;
         _shoot.SetCanShoot(false);
         _movement.LockRotation(true);
-        yield return _movement.RotateToFace(_player.position);
-        Vector3 playerPos = _player.position;
 
-        // forzar distancia minima
+        yield return _movement.RotateToFace(_player.position);
+
+        Vector3 playerPos = _player.position;
         Vector3 dirToPlayer = (playerPos - transform.position);
         dirToPlayer.y = 0f;
         float distToPlayer = dirToPlayer.magnitude;
         if (distToPlayer < _circleMinDistance)
             playerPos = transform.position + dirToPlayer.normalized * _circleMinDistance;
 
-        // 1. Calcular puntos en circulo alrededor del player
-        //Vector3 playerPos = _player.position;
-
-
-        int count = _circleTelegraphs.Length;
+        int count = _circleDashCount;
         Vector3[] destinations = new Vector3[count];
         float angleStep = 360f / count;
 
@@ -129,85 +182,49 @@ public class DashBossController : Enemy
             destinations[i].y = transform.position.y;
         }
 
-        // 2. Mostrar indicadores uno por uno
+        // Spawneo los indicadores uno por uno (todos muestran el círculo cerrándose)
         float spawnInterval = _circleTelegraphSpawnDuration / count;
-        Vector3 from = transform.position;
-        GameObject circle = null;
+        DashCircleIndicator[] indicators = new DashCircleIndicator[count];
 
         for (int i = 0; i < count; i++)
         {
-            float dist = Vector3.Distance(from, destinations[i]);
-            Debug.Log($"Telegraph {i}: distancia={dist}");
-
-            _circleTelegraphs[i].Show(from, destinations[i], _telegraphDuration);
-            from = destinations[i];
+            indicators[i] = SpawnIndicator(destinations[i], _telegraphDuration);
             yield return new WaitForSeconds(spawnInterval);
-            if (i == count - 1)
-            {
-                 circle = Instantiate(_finalDashIndicator, destinations[i], Quaternion.identity);
-
-
-            }
         }
 
-        // esperar que el primero termine
+        // Esperar que el primero termine de cerrarse
         yield return new WaitForSeconds(_telegraphDuration - _circleTelegraphSpawnDuration);
 
-        // 3. Dashes en secuencia
+        // Dashes en secuencia
         Vector3 prevPos = transform.position;
         for (int i = 0; i < count; i++)
         {
             Vector3 dir = (destinations[i] - transform.position);
             dir.y = 0f;
             transform.rotation = Quaternion.LookRotation(dir.normalized);
-            _circleTelegraphs[i].Hide();
+
+            if (indicators[i] != null)
+                Destroy(indicators[i].gameObject);
+
             yield return _movement.ExecuteDash(destinations[i], _circleDashDuration, revertTilt: false);
             SpawnDashFire(prevPos, destinations[i]);
             prevPos = destinations[i];
 
-          
-
             yield return new WaitForSeconds(_betweenDashes);
         }
-        circle.SetActive(false);
+
         yield return _movement.TiltX(0f);
         _movement.LockRotation(false);
         _nextCircleSpecialTime = Time.time + _circleSpecialCooldown;
         _isBusy = false;
         _shoot.SetCanShoot(true);
     }
-    private IEnumerator DoSpecialAttack()
-    {
-        _isBusy = true;
-        GameObject circle = null;
 
-        for (int i = 0; i < _specialDashCount; i++)
-        {
-            Vector3 playerPos = _player.position;
-            _movement.LockRotation(true);
-            Vector3 dir = (playerPos - transform.position);
-            dir.y = 0f;
-            Vector3 destination = playerPos + dir.normalized * _movement.StopDistance;
-            destination.y = transform.position.y;
-            yield return _movement.RotateToFace(destination);
-            _telegraph.Show(transform.position, destination, _telegraphDuration);
-            circle = Instantiate(_finalDashIndicator, destination, Quaternion.identity);
-            yield return new WaitForSeconds(_telegraphDuration);
-            _telegraph.Hide();
-            yield return _movement.ExecuteDash(destination);
-            circle.SetActive(false);
-            _movement.LockRotation(false);
-            yield return new WaitForSeconds(0.15f);
-        }
-        _nextSpecialTime = Time.time + _specialCooldown;
-        _nextDashTime = Time.time + _timeBetweenDashes;
-        _isBusy = false;
-        _shoot.SetCanShoot(true);
-        circle.SetActive(false);
-        print("Special finished, isBusy: " + _isBusy);
-    }
+    // ─────────────────────────────────────────────
+    //  Utilities
+    // ─────────────────────────────────────────────
 
-    void SpawnDashFire(Vector3 from, Vector3 to)
+    private void SpawnDashFire(Vector3 from, Vector3 to)
     {
         Vector3 center = (from + to) / 2f;
         center.y += _fireYOffset;
@@ -215,13 +232,12 @@ public class DashBossController : Enemy
         dir.y = 0f;
         Quaternion rotation = Quaternion.LookRotation(dir.normalized) * Quaternion.Euler(0f, 90f, 0f);
         GameObject p = Instantiate(_dashFirePrefab, center, rotation);
-        StartCoroutine( despawnParticles(p));
+        StartCoroutine(DespawnParticles(p));
     }
 
-    IEnumerator despawnParticles(GameObject fireP)
+    private IEnumerator DespawnParticles(GameObject fireP)
     {
         yield return new WaitForSeconds(3f);
         fireP.SetActive(false);
-
     }
 }

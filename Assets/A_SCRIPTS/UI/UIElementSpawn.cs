@@ -35,7 +35,7 @@ public class UIElementSpawn : MonoBehaviour
         float t = 0f;
         while (t < _duration)
         {
-            t += Time.deltaTime;
+            t += Time.unscaledDeltaTime;
             float progress = _curve.Evaluate(t / _duration);
             _pergaminoMaterial.SetFloat("_valorScroll", Mathf.Lerp(startVal, endVal, progress));
             _rectTransform.anchoredPosition = Vector2.Lerp(startPos, endPos, progress);

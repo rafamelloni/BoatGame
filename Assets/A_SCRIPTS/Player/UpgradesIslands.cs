@@ -69,18 +69,12 @@ public class UpgradesIslands : MonoBehaviour
     public void OnRouglikeSelection()
     {
         UIDesactivar.SetActive(false);
-        StartCoroutine(stopTime());
+        Time.timeScale = 0f;
     }
 
     public void OnRouglikeExit()
     {
         UIDesactivar.SetActive(true);
         Time.timeScale = 1f;
-    }
-
-    IEnumerator stopTime()
-    {
-        yield return new WaitForSeconds(1f);
-        Time.timeScale = 0f;
     }
 }
