@@ -60,7 +60,7 @@ Material:
     - _Smoothness: 0.8
     - _grietaStrenght: 0
     m_Colors:
-    - _Color: {r: 95.87452, g: 0, b: 0, a: 1}
+    - _Color: {r: 13.76636, g: 1.3694285, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &705278075202226300
