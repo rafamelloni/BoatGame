@@ -14,14 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeIconLibrary
   _icons:
   - abilityId: Cannon
-    stat: 0
-    icon: {fileID: 21300000, guid: 7692cb45223c9054d84d7a929a41ecf9, type: 3}
+    icon: {fileID: 21300000, guid: 382fdba4b6f71af4c8a5805974dd038d, type: 3}
   - abilityId: Cannon
-    stat: 1
-    icon: {fileID: 21300000, guid: 7692cb45223c9054d84d7a929a41ecf9, type: 3}
+    icon: {fileID: 21300000, guid: 382fdba4b6f71af4c8a5805974dd038d, type: 3}
   - abilityId: Cannon
-    stat: 2
-    icon: {fileID: 21300000, guid: 7692cb45223c9054d84d7a929a41ecf9, type: 3}
+    icon: {fileID: 21300000, guid: 382fdba4b6f71af4c8a5805974dd038d, type: 3}
   - abilityId: Mortar
-    stat: 0
-    icon: {fileID: 21300000, guid: 0ca43f081467c4b4c8cfa454f0e7e511, type: 3}
+    icon: {fileID: 21300000, guid: 275d331702eea1a4ba0330a3237bf2b8, type: 3}
