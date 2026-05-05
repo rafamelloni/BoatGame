@@ -15,6 +15,26 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private Transform _mortarShootPointReal;
     [SerializeField] private MortarChargeUI _mortarChargeUI;
 
+
+    [Header("Mortar Data To Activate")]
+    public GameObject mortarGo;
+    public GameObject mortargoAbilityUI;
+    public GameObject mortargoAbilityNumber;
+    public GameObject mortargoAbilityStats;
+    public GameObject mortargoAbilityKey;
+    public GameObject barra;
+    public GameObject TEXTDamage;
+    public bool _wasUMortar = false;
+
+    [Header("Cannon Data To Activate")]
+    public GameObject cannonMesh;
+    public GameObject cannonUI;
+    public GameObject cannonTecla;
+    public GameObject cannonBarra;
+    public GameObject cannonText;
+    public bool _wasUCannon = false;
+
+
     [Header("hardcodeado insta")]
     [SerializeField] private GameObject _mortarPhoto;
     [SerializeField] private GameObject _mortarText;
@@ -32,7 +52,8 @@ public class AbilityController : MonoBehaviour
     private CannonStrategy _abilityE;
     private MorterStrategy _abilityQ;
 
-    public bool _wasU = false;
+  
+
 
     private void Awake()
     {
@@ -67,10 +88,10 @@ public class AbilityController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && _wasUCannon)
             _abilityE.TryExecute();
 
-        if (Input.GetKeyDown(KeyCode.Q) && _wasU)
+        if (Input.GetKeyDown(KeyCode.Q) && _wasUMortar)
             _abilityQ.TryExecute();
     }
 
@@ -84,6 +105,40 @@ public class AbilityController : MonoBehaviour
         _abilityE._rtData.shotsPerBurst = 4;
     }
 
+    public void MortarAveilable()
+    {
+        _wasUMortar = true;
+        mortarGo.SetActive(true);
+
+
+        mortargoAbilityUI.SetActive(true);
+        mortargoAbilityNumber.SetActive(true);
+        mortargoAbilityStats.SetActive(true);
+        mortargoAbilityKey.SetActive(true);
+       
+        
+        barra.SetActive(true);
+        TEXTDamage.SetActive(true);
+        LetMortarBeUpgraded();
+    }
+
+    public void CannonAveilable()
+    {
+        _wasUCannon = true;
+        cannonMesh.SetActive(true);
+        cannonUI.SetActive(true);
+        cannonTecla.SetActive(true);
+        cannonBarra.SetActive(true);
+        cannonText.SetActive(true);
+
+        LetCannonBeUpgraded();
+
+}
+    public void LetCannonBeUpgraded()
+    {
+        _abilityE.SetUnlocked(true);
+        Debug.Log($"Mortar unlocked: {_abilityQ.IsUnlocked}");
+    }
     public void LetMortarBeUpgraded()
     {
         _abilityQ.SetUnlocked(true);
@@ -92,7 +147,7 @@ public class AbilityController : MonoBehaviour
 
     public void ResetAbilities()
     {
-        _wasU = false;
+        _wasUMortar = false;
         _mortarPhoto.SetActive(false);
         _mortarText.SetActive(false);
         _mortarMesh.SetActive(false);

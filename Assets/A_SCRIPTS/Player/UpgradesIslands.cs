@@ -11,14 +11,6 @@ public class UpgradesIslands : MonoBehaviour
     public GameObject UIDesactivar;
 
 
-    [Header("Mortar")]
-    public GameObject mortarGo;
-    public GameObject mortargoAbilityUI;
-    public GameObject mortargoAbilityNumber;
-    public GameObject mortargoAbilityStats;
-    public GameObject mortargoAbilityKey;
-    public GameObject barra;
-    public GameObject TEXTDamage;
 
     public GameObject canvas;
 
@@ -41,18 +33,9 @@ public class UpgradesIslands : MonoBehaviour
     }
     public void OnButtonClick1()
     {
-        ability._wasU = true;
-        mortarGo.SetActive(true);
-
-
-        mortargoAbilityUI.SetActive(true);
-        mortargoAbilityNumber.SetActive(true);
-        mortargoAbilityStats.SetActive(true);
-        mortargoAbilityKey.SetActive(true);
+        ability.MortarAveilable();
         ability.LetMortarBeUpgraded();
         canvas.SetActive(false);
-        barra.SetActive(true);
-        TEXTDamage.SetActive(true);
         OnRouglikeExit();
 
 
