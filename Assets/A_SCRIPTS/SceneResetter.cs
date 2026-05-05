@@ -14,6 +14,8 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private TimerBoss _timerBoss;
     [SerializeField] private GameObject _Canvas;
     [SerializeField] private GameObject _MESH;
+    [SerializeField] private GameObject _cameraPreSeleccion;
+    [SerializeField] private GameObject _canvasPreSeleccion;
 
     [Header("Player")]
     [SerializeField] private Transform _playerTransform;
@@ -42,7 +44,7 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private Movement _movement;
 
     private Material _vignetteMat;
-    private Camera _mainCamera;
+    public Camera _mainCamera;
     private bool _isResetting = false;
 
     void Start()
@@ -50,7 +52,6 @@ public class SceneResetter : MonoBehaviour
         _playerHealth.OnDeath += HandlePlayerDeath;
         _playerStartPosition = _playerTransform.position;
         _playerStartRotation = _playerTransform.rotation;
-        _mainCamera = Camera.main;
         _vignetteMat = _vignetteImage.material;
         _vignetteImage.gameObject.SetActive(false);
     }
@@ -66,17 +67,13 @@ public class SceneResetter : MonoBehaviour
             HandlePlayerDeath();
 
         if (Input.GetKeyUp(KeyCode.B))
-        {
             BOSS.SetActive(true);
-        }
-           
     }
 
     private void HandlePlayerDeath()
     {
         if (_isResetting) return;
         _isResetting = true;
-
         StartCoroutine(ResetRoutine());
     }
 
@@ -87,8 +84,7 @@ public class SceneResetter : MonoBehaviour
 
     private void ResetAll()
     {
-        //player
-        _movement.SetMovementEnabled(true);
+        // Player
         var rb = _playerTransform.GetComponent<Rigidbody>();
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
@@ -97,15 +93,16 @@ public class SceneResetter : MonoBehaviour
         _playerTransform.GetComponent<RT_PlayerStats>().ResetToBase();
         _playerHealth.ResetHealth();
 
-        //Abilityes-Stats
+        // Abilities - Stats
         _islandSpawnManager.ResetIslands();
-        _enemySpawner.DespawnAllAndReset();
+        _enemySpawner.DespawnAll();
         _abilityUpgradeSystem.ResetAllUpgradesStats();
         _upgradeStatsUI.ResetStats();
         _abilityController.ResetAbilities();
         _timerBoss.ResetTimer();
+        PreselectionData.Reset();
 
-        //boss
+        // Boss
         BOSS.SetActive(false);
     }
 
@@ -113,56 +110,49 @@ public class SceneResetter : MonoBehaviour
     {
         _movement.SetMovementEnabled(false);
         _vignetteImage.gameObject.SetActive(true);
-        //SetVignetteCenter();
-        // 1. Fade in vignette + zoom in simultáneos
+
+        // 1. Fade in vignette + efectos simultáneos
         _Canvas.SetActive(false);
         StartCoroutine(LerpFOV(_mainCamera.fieldOfView, _zoomFOV, _fadeInDuration));
         StartCoroutine(LerpTimeScale(_slowMotionScale, _slowMoFadeInDuration));
         StartCoroutine(PlayParticlesStaggered());
         yield return StartCoroutine(AnimateRadiusUnscaled(0.3f, _vignetteClosedRadius, _fadeInDuration));
 
-        // 2. Zoom in + slow mo + partículas simultáneos
-     
-       
-
         yield return new WaitForSecondsRealtime(_holdDuration);
 
-        // 3. Cerrar vignette del todo
-        //SetVignetteCenter();
+        // 2. Cerrar vignette del todo
         yield return StartCoroutine(AnimateRadiusUnscaled(_vignetteClosedRadius, 0f, _fadeOutDuration));
 
-        // 4. Reset todo
+        // 3. Reset — pantalla completamente negra, cámara main todavía activa
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
         _mainCamera.fieldOfView = 60f;
 
-       
         ResetAll();
 
         foreach (var ps in _deathParticles)
             if (ps != null) ps.Stop();
 
-        // 5. Abrir vignette DESDE la posición nueva del player
-        //SetVignetteCenter();
         yield return new WaitForSecondsRealtime(_holdAfterResetDuration);
-        _MESH.SetActive(true);
-        _Canvas.SetActive(true);
-        yield return StartCoroutine(AnimateRadiusUnscaled(0f, 0.3f, _fadeOutDuration));
-       
-        _vignetteImage.gameObject.SetActive(false);
-        _isResetting = false;
-        
-        
-        
 
+        // 4. Abrir vignette — todavía con la main camera
+        _MESH.SetActive(true);
+        yield return StartCoroutine(AnimateRadiusUnscaled(0f, 0.3f, _fadeOutDuration));
+
+        // 5. Vignette terminó — recién acá swapeamos cámaras y mostramos preselección
+        _vignetteImage.gameObject.SetActive(false);
+        _Canvas.SetActive(false);
+        _mainCamera.gameObject.SetActive(false);
+        _cameraPreSeleccion.SetActive(true);
+        _canvasPreSeleccion.SetActive(true);
+
+        _isResetting = false;
     }
 
-    // Interpola Time.timeScale en tiempo real
     private IEnumerator LerpTimeScale(float targetScale, float realDuration)
     {
         float startScale = Time.timeScale;
         float elapsed = 0f;
-
         while (elapsed < realDuration)
         {
             elapsed += Time.unscaledDeltaTime;
@@ -171,12 +161,10 @@ public class SceneResetter : MonoBehaviour
             Time.fixedDeltaTime = 0.02f * Time.timeScale;
             yield return null;
         }
-
         Time.timeScale = targetScale;
         Time.fixedDeltaTime = 0.02f * targetScale;
     }
 
-    // AnimateRadius en tiempo real para que no le afecte el slow mo
     private IEnumerator AnimateRadiusUnscaled(float from, float to, float realDuration)
     {
         float elapsed = 0f;
@@ -195,13 +183,9 @@ public class SceneResetter : MonoBehaviour
         for (int i = 0; i < _deathParticles.Length; i++)
         {
             if (_deathParticles[i] == null) continue;
-            
-             _deathParticles[i].Play();
-
-            if(i == 2)
-            {
+            _deathParticles[i].Play();
+            if (i == 2)
                 _MESH.SetActive(false);
-            }
             yield return new WaitForSecondsRealtime(_particleDelay);
         }
     }

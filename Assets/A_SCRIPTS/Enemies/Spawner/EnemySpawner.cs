@@ -67,11 +67,6 @@ public class EnemySpawner : MonoBehaviour
         );
     }
 
-    private void Start()
-    {
-        StartCoroutine(GroupSpawnLoop());
-        StartCoroutine(ShipSpawnLoop());
-    }
 
     // — GROUPS —
 

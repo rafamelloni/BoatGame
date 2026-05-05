@@ -14,6 +14,16 @@ public class MortarChargeUI : MonoBehaviour
     private bool _isRecharging = false;
     private float _cooldown;
 
+    public void TurnOff()
+    {
+        StopAllCoroutines();
+        _charges = 3;
+        _rechargesQueued = 0;
+        _isRecharging = false;
+        _radialImage.fillAmount = 0f;
+        _radialImage.enabled = false;
+        _chargesText.text = "3";
+    }
     public void Init(float cooldown, System.Action onRestoreCharge)
     {
         _cooldown = cooldown;

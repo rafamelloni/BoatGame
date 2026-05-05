@@ -8,6 +8,8 @@ public class PlayButton : MonoBehaviour
     [SerializeField] private GameObject canvasMain;
     [SerializeField] private GameObject cameraPreSeleciion;
     [SerializeField] private GameObject camaramMain;
+    [SerializeField] private Movement _movement;
+    [SerializeField] private EnemySpawner _enemySpawner;
 
     private void Awake()
     {
@@ -41,6 +43,8 @@ public class PlayButton : MonoBehaviour
 
     public void StartGame()
     {
+        _movement.SetMovementEnabled(true);
+        _enemySpawner.ResumeSpawning();
         canvas.SetActive(false);
         cameraPreSeleciion.SetActive(false);
         camaramMain.SetActive(true);

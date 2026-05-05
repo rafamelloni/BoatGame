@@ -24,6 +24,8 @@ public class AbilityController : MonoBehaviour
     public GameObject mortargoAbilityKey;
     public GameObject barra;
     public GameObject TEXTDamage;
+    public GameObject cooldownM;
+
     public bool _wasUMortar = false;
 
     [Header("Cannon Data To Activate")]
@@ -32,6 +34,7 @@ public class AbilityController : MonoBehaviour
     public GameObject cannonTecla;
     public GameObject cannonBarra;
     public GameObject cannonText;
+    public GameObject cooldownC;
     public bool _wasUCannon = false;
 
 
@@ -115,6 +118,7 @@ public class AbilityController : MonoBehaviour
         mortargoAbilityNumber.SetActive(true);
         mortargoAbilityStats.SetActive(true);
         mortargoAbilityKey.SetActive(true);
+        cooldownM.SetActive(true);
        
         
         barra.SetActive(true);
@@ -130,10 +134,43 @@ public class AbilityController : MonoBehaviour
         cannonTecla.SetActive(true);
         cannonBarra.SetActive(true);
         cannonText.SetActive(true);
+        cooldownC.SetActive(true);
 
         LetCannonBeUpgraded();
 
 }
+
+
+    public void ResetAbilities()
+    {
+        // Flags
+        _wasUCannon = false;
+        _wasUMortar = false;
+
+        _cannonCooldownUI.TurnOff();
+        _mortarChargeUI.TurnOff();
+
+        // Cannon
+        cannonMesh.SetActive(false);
+        cannonUI.SetActive(false);
+        cannonTecla.SetActive(false);
+        cannonBarra.SetActive(false);
+        cannonText.SetActive(false);
+        cooldownC.SetActive(false);
+
+
+        // Mortar
+        mortarGo.SetActive(false);
+        mortargoAbilityUI.SetActive(false);
+        mortargoAbilityNumber.SetActive(false);
+        mortargoAbilityStats.SetActive(false);
+        mortargoAbilityKey.SetActive(false);
+        barra.SetActive(false);
+        TEXTDamage.SetActive(false);
+        cooldownM.SetActive(false);
+
+    }
+
     public void LetCannonBeUpgraded()
     {
         _abilityE.SetUnlocked(true);
@@ -143,13 +180,5 @@ public class AbilityController : MonoBehaviour
     {
         _abilityQ.SetUnlocked(true);
         Debug.Log($"Mortar unlocked: {_abilityQ.IsUnlocked}");
-    }
-
-    public void ResetAbilities()
-    {
-        _wasUMortar = false;
-        _mortarPhoto.SetActive(false);
-        _mortarText.SetActive(false);
-        _mortarMesh.SetActive(false);
     }
 }

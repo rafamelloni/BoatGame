@@ -34,8 +34,11 @@ public class Movement : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _sprintStamina = sprintMaxDuration;
     }
+    private void Start()
+    {
+        SetMovementEnabled(false);
+    }
 
- 
 
     void Update()
     {
