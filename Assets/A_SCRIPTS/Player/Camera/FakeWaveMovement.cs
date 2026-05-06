@@ -27,6 +27,7 @@ public class FakeWaveMovement : MonoBehaviour
     void Start()
     {
         baseHeight = transform.position.y;
+        Debug.Log($"baseHeight: {baseHeight}");
         _phaseOffset = Random.Range(0f, Mathf.PI * 2f);
         _rb = GetComponent<Rigidbody>();
     }
@@ -38,6 +39,7 @@ public class FakeWaveMovement : MonoBehaviour
     void LateUpdate()
     {
         float t = Time.time + _phaseOffset;
+        float before = _rb.position.y;
 
         if (_tiltHoldTimer > 0f) { _tiltHoldTimer -= Time.deltaTime; _targetExtraTiltX = -manualTiltAmount; }
         else { _targetExtraTiltX = 0f; }
@@ -51,9 +53,17 @@ public class FakeWaveMovement : MonoBehaviour
         // Tomar el yaw actual del rb, no del transform
         float currentYaw = _rb.rotation.eulerAngles.y;
         _rb.MoveRotation(Quaternion.Euler(tiltX, currentYaw, tiltZ));
+        float after = _rb.position.y;
+        if (Mathf.Abs(after - before) > 0.01f)
+            Debug.Log($"LateUpdate movió Y: {before} -> {after}");
     }
     public void ApplyForwardTilt(float duration)
     {
         _tiltHoldTimer = duration;
+    }
+
+    public void SetBaseHeight(float y)
+    {
+        baseHeight = y;
     }
 }

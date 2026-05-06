@@ -53,7 +53,7 @@ MonoBehaviour:
   - {fileID: 559045322725610574}
   - {fileID: 174596643746797839}
   - {fileID: 5462108269405984583}
-  stopDistance: 22.5
+  stopDistance: 15
   fireRate: 2.3
 --- !u!1 &1300345625809637489
 GameObject:
@@ -271,8 +271,8 @@ Transform:
   m_GameObject: {fileID: 3945307318471089387}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.86602443, z: -0, w: 0.5000018}
-  m_LocalPosition: {x: -380.4, y: 1.73, z: -57.4}
-  m_LocalScale: {x: 0.2744378, y: 0.121030435, z: 0.2744378}
+  m_LocalPosition: {x: -353.1, y: 1.73, z: -41.7}
+  m_LocalScale: {x: 0.20409389, y: 0.090007916, z: 0.20409389}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6156525555566068937}
@@ -410,7 +410,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 559045322725610574}
   leader: {fileID: 1775793466984374414}
   player: {fileID: 0}
-  speed: 1.5
+  speed: 2.3
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -418,7 +418,7 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2048
-  separationRadius: 4
+  separationRadius: 2
   separationForce: 2
   enemyLayer:
     serializedVersion: 2
@@ -438,7 +438,7 @@ MonoBehaviour:
   enemyBullet: {fileID: 0}
   shootPoint: {fileID: 5499714198943544453}
   target: {fileID: 0}
-  viewDistance: 23
+  viewDistance: 15
   viewAngle: 90
   obstacleMask:
     serializedVersion: 2
@@ -505,8 +505,8 @@ Transform:
   m_GameObject: {fileID: 6709756473630529894}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.86602443, z: -0, w: 0.5000018}
-  m_LocalPosition: {x: -215.3, y: 1.73, z: 43.5}
-  m_LocalScale: {x: 0.2744378, y: 0.121030435, z: 0.2744378}
+  m_LocalPosition: {x: -238.5, y: 1.73, z: 30.1}
+  m_LocalScale: {x: 0.20409389, y: 0.090007916, z: 0.20409389}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3410487844418118186}
@@ -644,7 +644,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 174596643746797839}
   leader: {fileID: 1775793466984374414}
   player: {fileID: 0}
-  speed: 1.5
+  speed: 2.3
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -652,7 +652,7 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2048
-  separationRadius: 4
+  separationRadius: 2
   separationForce: 2
   enemyLayer:
     serializedVersion: 2
@@ -699,7 +699,7 @@ MonoBehaviour:
   enemyBullet: {fileID: 0}
   shootPoint: {fileID: 5638035182522738763}
   target: {fileID: 0}
-  viewDistance: 23
+  viewDistance: 15
   viewAngle: 90
   obstacleMask:
     serializedVersion: 2
@@ -740,7 +740,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.86602443, z: -0, w: 0.5000018}
   m_LocalPosition: {x: -303.39, y: 1.73, z: -0.75751}
-  m_LocalScale: {x: 0.2744378, y: 0.12103043, z: 0.2744378}
+  m_LocalScale: {x: 0.20409389, y: 0.09000791, z: 0.20409389}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3818962361569729012}
@@ -880,7 +880,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 7591484705861560922}
   leader: {fileID: 0}
   player: {fileID: 0}
-  speed: 1.5
+  speed: 2.3
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -888,7 +888,7 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2048
-  separationRadius: 4
+  separationRadius: 2
   separationForce: 2
   enemyLayer:
     serializedVersion: 2
@@ -935,7 +935,7 @@ MonoBehaviour:
   enemyBullet: {fileID: 0}
   shootPoint: {fileID: 7894666344733141575}
   target: {fileID: 0}
-  viewDistance: 23
+  viewDistance: 15
   viewAngle: 90
   obstacleMask:
     serializedVersion: 2
@@ -976,7 +976,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.86602443, z: -0, w: 0.5000018}
   m_LocalPosition: {x: -244.8, y: 1.73, z: -101.6}
-  m_LocalScale: {x: 0.2744378, y: 0.121030435, z: 0.2744378}
+  m_LocalScale: {x: 0.20409389, y: 0.090007916, z: 0.20409389}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5943333154051874069}
@@ -1091,7 +1091,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 5462108269405984583}
   leader: {fileID: 1775793466984374414}
   player: {fileID: 0}
-  speed: 1.5
+  speed: 2.3
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -1099,7 +1099,7 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2048
-  separationRadius: 4
+  separationRadius: 2
   separationForce: 2
   enemyLayer:
     serializedVersion: 2
@@ -1119,7 +1119,7 @@ MonoBehaviour:
   enemyBullet: {fileID: 0}
   shootPoint: {fileID: 8398302548911467065}
   target: {fileID: 0}
-  viewDistance: 23
+  viewDistance: 15
   viewAngle: 90
   obstacleMask:
     serializedVersion: 2

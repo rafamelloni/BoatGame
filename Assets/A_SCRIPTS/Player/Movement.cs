@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using static UnityEditor.PlayerSettings;
 
 public class Movement : MonoBehaviour
 {
@@ -42,6 +43,7 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
+        if (!enabled) return;
         HandleSprint();
 
         float vertical = Input.GetAxisRaw("Vertical");
@@ -70,11 +72,16 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
+
+        if (!enabled) return;
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
         _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0f, _smoothTurn * Time.fixedDeltaTime, 0f));
 
         Vector3 move;
+
+
+
         if (_isKnockedBack)
         {
             move = _knockbackVelocity * Time.fixedDeltaTime;
@@ -144,6 +151,14 @@ public class Movement : MonoBehaviour
 
     public void SetMovementEnabled(bool enabled)
     {
+        Debug.Log($"ANTES: {_rb.position.y}");
         this.enabled = enabled;
+        Debug.Log($"DESPUES enabled: {_rb.position.y}");
+        float targetY = 7.49f;
+        Vector3 pos = _rb.position;
+        pos.y = targetY;
+        _rb.position = pos;
+        Debug.Log($"DESPUES setY: {_rb.position.y}");
+        fakeWaveMomenent.SetBaseHeight(targetY);
     }
 }
