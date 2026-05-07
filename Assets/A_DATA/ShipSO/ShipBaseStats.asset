@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 585879ec79f9c89499982c3e2e5de52b, type: 3}
   m_Name: ShipBaseStats
   m_EditorClassIdentifier: Assembly-CSharp::SO_BASESTATS
-  moveSpeed: 6
-  turnSpeed: 60
-  acceleration: 4
-  deceleration: 3
+  moveSpeed: 7
+  turnSpeed: 110
+  acceleration: 2
+  deceleration: 1
   sprintMultiplier: 1.3
   maxHealth: 150

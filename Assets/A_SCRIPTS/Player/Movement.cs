@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using static UnityEditor.PlayerSettings;
 
 public class Movement : MonoBehaviour
 {
@@ -12,7 +11,7 @@ public class Movement : MonoBehaviour
     public ParticleSystem trail2;
     public ParticleSystem trailSprint;
     public ParticleSystem trailSprint1;
-    public FakeWaveMovement fakeWaveMomenent;
+    public PlayerWaveMovement playerWave;
 
     [Header("Sprint")]
     public float sprintSpeedMultiplier = 1.5f;
@@ -35,11 +34,11 @@ public class Movement : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _sprintStamina = sprintMaxDuration;
     }
+
     private void Start()
     {
         SetMovementEnabled(false);
     }
-
 
     void Update()
     {
@@ -52,6 +51,7 @@ public class Movement : MonoBehaviour
 
         float targetTurn = horizontal * _stats.turnSpeed;
         _smoothTurn = Mathf.Lerp(_smoothTurn, targetTurn, Time.deltaTime * 5f);
+
 
         float targetSpeed = _stats.moveSpeed * (_isSprinting ? sprintSpeedMultiplier : 1f);
 
@@ -72,27 +72,17 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
-
         if (!enabled) return;
-        _rb.linearVelocity = Vector3.zero;
-        _rb.angularVelocity = Vector3.zero;
-        _rb.MoveRotation(_rb.rotation * Quaternion.Euler(0f, _smoothTurn * Time.fixedDeltaTime, 0f));
 
-        Vector3 move;
+        float newYaw = _rb.rotation.eulerAngles.y + _smoothTurn * Time.fixedDeltaTime;
+        _rb.MoveRotation(playerWave.GetWaveTilt(newYaw));
 
-
-
-        if (_isKnockedBack)
-        {
-            move = _knockbackVelocity * Time.fixedDeltaTime;
-        }
-        else
-        {
-            move = transform.forward * _currentSpeed * Time.fixedDeltaTime;
-        }
+        Vector3 move = _isKnockedBack
+            ? _knockbackVelocity * Time.fixedDeltaTime
+            : transform.forward * _currentSpeed * Time.fixedDeltaTime;
 
         Vector3 newPos = _rb.position + move;
-        newPos.y = fakeWaveMomenent.GetWaveY();
+        newPos.y = playerWave.GetWaveY();
         _rb.MovePosition(newPos);
     }
 
@@ -108,7 +98,7 @@ public class Movement : MonoBehaviour
                 _isSprinting = true;
                 trailSprint.Play();
                 trailSprint1.Play();
-                fakeWaveMomenent.ApplyForwardTilt(0.2f);
+                playerWave.ApplyForwardTilt(0.2f);
             }
             _sprintStamina -= sprintDrainRate * Time.deltaTime;
             _sprintStamina = Mathf.Max(_sprintStamina, 0f);
@@ -151,14 +141,11 @@ public class Movement : MonoBehaviour
 
     public void SetMovementEnabled(bool enabled)
     {
-        Debug.Log($"ANTES: {_rb.position.y}");
         this.enabled = enabled;
-        Debug.Log($"DESPUES enabled: {_rb.position.y}");
         float targetY = 7.49f;
         Vector3 pos = _rb.position;
         pos.y = targetY;
         _rb.position = pos;
-        Debug.Log($"DESPUES setY: {_rb.position.y}");
-        fakeWaveMomenent.SetBaseHeight(targetY);
+        playerWave.SetBaseHeight(targetY);
     }
 }

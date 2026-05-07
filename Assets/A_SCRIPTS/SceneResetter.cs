@@ -199,6 +199,6 @@ public class SceneResetter : MonoBehaviour
             _mainCamera.fieldOfView = Mathf.Lerp(from, to, elapsed / realDuration);
             yield return null;
         }
-        _mainCamera.fieldOfView = to;
+        _mainCamera.fieldOfView = 50;
     }
 }
