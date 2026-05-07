@@ -13,18 +13,33 @@ public class UIHealthBarDashBoss : MonoBehaviour
     [Header("Propiedades Shader")]
     [SerializeField] private string _grietaStrengthProperty = "_grietaStrength";
     [SerializeField] private string _emissionStrengthProperty = "_EmissionStrength";
+    [SerializeField] private string _normalStrengthProperty = "_NormalStrenght";
 
     [Header("Ajustes Visuales")]
-    [SerializeField] private float _curvaGrietas = 0.6f;        // más bajo = más progresivo
+    [SerializeField] private float _curvaGrietas = 0.6f;
     [SerializeField] private float _maxGrietaStrength = 1f;
     [SerializeField] private float _maxEmissionStrength = 2f;
+    [SerializeField] private float _maxNormalStrength = 1f;
+
+    [Header("Partículas por daño")]
+    [SerializeField] private GameObject[] _damageParticleObjects;
+    [SerializeField, Range(0f, 1f)] private float[] _healthThresholds;
 
     private Material _materialInstance;
+    private bool[] _activatedParticles;
 
     private void Awake()
     {
         if (_bossRenderer != null)
             _materialInstance = _bossRenderer.material;
+
+        _activatedParticles = new bool[_damageParticleObjects.Length];
+
+        for (int i = 0; i < _damageParticleObjects.Length; i++)
+        {
+            if (_damageParticleObjects[i] != null)
+                _damageParticleObjects[i].SetActive(false);
+        }
     }
 
     private void OnEnable()
@@ -32,7 +47,8 @@ public class UIHealthBarDashBoss : MonoBehaviour
         if (_bossHealth != null)
         {
             _bossHealth.OnDamage += UpdateBar;
-            if (_bossHealth.GetCurrenHealt() > 0f) // solo si ya fue inicializado
+
+            if (_bossHealth.GetCurrenHealt() > 0f)
                 UpdateBar(_bossHealth.GetCurrenHealt());
         }
     }
@@ -51,6 +67,7 @@ public class UIHealthBarDashBoss : MonoBehaviour
             _fillImage.fillAmount = healthNormalized;
 
         UpdateCracks(healthNormalized);
+        UpdateDamageParticles(healthNormalized);
     }
 
     private void UpdateCracks(float healthNormalized)
@@ -58,22 +75,37 @@ public class UIHealthBarDashBoss : MonoBehaviour
         if (_materialInstance == null)
             return;
 
-        // 0 = sin daño, 1 = daño total
         float damagePercent = 1f - healthNormalized;
-
-        // suaviza la transición (clave para que sea progresivo)
         float smoothDamage = Mathf.SmoothStep(0f, 1f, damagePercent);
 
-        // grietas progresivas
         float crackValue = Mathf.Pow(smoothDamage, _curvaGrietas) * _maxGrietaStrength;
-
-        // brillo más tardío (solo cuando está bastante dañado)
         float emissionValue = Mathf.Pow(smoothDamage, 2.5f) * _maxEmissionStrength;
-
-        Debug.Log($"damagePercent={damagePercent:F2} crack={crackValue:F2} emission={emissionValue:F2}");
-        Debug.Log($"Material: {_materialInstance.name}, shader: {_materialInstance.shader.name}");
+        float normalValue = Mathf.Pow(smoothDamage, _curvaGrietas) * _maxNormalStrength;
 
         _materialInstance.SetFloat(_grietaStrengthProperty, crackValue);
         _materialInstance.SetFloat(_emissionStrengthProperty, emissionValue);
+        _materialInstance.SetFloat(_normalStrengthProperty, normalValue);
+    }
+
+    private void UpdateDamageParticles(float healthNormalized)
+    {
+        if (_damageParticleObjects == null || _healthThresholds == null)
+            return;
+
+        int count = Mathf.Min(_damageParticleObjects.Length, _healthThresholds.Length);
+
+        for (int i = 0; i < count; i++)
+        {
+            if (_activatedParticles[i])
+                continue;
+
+            if (healthNormalized <= _healthThresholds[i])
+            {
+                _activatedParticles[i] = true;
+
+                if (_damageParticleObjects[i] != null)
+                    _damageParticleObjects[i].SetActive(true);
+            }
+        }
     }
 }
