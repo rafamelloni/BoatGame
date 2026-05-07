@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class PlayButton : MonoBehaviour
 {
     [SerializeField] private AbilityController abilityController;
+    [SerializeField] private RT_PlayerStats playerStats;
     [SerializeField] private GameObject canvas;
     [SerializeField] private GameObject canvasMain;
     [SerializeField] private GameObject cameraPreSeleciion;
@@ -18,28 +19,33 @@ public class PlayButton : MonoBehaviour
 
     public void OnClick()
     {
+        if (PreselectionData.Ability == SelectedAbility.None)
+        {
+            Debug.LogWarning("[PlayButton] No se eligió ninguna habilidad.");
+            return;
+        }
+
+        if (PreselectionData.SelectedShipStats == null)
+        {
+            Debug.LogWarning("[PlayButton] No se eligió ningún barco.");
+            return;
+        }
+
+        // Aplicar stats del barco elegido
+        playerStats.SetBaseStats(PreselectionData.SelectedShipStats);
+
         switch (PreselectionData.Ability)
         {
             case SelectedAbility.Cannon:
                 abilityController.CannonAveilable();
-                StartGame();
                 break;
-
             case SelectedAbility.Mortar:
                 abilityController.MortarAveilable();
-                StartGame();
                 break;
-
-            case SelectedAbility.None:
-                Debug.LogWarning("[PlayButton] No se eligió ninguna habilidad.");
-                return;
         }
 
-        //PreselectionData.Reset();
-        // Acá cargás la escena de juego o activás lo que necesites
-        // SceneManager.LoadScene("GameScene");
+        StartGame();
     }
-
 
     public void StartGame()
     {

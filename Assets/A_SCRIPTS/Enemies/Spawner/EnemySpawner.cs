@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
@@ -11,19 +13,24 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Group Prefabs")]
     [SerializeField] private GameObject[] _enemyGroupPrefabs;
-    [SerializeField] private int _initialStockPerType = 3;
-
-    [Header("Ship Prefab")]
-    [SerializeField] private GameObject _shipEnemyPrefab;
-    [SerializeField] private int _initialShipStock = 3;
-
-    [Header("Spawn Config (Groups)")]
+    [SerializeField] private int _initialGroupStockPerType = 3;
     [SerializeField] private float _groupSpawnInterval = 5f;
     [SerializeField] private int _maxActiveGroups = 10;
+    [SerializeField] private float _minDistanceBetweenGroups = 30f;
 
-    [Header("Spawn Config (Ships)")]
+    [Header("Ship Enemy")]
+    [SerializeField] private GameObject _shipEnemyPrefab;
+    [SerializeField] private int _initialShipStock = 3;
     [SerializeField] private float _shipSpawnInterval = 8f;
     [SerializeField] private int _maxActiveShips = 5;
+    [SerializeField] private float _minDistanceBetweenShips = 20f;
+
+    [Header("Rafa Enemy")]
+    [SerializeField] private GameObject _rafaEnemyPrefab;
+    [SerializeField] private int _initialRafaStock = 3;
+    [SerializeField] private float _rafaSpawnInterval = 6f;
+    [SerializeField] private int _maxActiveRafas = 4;
+    [SerializeField] private float _minDistanceBetweenRafas = 15f;
 
     [Header("Spawn Area")]
     [SerializeField] private Transform _spawnCenter;
@@ -34,41 +41,79 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Placement")]
     [SerializeField] private int _maxSpawnAttempts = 30;
-    [SerializeField] private float _minDistanceFromPlayer = 20f;
     [SerializeField] private float _overlapCheckRadius = 5f;
     [SerializeField] private LayerMask _overlapCheckMask;
-    [SerializeField] private float _minDistanceBetweenGroups = 30f;
-    [SerializeField] private float _minDistanceBetweenShips = 20f;
 
-    private ObjectPool<EnemyGroup>[] _pools;
-    private ObjectPool<ShipEnemy> _shipPool;
+    // Handlers
+    private EnemySpawnHandler<ShipEnemy> _shipHandler;
+    private EnemySpawnHandler<RafaEnemy> _rafaHandler;
+
+    // Groups siguen aparte porque tienen pool multiple y lógica de nombre
+    private ObjectPool<EnemyGroup>[] _groupPools;
     private int _activeGroupCount = 0;
-    private int _activeShipCount = 0;
 
     private void Awake()
     {
-        _pools = new ObjectPool<EnemyGroup>[_enemyGroupPrefabs.Length];
-        for (int i = 0; i < _enemyGroupPrefabs.Length; i++)
-        {
-            var prefab = _enemyGroupPrefabs[i];
-            _pools[i] = new ObjectPool<EnemyGroup>(
-                () => { var go = Instantiate(prefab); go.SetActive(true); return go.GetComponent<EnemyGroup>(); },
-                g => g.gameObject.SetActive(true),
-                g => { g.Cleanup(); g.gameObject.SetActive(false); },
-                _initialStockPerType
-            );
-        }
+        InitGroupPools();
 
-        _shipPool = new ObjectPool<ShipEnemy>(
-            () => { var go = Instantiate(_shipEnemyPrefab); go.SetActive(false); return go.GetComponent<ShipEnemy>(); },
-            s => s.gameObject.SetActive(true),
-            s => s.gameObject.SetActive(false),
-            _initialShipStock
+        _shipHandler = new EnemySpawnHandler<ShipEnemy>(
+            prefab: _shipEnemyPrefab,
+            initialStock: _initialShipStock,
+            spawnInterval: _shipSpawnInterval,
+            maxActive: _maxActiveShips,
+            minDistance: _minDistanceBetweenShips,
+            onSpawn: ship =>
+            {
+                ship.SetPlayer(_player, _playerAimPo);
+                ship.OnDead += _shipHandler.Return;
+            },
+            onReturn: ship =>
+            {
+                ship.OnDead -= _shipHandler.Return;
+            },
+            owner: this
+        );
+
+        _rafaHandler = new EnemySpawnHandler<RafaEnemy>(
+            prefab: _rafaEnemyPrefab,
+            initialStock: _initialRafaStock,
+            spawnInterval: _rafaSpawnInterval,
+            maxActive: _maxActiveRafas,
+            minDistance: _minDistanceBetweenRafas,
+            onSpawn: rafa =>
+            {
+                rafa.SetPlayer(_player);
+                rafa.OnDead += _rafaHandler.Return;
+            },
+            onReturn: rafa =>
+            {
+                rafa.OnDead -= _rafaHandler.Return;
+            },
+            owner: this
         );
     }
 
+    private void Start()
+    {
+        //ResumeSpawning();
+    }
 
     // — GROUPS —
+
+    private void InitGroupPools()
+    {
+        _groupPools = new ObjectPool<EnemyGroup>[_enemyGroupPrefabs.Length];
+        for (int i = 0; i < _enemyGroupPrefabs.Length; i++)
+        {
+            var prefab = _enemyGroupPrefabs[i];
+            _groupPools[i] = new ObjectPool<EnemyGroup>(
+                () => { var go = Instantiate(prefab); go.SetActive(true); return go.GetComponent<EnemyGroup>(); },
+                g => g.gameObject.SetActive(true),
+                g => { g.Cleanup(); g.gameObject.SetActive(false); },
+                _initialGroupStockPerType
+            );
+        }
+    }
 
     private IEnumerator GroupSpawnLoop()
     {
@@ -84,8 +129,8 @@ public class EnemySpawner : MonoBehaviour
 
     private void SpawnGroup(Vector3 position)
     {
-        int randomIndex = Random.Range(0, _pools.Length);
-        var group = _pools[randomIndex].Get();
+        int randomIndex = UnityEngine.Random.Range(0, _groupPools.Length);
+        var group = _groupPools[randomIndex].Get();
         group.transform.position = position + new Vector3(0f, _spawnYOffset, 0f);
         group.OnGroupDead += ReturnGroupToPool;
         group.Init(_player, enemyBullet);
@@ -95,14 +140,12 @@ public class EnemySpawner : MonoBehaviour
     private void ReturnGroupToPool(EnemyGroup group)
     {
         if (!group.gameObject.activeSelf) return;
-
-
         group.OnGroupDead -= ReturnGroupToPool;
         for (int i = 0; i < _enemyGroupPrefabs.Length; i++)
         {
             if (group.gameObject.name.Contains(_enemyGroupPrefabs[i].name))
             {
-                _pools[i].Return(group);
+                _groupPools[i].Return(group);
                 break;
             }
         }
@@ -117,47 +160,9 @@ public class EnemySpawner : MonoBehaviour
         return false;
     }
 
-    // — SHIPS —
-
-    private IEnumerator ShipSpawnLoop()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(_shipSpawnInterval);
-            if (_activeShipCount >= _maxActiveShips) continue;
-            Vector3? pos = TryGetValidPosition(IsTooCloseToActiveShip);
-            if (pos == null) continue;
-            SpawnShip(pos.Value);
-        }
-    }
-
-    private void SpawnShip(Vector3 position)
-    {
-        var ship = _shipPool.Get();
-        ship.transform.position = position + new Vector3(0f, _spawnYOffset, 0f);
-        ship.SetPlayer(_player, _playerAimPo);
-        ship.OnDead += ReturnShipToPool;
-        _activeShipCount++;
-    }
-
-    private void ReturnShipToPool(ShipEnemy ship)
-    {
-        ship.OnDead -= ReturnShipToPool;
-        _shipPool.Return(ship);
-        _activeShipCount--;
-    }
-
-    private bool IsTooCloseToActiveShip(Vector3 candidate)
-    {
-        var ships = FindObjectsByType<ShipEnemy>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        foreach (var s in ships)
-            if (Vector3.Distance(candidate, s.transform.position) < _minDistanceBetweenShips) return true;
-        return false;
-    }
-
     // — COMPARTIDO —
 
-    private Vector3? TryGetValidPosition(System.Func<Vector3, bool> isTooClose)
+    private Vector3? TryGetValidPosition(Func<Vector3, bool> isTooClose)
     {
         for (int i = 0; i < _maxSpawnAttempts; i++)
         {
@@ -175,7 +180,7 @@ public class EnemySpawner : MonoBehaviour
     {
         float halfX = _spawnAreaSize.x * 0.5f;
         float halfZ = _spawnAreaSize.y * 0.5f;
-        Vector2 randomCircle = Random.insideUnitCircle * _spawnRangeAroundPlayer;
+        Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * _spawnRangeAroundPlayer;
         float x = Mathf.Clamp(_player.position.x + randomCircle.x,
             _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
         float z = Mathf.Clamp(_player.position.z + randomCircle.y,
@@ -192,44 +197,24 @@ public class EnemySpawner : MonoBehaviour
         return vp.x >= 0f && vp.x <= 1f && vp.y >= 0f && vp.y <= 1f && vp.z > 0f;
     }
 
+    // — DESPAWN / RESUME —
+
     public void DespawnAllAndReset()
     {
-        StopAllCoroutines();
-
-        // Despawnear grupos
-        var groups = FindObjectsByType<EnemyGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        foreach (var group in groups)
-        {
-            group.OnGroupDead -= ReturnGroupToPool;
-            for (int i = 0; i < _enemyGroupPrefabs.Length; i++)
-            {
-                if (group.gameObject.name.Contains(_enemyGroupPrefabs[i].name))
-                {
-                    _pools[i].Return(group);
-                    break;
-                }
-            }
-        }
-        _activeGroupCount = 0;
-
-        // Despawnear ships
-        var ships = FindObjectsByType<ShipEnemy>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        foreach (var ship in ships)
-        {
-            ship.OnDead -= ReturnShipToPool;
-            _shipPool.Return(ship);
-        }
-        _activeShipCount = 0;
-
-        // Reiniciar loops
+        DespawnAll();
         ResumeSpawning();
     }
 
     public void DespawnAll()
     {
         StopAllCoroutines();
+        DespawnGroups();
+        _shipHandler.DespawnAll();
+        _rafaHandler.DespawnAll();
+    }
 
-        // Despawnear grupos
+    private void DespawnGroups()
+    {
         var groups = FindObjectsByType<EnemyGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (var group in groups)
         {
@@ -238,36 +223,125 @@ public class EnemySpawner : MonoBehaviour
             {
                 if (group.gameObject.name.Contains(_enemyGroupPrefabs[i].name))
                 {
-                    _pools[i].Return(group);
+                    _groupPools[i].Return(group);
                     break;
                 }
             }
         }
         _activeGroupCount = 0;
-
-        // Despawnear ships
-        var ships = FindObjectsByType<ShipEnemy>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        foreach (var ship in ships)
-        {
-            ship.OnDead -= ReturnShipToPool;
-            _shipPool.Return(ship);
-        }
-        _activeShipCount = 0;
     }
-
 
     public void ResumeSpawning()
     {
         StartCoroutine(GroupSpawnLoop());
-        StartCoroutine(ShipSpawnLoop());
+        _shipHandler.StartLoop();
+        _rafaHandler.StartLoop();
     }
-
-
 
     private void OnDrawGizmos()
     {
         if (_spawnCenter == null) return;
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(_spawnCenter.position, new Vector3(_spawnAreaSize.x, 1f, _spawnAreaSize.y));
+    }
+
+    // ————————————————————————————————————————————
+    // HANDLER GENERICO
+    // ————————————————————————————————————————————
+
+    private class EnemySpawnHandler<T> where T : MonoBehaviour
+    {
+        private readonly ObjectPool<T> _pool;
+        private readonly float _spawnInterval;
+        private readonly int _maxActive;
+        private readonly float _minDistance;
+        private readonly Action<T> _onSpawn;
+        private readonly Action<T> _onReturn;
+        private readonly EnemySpawner _owner;
+        private int _activeCount;
+        private Coroutine _loop;
+
+        public EnemySpawnHandler(
+            GameObject prefab,
+            int initialStock,
+            float spawnInterval,
+            int maxActive,
+            float minDistance,
+            Action<T> onSpawn,
+            Action<T> onReturn,
+            EnemySpawner owner)
+        {
+            _spawnInterval = spawnInterval;
+            _maxActive = maxActive;
+            _minDistance = minDistance;
+            _onSpawn = onSpawn;
+            _onReturn = onReturn;
+            _owner = owner;
+
+            _pool = new ObjectPool<T>(
+                () => { var go = UnityEngine.Object.Instantiate(prefab); go.SetActive(false); return go.GetComponent<T>(); },
+                t => t.gameObject.SetActive(true),
+                t => t.gameObject.SetActive(false),
+                initialStock
+            );
+        }
+
+        public void StartLoop()
+        {
+            _loop = _owner.StartCoroutine(SpawnLoop());
+        }
+
+        public void StopLoop()
+        {
+            if (_loop != null)
+                _owner.StopCoroutine(_loop);
+        }
+
+        public void Return(T instance)
+        {
+            _onReturn(instance);
+            _pool.Return(instance);
+            _activeCount--;
+        }
+
+        public void DespawnAll()
+        {
+            StopLoop();
+            var active = UnityEngine.Object.FindObjectsByType<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var instance in active)
+            {
+                _onReturn(instance);
+                _pool.Return(instance);
+            }
+            _activeCount = 0;
+        }
+
+        private IEnumerator SpawnLoop()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(_spawnInterval);
+                if (_activeCount >= _maxActive) continue;
+                Vector3? pos = _owner.TryGetValidPosition(IsTooClose);
+                if (pos == null) continue;
+                Spawn(pos.Value);
+            }
+        }
+
+        private void Spawn(Vector3 position)
+        {
+            var instance = _pool.Get();
+            instance.transform.position = position + new Vector3(0f, _owner._spawnYOffset, 0f);
+            _onSpawn(instance);
+            _activeCount++;
+        }
+
+        private bool IsTooClose(Vector3 candidate)
+        {
+            var active = UnityEngine.Object.FindObjectsByType<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var t in active)
+                if (Vector3.Distance(candidate, t.transform.position) < _minDistance) return true;
+            return false;
+        }
     }
 }

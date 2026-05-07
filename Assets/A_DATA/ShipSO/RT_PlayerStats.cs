@@ -37,4 +37,15 @@ public class RT_PlayerStats : MonoBehaviour
         maxHealth = baseStats.maxHealth;
         currentHealth = baseStats.maxHealth;
     }
+
+    public void SetBaseStats(SO_BASESTATS stats)
+    {
+        moveSpeed = stats.moveSpeed;
+        turnSpeed = stats.turnSpeed;
+        acceleration = stats.acceleration;
+        deceleration = stats.deceleration;
+        sprintMultiplier = stats.sprintMultiplier;
+        maxHealth = stats.maxHealth;
+        currentHealth = stats.maxHealth;
+    }
 }

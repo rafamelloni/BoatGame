@@ -101,6 +101,8 @@ public class SceneResetter : MonoBehaviour
         _abilityController.ResetAbilities();
         _timerBoss.ResetTimer();
         PreselectionData.Reset();
+        ShipPreselectionManager.Instance.Reset();
+
 
         // Boss
         BOSS.SetActive(false);

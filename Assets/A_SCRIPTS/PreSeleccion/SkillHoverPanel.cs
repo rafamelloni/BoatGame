@@ -27,6 +27,8 @@ public class SkillHoverPanel : MonoBehaviour
 
     public void Show(string title, string description, RectTransform buttonRect, GameObject hoverObject, GameObject previewModel = null)
     {
+
+        Debug.Log($"[Show] previewModel: {(previewModel != null ? previewModel.name : "NULL")}");
         titleText.text = title;
         descriptionText.text = description;
 
