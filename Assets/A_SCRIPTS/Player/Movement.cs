@@ -98,10 +98,14 @@ public class Movement : MonoBehaviour
                 _isSprinting = true;
                 trailSprint.Play();
                 trailSprint1.Play();
-                playerWave.ApplyForwardTilt(0.2f);
             }
+
+            // Tilt cada frame mientras sprintea, no solo al entrar
+            playerWave.ApplyForwardTilt(0.2f);
+
             _sprintStamina -= sprintDrainRate * Time.deltaTime;
             _sprintStamina = Mathf.Max(_sprintStamina, 0f);
+
             if (_sprintStamina <= 0f)
                 StopSprint();
         }
@@ -109,8 +113,14 @@ public class Movement : MonoBehaviour
         {
             if (_isSprinting)
                 StopSprint();
-            _sprintStamina += sprintRechargeRate * Time.deltaTime;
-            _sprintStamina = Mathf.Min(_sprintStamina, sprintMaxDuration);
+
+            // Solo recarga si Shift NO está presionado
+            // (evita el tilt fantasma al mantener Shift sin stamina)
+            if (!shiftHeld)
+            {
+                _sprintStamina += sprintRechargeRate * Time.deltaTime;
+                _sprintStamina = Mathf.Min(_sprintStamina, sprintMaxDuration);
+            }
         }
     }
 
