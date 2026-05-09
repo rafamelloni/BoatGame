@@ -49,9 +49,9 @@ public class UIElementSpawn : MonoBehaviour
 
     void ActivarElementos()
     {
-        _dataTarjetaUI.SetActive(true);
-        _dataTarjetaUI1.SetActive(true);
-        _dataTarjetaUI2.SetActive(true);
+        if (_dataTarjetaUI != null) _dataTarjetaUI.SetActive(true);
+        if (_dataTarjetaUI1 != null) _dataTarjetaUI1.SetActive(true);
+        if (_dataTarjetaUI2 != null) _dataTarjetaUI2.SetActive(true);
     }
 
     private void OnDisable()
@@ -60,9 +60,9 @@ public class UIElementSpawn : MonoBehaviour
         _pergaminoMaterial.SetFloat("_valorScroll", _originalVal);
         _rectTransform.anchoredPosition = _originalPos;
 
-        _dataTarjetaUI.SetActive(false);
-        _dataTarjetaUI1.SetActive(false);
-        _dataTarjetaUI2.SetActive(false);
+        if (_dataTarjetaUI != null) _dataTarjetaUI.SetActive(false);
+        if (_dataTarjetaUI1 != null) _dataTarjetaUI1.SetActive(false);
+        if (_dataTarjetaUI2 != null) _dataTarjetaUI2.SetActive(false);
     }
     private void OnEnable()
     {

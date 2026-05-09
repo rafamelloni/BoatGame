@@ -25,6 +25,9 @@ public class UIHealthBarDashBoss : MonoBehaviour
     [SerializeField] private GameObject[] _damageParticleObjects;
     [SerializeField, Range(0f, 1f)] private float[] _healthThresholds;
 
+    [Header("UI Ship Upgrade")]
+    [SerializeField] GameObject _UIShipUpgrade;
+
     private Material _materialInstance;
     private bool[] _activatedParticles;
 
@@ -47,6 +50,7 @@ public class UIHealthBarDashBoss : MonoBehaviour
         if (_bossHealth != null)
         {
             _bossHealth.OnDamage += UpdateBar;
+            _bossHealth.OnDeath += DieBoss;
 
             if (_bossHealth.GetCurrenHealt() > 0f)
                 UpdateBar(_bossHealth.GetCurrenHealt());
@@ -56,7 +60,11 @@ public class UIHealthBarDashBoss : MonoBehaviour
     private void OnDisable()
     {
         if (_bossHealth != null)
+        {
             _bossHealth.OnDamage -= UpdateBar;
+            _bossHealth.OnDeath += DieBoss;
+        }
+            
     }
 
     private void UpdateBar(float currentHealth)
@@ -107,5 +115,10 @@ public class UIHealthBarDashBoss : MonoBehaviour
                     _damageParticleObjects[i].SetActive(true);
             }
         }
+    }
+
+    private void DieBoss()
+    {
+        _UIShipUpgrade.SetActive(true);
     }
 }

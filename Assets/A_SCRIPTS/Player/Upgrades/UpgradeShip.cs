@@ -17,10 +17,12 @@ public class UpgradeShip : MonoBehaviour
     [SerializeField] GameObject _barcoNew;
 
     [SerializeField] GameObject _particulasPuff;
+    [SerializeField] GameObject _canvasShipUpgrades;
 
     public void Onclick()
     {
         AnimateShip();
+        _canvasShipUpgrades.SetActive(false);
     }
 
     private void AnimateShip()

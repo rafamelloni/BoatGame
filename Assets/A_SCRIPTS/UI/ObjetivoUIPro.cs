@@ -50,11 +50,13 @@ public class ObjetivoUIPro : MonoBehaviour
     private void OnEnable()
     {
         MostrarObjetivo();
+        Time.timeScale = 0f;
     }
 
     private void OnDisable()
     {
         ResetUIInterno();
+        Time.timeScale = 1f;
     }
 
     public void MostrarObjetivo()
@@ -67,6 +69,7 @@ public class ObjetivoUIPro : MonoBehaviour
 
     private IEnumerator SecuenciaObjetivo()
     {
+
         panelObjetivo.anchoredPosition = posicionInicial;
         panelObjetivo.localRotation = Quaternion.identity;
         canvasGroup.alpha = 0f;

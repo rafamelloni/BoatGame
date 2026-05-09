@@ -62,12 +62,12 @@ public class Movement : MonoBehaviour
 
         if (vertical != 0)
         {
-            trail.Play(); trail1.Play(); trail2.Play();
+            trail.Play();
             _currentSpeed = Mathf.Lerp(_currentSpeed, vertical * targetSpeed, Time.deltaTime * _stats.acceleration);
         }
         else
         {
-            trail.Stop(); trail1.Stop(); trail2.Stop();
+            trail.Stop(); 
             _currentSpeed = Mathf.Lerp(_currentSpeed, 0f, Time.deltaTime * _stats.deceleration);
         }
 
