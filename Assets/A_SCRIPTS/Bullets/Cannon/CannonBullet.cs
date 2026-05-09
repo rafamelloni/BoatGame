@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class CannonBullet : BulletsBase
@@ -13,6 +14,8 @@ public class CannonBullet : BulletsBase
     [Header("Explosion")]
     [SerializeField] private float _explosionRadius = 2f;
     [SerializeField] private LayerMask _damageLayers;
+
+    [SerializeField] Collider _collider;
 
     private Vector3 _lastExplosionPoint;
     private bool _showLastExplosion;
@@ -30,6 +33,7 @@ public class CannonBullet : BulletsBase
         if (_impactIndicator != null)
             _impactIndicator.ResetIndicator();
         _trail.Clear();
+        _collider.enabled = false;
     }
 
     public void Setup(Transform point, RT_CannonData rtData, float side)
@@ -63,6 +67,8 @@ public class CannonBullet : BulletsBase
 
         if (_impactIndicator != null)
             _impactIndicator.Init(_pointShoot.position, startVelocity);
+
+        StartCoroutine(ActivateColliderBulelt());
 
     }
     private void OnTriggerEnter(Collider other)
@@ -102,5 +108,12 @@ public class CannonBullet : BulletsBase
                 damageable.TakeDamage(_rtData.damage);
             }
         }
+    }
+
+    private IEnumerator ActivateColliderBulelt()
+    {
+        yield return new WaitForSeconds (0.1f);
+        _collider.enabled = true;
+
     }
 }

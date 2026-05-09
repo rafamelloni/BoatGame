@@ -16,6 +16,11 @@ public class CannonRecoil : MonoBehaviour
         _localOrigin = transform.localPosition;
     }
 
+    public void UpdateLocalOrgin()
+    {
+        _localOrigin = transform.localPosition;
+    }
+
     public void Fire(float fireRate)
     {
         transform.localPosition = _localOrigin - transform.localRotation * -Vector3.right * recoilDistance; _recoilTimer = fireRate;

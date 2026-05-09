@@ -52,6 +52,18 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private AbilityUpgradeSystem _upgradeSystem;
     [SerializeField] private UpgradeStatsUI _statsUI;
 
+    [Header("Data para cuando matemos al Boss")]
+    [SerializeField] private GameObject _cannonR;
+    [SerializeField] private GameObject _cannonL;
+    [SerializeField] private GameObject _mortar;
+    [SerializeField] private Transform _newCannonPosR;
+    [SerializeField] private Transform _newCannonPosL;
+    [SerializeField] private Transform _newMortarPos;
+
+
+
+
+
     private CannonStrategy _abilityE;
     private MorterStrategy _abilityQ;
 
@@ -180,5 +192,16 @@ public class AbilityController : MonoBehaviour
     {
         _abilityQ.SetUnlocked(true);
         Debug.Log($"Mortar unlocked: {_abilityQ.IsUnlocked}");
+    }
+
+    public void ShipUpgraded()
+    {
+        _cannonR.transform.position = _newCannonPosR.transform.position;
+        _cannonL.transform.position = _newCannonPosL.transform.position;
+        _mortar.transform.position = _newMortarPos.transform.position;
+
+
+        _recoilCannonR.UpdateLocalOrgin();
+        _recoilCannonL.UpdateLocalOrgin();
     }
 }

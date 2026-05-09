@@ -20,6 +20,11 @@ public class Movement : MonoBehaviour
     public float sprintDrainRate = 1f;
     public Image sprintBarImage;
 
+    [Header("Bank/Tilt")]
+    public float bankAngle = 15f;
+    public float bankSpeed = 5f;
+    private float _currentBankZ = 0f;
+
     private bool _isKnockedBack = false;
     private Vector3 _knockbackVelocity;
 
@@ -27,6 +32,7 @@ public class Movement : MonoBehaviour
     private bool _isSprinting = false;
     private float _currentSpeed = 0f;
     private float _smoothTurn = 0f;
+    public float GetCurrentBankZ() => _currentBankZ;
 
     private void Awake()
     {
@@ -52,7 +58,6 @@ public class Movement : MonoBehaviour
         float targetTurn = horizontal * _stats.turnSpeed;
         _smoothTurn = Mathf.Lerp(_smoothTurn, targetTurn, Time.deltaTime * 5f);
 
-
         float targetSpeed = _stats.moveSpeed * (_isSprinting ? sprintSpeedMultiplier : 1f);
 
         if (vertical != 0)
@@ -75,7 +80,13 @@ public class Movement : MonoBehaviour
         if (!enabled) return;
 
         float newYaw = _rb.rotation.eulerAngles.y + _smoothTurn * Time.fixedDeltaTime;
-        _rb.MoveRotation(playerWave.GetWaveTilt(newYaw));
+
+        float targetBankZ = -(_smoothTurn / _stats.turnSpeed) * bankAngle;
+        _currentBankZ = Mathf.Lerp(_currentBankZ, targetBankZ, Time.fixedDeltaTime * bankSpeed);
+
+        Quaternion waveTilt = playerWave.GetWaveTilt(newYaw);
+        Quaternion bankRot = Quaternion.Euler(0f, 0f, _currentBankZ);
+        _rb.MoveRotation(waveTilt * bankRot);
 
         Vector3 move = _isKnockedBack
             ? _knockbackVelocity * Time.fixedDeltaTime
@@ -89,7 +100,8 @@ public class Movement : MonoBehaviour
     void HandleSprint()
     {
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift);
-        bool canSprint = _sprintStamina > 0f;
+        float vertical = Input.GetAxisRaw("Vertical");
+        bool canSprint = _sprintStamina > 0f && vertical > 0f;
 
         if (shiftHeld && canSprint)
         {
@@ -100,7 +112,6 @@ public class Movement : MonoBehaviour
                 trailSprint1.Play();
             }
 
-            // Tilt cada frame mientras sprintea, no solo al entrar
             playerWave.ApplyForwardTilt(0.2f);
 
             _sprintStamina -= sprintDrainRate * Time.deltaTime;
@@ -114,8 +125,6 @@ public class Movement : MonoBehaviour
             if (_isSprinting)
                 StopSprint();
 
-            // Solo recarga si Shift NO está presionado
-            // (evita el tilt fantasma al mantener Shift sin stamina)
             if (!shiftHeld)
             {
                 _sprintStamina += sprintRechargeRate * Time.deltaTime;
