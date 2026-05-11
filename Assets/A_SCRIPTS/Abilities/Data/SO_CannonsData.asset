@@ -16,7 +16,7 @@ MonoBehaviour:
   bulletSpeed: 11
   verticalArc: 0.5
   damage: 50
-  shotsPerBurst: 2
+  shotsPerBurst: 1
   timeBetweenShots: 0.5
   cooldown: 1.5
   explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}

@@ -117,7 +117,7 @@ public class AbilityController : MonoBehaviour
     }
     public void Upgrade()
     {
-        _abilityE._rtData.shotsPerBurst = 4;
+        _abilityE._rtData.shotsPerBurst = 2;
     }
 
     public void MortarAveilable()

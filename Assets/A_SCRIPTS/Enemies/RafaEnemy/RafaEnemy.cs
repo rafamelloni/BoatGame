@@ -53,7 +53,7 @@ public class RafaEnemy : Enemy
         ContactPoint contact = collision.contacts[0];
        
 
-        if (collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Island"))
         {
             collision.gameObject.GetComponent<RT_PlayerHealth>().TakeDamage(10f);
             ParticlePool.Instance.GetParticle(baseData.woodExplosionVFX, collision.contacts[0].point);

@@ -128,7 +128,7 @@ public class SceneResetter : MonoBehaviour
         // 3. Reset — pantalla completamente negra, cámara main todavía activa
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
-        _mainCamera.fieldOfView = 60f;
+        //_mainCamera.fieldOfView = 50f;
 
         ResetAll();
 
@@ -141,10 +141,13 @@ public class SceneResetter : MonoBehaviour
         _MESH.SetActive(true);
         yield return StartCoroutine(AnimateRadiusUnscaled(0f, 0.3f, _fadeOutDuration));
 
+        StartCoroutine(LerpFOV(_mainCamera.fieldOfView, 50, 0.1f));
+
         // 5. Vignette terminó — recién acá swapeamos cámaras y mostramos preselección
         _vignetteImage.gameObject.SetActive(false);
         _Canvas.SetActive(false);
         _mainCamera.gameObject.SetActive(false);
+       
         _cameraPreSeleccion.SetActive(true);
         _canvasPreSeleccion.SetActive(true);
 
@@ -201,6 +204,6 @@ public class SceneResetter : MonoBehaviour
             _mainCamera.fieldOfView = Mathf.Lerp(from, to, elapsed / realDuration);
             yield return null;
         }
-        _mainCamera.fieldOfView = 50;
+       // _mainCamera.fieldOfView = 50;
     }
 }
