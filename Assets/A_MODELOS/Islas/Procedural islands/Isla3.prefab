@@ -738,7 +738,19 @@ PrefabInstance:
       addedObject: {fileID: 4898482147142703017}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: db983af0b78b6d14cb91002d2f8341eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: -7326227716503246194}
+      addedObject: {fileID: 5485197770353103668}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: db983af0b78b6d14cb91002d2f8341eb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2482539713371264538}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: db983af0b78b6d14cb91002d2f8341eb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1794432282478271029}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: db983af0b78b6d14cb91002d2f8341eb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3568389824494150852}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: db983af0b78b6d14cb91002d2f8341eb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 156899002785041753}
   m_SourcePrefab: {fileID: 100100000, guid: db983af0b78b6d14cb91002d2f8341eb, type: 3}
 --- !u!1 &481323924117471551 stripped
 GameObject:
@@ -760,8 +772,8 @@ MonoBehaviour:
   _totalDefenses: 0
   _canvasExample: {fileID: 0}
   _tiempoDesactivarIslas: 15
---- !u!135 &-7326227716503246194
-SphereCollider:
+--- !u!65 &5485197770353103668
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -779,8 +791,92 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 1081.4407
-  m_Center: {x: 0, y: 0, z: 0.000061035156}
+  m_Size: {x: 861.4666, y: 83.152054, z: 1134.3975}
+  m_Center: {x: -118.54992, y: -39.59577, z: 26.030159}
+--- !u!65 &2482539713371264538
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481323924117471551}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 674.3126, y: 96.44525, z: 492.41867}
+  m_Center: {x: 632.2853, y: -32.949196, z: 160.81657}
+--- !u!65 &1794432282478271029
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481323924117471551}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 319.44922, y: 85.471985, z: 502.13776}
+  m_Center: {x: 454.98868, y: -38.43583, z: -306.19507}
+--- !u!65 &3568389824494150852
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481323924117471551}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 413.9596, y: 84.65588, z: 763.8045}
+  m_Center: {x: -731.68787, y: -38.843884, z: -112.38554}
+--- !u!65 &156899002785041753
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481323924117471551}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 441.5083, y: 94.892456, z: 263.65204}
+  m_Center: {x: -646.4288, y: -33.72557, z: -562.61597}
 --- !u!4 &1001436442902862725 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: db983af0b78b6d14cb91002d2f8341eb, type: 3}
