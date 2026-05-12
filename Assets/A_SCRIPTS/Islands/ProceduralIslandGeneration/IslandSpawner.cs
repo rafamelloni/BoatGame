@@ -16,6 +16,10 @@ public class IslandSpawner : MonoBehaviour
     [SerializeField] private GameObject _canvasExample;
     [SerializeField] private int _poolSizePerType = 3;
 
+    [Header("Indicator")]
+    [SerializeField] private RectTransform _indicatorPrefab;
+    [SerializeField] private Transform _canvasParent;
+
     private Dictionary<GameObject, ObjectPool<GameObject>> _islandPools = new();
     private Dictionary<GameObject, IslandEntry> _prefabToEntry = new();
     private Dictionary<GameObject, (GameObject prefab, GameObject instance)> _activeIslands = new();
@@ -42,8 +46,10 @@ public class IslandSpawner : MonoBehaviour
     {
         IslandEntry entry = PickWeighted();
         if (entry == null) return;
+
         GameObject instance = _islandPools[entry.islandPrefab].Get();
         instance.transform.SetPositionAndRotation(position, Quaternion.Euler(0, Random.Range(0, 360f), 0));
+
         IslandManager manager = instance.GetComponent<IslandManager>();
         if (manager != null)
         {
@@ -51,8 +57,16 @@ public class IslandSpawner : MonoBehaviour
             manager.Init();
             manager.OnReadyToReturn += HandleIslandReturn;
         }
+
+        // Instanciar y asignar indicador
+        if (_indicatorPrefab != null && _canvasParent != null)
+        {
+            RectTransform arrow = Instantiate(_indicatorPrefab, _canvasParent);
+            instance.GetComponent<IslandIndicator>()?.Init(arrow);
+        }
+
         SpawnDecorations(instance, entry);
-        _activeIslands[instance] = (entry.islandPrefab, instance); // <-- trackear
+        _activeIslands[instance] = (entry.islandPrefab, instance);
     }
 
     private void SpawnDecorations(GameObject instance, IslandEntry entry)
@@ -87,9 +101,10 @@ public class IslandSpawner : MonoBehaviour
             foreach (Transform child in point.transform)
                 Destroy(child.gameObject);
         }
+
         instance.GetComponent<IslandManager>()?.ResetIsland();
         _islandPools[prefab].Return(instance);
-        _activeIslands.Remove(instance); // <-- limpiar tracking
+        _activeIslands.Remove(instance);
     }
 
     public void DespawnAll()
@@ -99,12 +114,14 @@ public class IslandSpawner : MonoBehaviour
         foreach (var kvp in toRemove)
             ReturnIsland(kvp.prefab, kvp.instance);
     }
+
     private void HandleIslandReturn(GameObject instance)
     {
         if (!_activeIslands.TryGetValue(instance, out var entry)) return;
         _activeIslands.Remove(instance);
         ReturnIsland(entry.prefab, instance);
     }
+
     private IslandEntry PickWeighted()
     {
         int total = 0;

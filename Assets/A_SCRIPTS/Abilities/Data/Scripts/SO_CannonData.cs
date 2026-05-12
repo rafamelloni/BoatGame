@@ -8,6 +8,7 @@ public class SO_CannonData : ScriptableObject
     public float bulletSpeed = 20f;
     public float verticalArc = 0.25f;
     public float damage = 15f;
+    public float dropDelay = 0.5f;
 
     [Header("Burst")]
     public int shotsPerBurst = 2;

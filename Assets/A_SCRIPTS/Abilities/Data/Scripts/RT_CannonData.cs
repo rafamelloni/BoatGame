@@ -8,6 +8,7 @@ public class RT_CannonData
     public float timeBetweenShots;
     public float cooldown;
     public float damage;
+    public float dropDelay;
 
     public GameObject waterSplashVFX;
     public GameObject explosionVFX;
@@ -20,6 +21,7 @@ public class RT_CannonData
         timeBetweenShots = so.timeBetweenShots;
         cooldown = so.cooldown;
         damage = so.damage;
+        dropDelay = so.dropDelay;
 
         waterSplashVFX = so.waterSplash;
         explosionVFX = so.explosionVfx;

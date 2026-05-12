@@ -443,6 +443,7 @@ GameObject:
   - component: {fileID: 1359977383431801559}
   - component: {fileID: 8656493855582825621}
   - component: {fileID: -128659617295121785}
+  - component: {fileID: -7857690708141285310}
   m_Layer: 11
   m_Name: Isla4
   m_TagString: Islas
@@ -577,6 +578,20 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 939.7752
   m_Center: {x: 0, y: 0, z: 0.000061035156}
+--- !u!114 &-7857690708141285310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4731327829055046239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60871fc336a145d4782ecedf898df87f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IslandIndicator
+  _edgePadding: 5
+  _hideDistance: 50
 --- !u!1 &5049064864942915550
 GameObject:
   m_ObjectHideFlags: 0

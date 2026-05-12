@@ -1096,6 +1096,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f46389df32169944aaf612fd0a9580e0, type: 3}
       insertIndex: -1
       addedObject: {fileID: -1253308758778591921}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f46389df32169944aaf612fd0a9580e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4588941188515047296}
   m_SourcePrefab: {fileID: 100100000, guid: f46389df32169944aaf612fd0a9580e0, type: 3}
 --- !u!1 &2571380644845227281 stripped
 GameObject:
@@ -1138,6 +1141,20 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 939.7752
   m_Center: {x: 0, y: 0, z: 0.000061035156}
+--- !u!114 &4588941188515047296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2571380644845227281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60871fc336a145d4782ecedf898df87f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IslandIndicator
+  _edgePadding: 5
+  _hideDistance: 50
 --- !u!4 &2946675485890893739 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f46389df32169944aaf612fd0a9580e0, type: 3}

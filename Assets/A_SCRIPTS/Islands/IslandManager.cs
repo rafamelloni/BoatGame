@@ -19,6 +19,7 @@ public class IslandManager : MonoBehaviour
     public static event Action OnAnyIslandDefeated;
 
     [SerializeField] float _tiempoDesactivarIslas = 15f;
+    IslandIndicator _indicator;
 
     private void Start()
     {
@@ -30,6 +31,7 @@ public class IslandManager : MonoBehaviour
         _totalDefenses = GetComponentsInChildren<IslandDefense>().Length;
         _wasDefeated = false;
         _destroyedDefenses = 0;
+        _indicator?.Show();
 
         //if (_canvasExample != null)
         //    _canvasExample.SetActive(false);
@@ -69,6 +71,7 @@ public class IslandManager : MonoBehaviour
     private IEnumerator DeactivateIsland()
     {
         yield return new WaitForSeconds(_tiempoDesactivarIslas);
+        _indicator?.Hide();
         OnReadyToReturn?.Invoke(gameObject);
     }
 }
