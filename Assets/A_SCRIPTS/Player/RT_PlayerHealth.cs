@@ -22,6 +22,14 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float _healthPercentToStartCracks = 0.9f;
     [SerializeField] private AnimationCurve _crackCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
+    [Header("Shader Daño Velas")]
+    [SerializeField] private Renderer _sailRenderer;
+    [SerializeField] private string _sailBreakProperty = "_BreakAmount";
+    [SerializeField] private float _minSailBreakAmount = -0.1f;
+    [SerializeField] private float _maxSailBreakAmount = 0.05f;
+    [SerializeField, Range(0f, 1f)] private float _healthPercentToStartSailDamage = 0.9f;
+    [SerializeField] private AnimationCurve _sailDamageCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
     [Header("Vignette por vida baja")]
     [SerializeField, Range(0f, 1f)] private float _healthPercentToShowVignette = 0.5f;
     [SerializeField] private float _lowHealthCurve = 2f;
@@ -36,6 +44,7 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField] private float _vidaParaActivarFuego = 30f;
 
     private Material _shipMaterial;
+    private Material _sailMaterial;
     private Coroutine _vignettePulseRoutine;
 
     private static readonly int VignetteIntensityID = Shader.PropertyToID("_VignetteIntensity");
@@ -46,6 +55,9 @@ public class RT_PlayerHealth : MonoBehaviour
 
         if (_shipRenderer != null)
             _shipMaterial = _shipRenderer.material;
+
+        if (_sailRenderer != null)
+            _sailMaterial = _sailRenderer.material;
 
         ResetVisuals();
     }
@@ -99,6 +111,7 @@ public class RT_PlayerHealth : MonoBehaviour
     {
         UpdateVignette();
         UpdateDamageShader();
+        UpdateSailDamageShader();
         UpdateDestroyedVFX();
     }
 
@@ -127,27 +140,55 @@ public class RT_PlayerHealth : MonoBehaviour
         return Mathf.Lerp(_vignetteMinIntensity, _vignetteMaxIntensity, lowHealthPercent);
     }
 
-    private void UpdateDamageShader()
+    private float GetDamagePercent(float startHealthPercent, AnimationCurve curve)
     {
-        if (_shipMaterial == null || _stats == null || _stats.maxHealth <= 0f)
-            return;
+        if (_stats == null || _stats.maxHealth <= 0f)
+            return 0f;
 
         float healthPercent = Mathf.Clamp01(_stats.currentHealth / _stats.maxHealth);
 
         float damagePercent = Mathf.InverseLerp(
-            _healthPercentToStartCracks,
+            startHealthPercent,
             0f,
             healthPercent
         );
 
         damagePercent = Mathf.Clamp01(damagePercent);
-        damagePercent = _crackCurve.Evaluate(damagePercent);
+
+        if (curve != null)
+            damagePercent = curve.Evaluate(damagePercent);
+
+        return damagePercent;
+    }
+
+    private void UpdateDamageShader()
+    {
+        if (_shipMaterial == null)
+            return;
+
+        float damagePercent = GetDamagePercent(_healthPercentToStartCracks, _crackCurve);
 
         float grietaValue = damagePercent * _maxGrietaStrenght;
         float normalValue = damagePercent * _maxNormalStrenght;
 
         _shipMaterial.SetFloat(_grietaProperty, grietaValue);
         _shipMaterial.SetFloat(_normalProperty, normalValue);
+    }
+
+    private void UpdateSailDamageShader()
+    {
+        if (_sailMaterial == null)
+            return;
+
+        float damagePercent = GetDamagePercent(_healthPercentToStartSailDamage, _sailDamageCurve);
+
+        float sailBreakValue = Mathf.Lerp(
+            _minSailBreakAmount,
+            _maxSailBreakAmount,
+            damagePercent
+        );
+
+        _sailMaterial.SetFloat(_sailBreakProperty, sailBreakValue);
     }
 
     private void PlayDamageVignettePulse()
@@ -226,6 +267,9 @@ public class RT_PlayerHealth : MonoBehaviour
             _shipMaterial.SetFloat(_grietaProperty, 0f);
             _shipMaterial.SetFloat(_normalProperty, 0f);
         }
+
+        if (_sailMaterial != null)
+            _sailMaterial.SetFloat(_sailBreakProperty, _minSailBreakAmount);
 
         if (_vfxDestroyed != null)
             _vfxDestroyed.SetActive(false);
