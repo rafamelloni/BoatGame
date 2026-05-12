@@ -13,6 +13,15 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField] private float _vignetteMaxIntensity = 1.5f;
     [SerializeField] private float _vignetteMinIntensity = 0f;
 
+    [Header("Shader Daño Barco")]
+    [SerializeField] private Renderer _shipRenderer;
+    [SerializeField] private string _grietaProperty = "_grietaStrenght";
+    [SerializeField] private string _normalProperty = "_NormalStrenght";
+    [SerializeField] private float _maxGrietaStrenght = 1f;
+    [SerializeField] private float _maxNormalStrenght = 1.5f;
+    [SerializeField, Range(0f, 1f)] private float _healthPercentToStartCracks = 0.9f;
+    [SerializeField] private AnimationCurve _crackCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
     [Header("Vignette por vida baja")]
     [SerializeField, Range(0f, 1f)] private float _healthPercentToShowVignette = 0.5f;
     [SerializeField] private float _lowHealthCurve = 2f;
@@ -26,6 +35,7 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField] private GameObject _vfxDestroyed;
     [SerializeField] private float _vidaParaActivarFuego = 30f;
 
+    private Material _shipMaterial;
     private Coroutine _vignettePulseRoutine;
 
     private static readonly int VignetteIntensityID = Shader.PropertyToID("_VignetteIntensity");
@@ -33,7 +43,11 @@ public class RT_PlayerHealth : MonoBehaviour
     private void Awake()
     {
         _stats = GetComponent<RT_PlayerStats>();
-        ResetVignette();
+
+        if (_shipRenderer != null)
+            _shipMaterial = _shipRenderer.material;
+
+        ResetVisuals();
     }
 
     public void TakeDamage(float amount)
@@ -43,7 +57,7 @@ public class RT_PlayerHealth : MonoBehaviour
         _stats.currentHealth -= amount;
         _stats.currentHealth = Mathf.Max(_stats.currentHealth, 0f);
 
-        UpdateVignette();
+        UpdateVisuals();
         PlayDamageVignettePulse();
 
         if (_stats.currentHealth <= 0f)
@@ -59,7 +73,7 @@ public class RT_PlayerHealth : MonoBehaviour
 
         _stats.currentHealth = Mathf.Min(_stats.currentHealth + amount, _stats.maxHealth);
 
-        UpdateVignette();
+        UpdateVisuals();
     }
 
     private IEnumerator DeathRoutine()
@@ -70,7 +84,7 @@ public class RT_PlayerHealth : MonoBehaviour
 
         Debug.Log("Player muerto");
 
-        UpdateVignette();
+        UpdateVisuals();
     }
 
     public void ResetHealth()
@@ -78,18 +92,23 @@ public class RT_PlayerHealth : MonoBehaviour
         _isDead = false;
         _stats.currentHealth = _stats.maxHealth;
 
-        ResetVignette();
+        ResetVisuals();
+    }
+
+    private void UpdateVisuals()
+    {
+        UpdateVignette();
+        UpdateDamageShader();
+        UpdateDestroyedVFX();
     }
 
     private void UpdateVignette()
     {
-        if (_vignetteMaterial != null)
-        {
-            float baseIntensity = GetBaseVignetteIntensity();
-            _vignetteMaterial.SetFloat(VignetteIntensityID, baseIntensity);
-        }
+        if (_vignetteMaterial == null)
+            return;
 
-        UpdateDestroyedVFX();
+        float baseIntensity = GetBaseVignetteIntensity();
+        _vignetteMaterial.SetFloat(VignetteIntensityID, baseIntensity);
     }
 
     private float GetBaseVignetteIntensity()
@@ -106,6 +125,29 @@ public class RT_PlayerHealth : MonoBehaviour
         lowHealthPercent = Mathf.Pow(lowHealthPercent, _lowHealthCurve);
 
         return Mathf.Lerp(_vignetteMinIntensity, _vignetteMaxIntensity, lowHealthPercent);
+    }
+
+    private void UpdateDamageShader()
+    {
+        if (_shipMaterial == null || _stats == null || _stats.maxHealth <= 0f)
+            return;
+
+        float healthPercent = Mathf.Clamp01(_stats.currentHealth / _stats.maxHealth);
+
+        float damagePercent = Mathf.InverseLerp(
+            _healthPercentToStartCracks,
+            0f,
+            healthPercent
+        );
+
+        damagePercent = Mathf.Clamp01(damagePercent);
+        damagePercent = _crackCurve.Evaluate(damagePercent);
+
+        float grietaValue = damagePercent * _maxGrietaStrenght;
+        float normalValue = damagePercent * _maxNormalStrenght;
+
+        _shipMaterial.SetFloat(_grietaProperty, grietaValue);
+        _shipMaterial.SetFloat(_normalProperty, normalValue);
     }
 
     private void PlayDamageVignettePulse()
@@ -162,13 +204,13 @@ public class RT_PlayerHealth : MonoBehaviour
 
     private void UpdateDestroyedVFX()
     {
-        if (_vfxDestroyed == null)
+        if (_vfxDestroyed == null || _stats == null)
             return;
 
         _vfxDestroyed.SetActive(_stats.currentHealth <= _vidaParaActivarFuego);
     }
 
-    private void ResetVignette()
+    private void ResetVisuals()
     {
         if (_vignettePulseRoutine != null)
         {
@@ -178,6 +220,12 @@ public class RT_PlayerHealth : MonoBehaviour
 
         if (_vignetteMaterial != null)
             _vignetteMaterial.SetFloat(VignetteIntensityID, _vignetteMinIntensity);
+
+        if (_shipMaterial != null)
+        {
+            _shipMaterial.SetFloat(_grietaProperty, 0f);
+            _shipMaterial.SetFloat(_normalProperty, 0f);
+        }
 
         if (_vfxDestroyed != null)
             _vfxDestroyed.SetActive(false);
