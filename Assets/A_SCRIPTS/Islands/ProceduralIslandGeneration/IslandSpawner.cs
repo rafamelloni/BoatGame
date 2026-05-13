@@ -112,7 +112,12 @@ public class IslandSpawner : MonoBehaviour
         var toRemove = new List<(GameObject prefab, GameObject instance)>(_activeIslands.Values);
         _activeIslands.Clear();
         foreach (var kvp in toRemove)
+        {
+            kvp.instance.GetComponent<IslandIndicator>()?.Hide();
             ReturnIsland(kvp.prefab, kvp.instance);
+
+        }
+            
     }
 
     private void HandleIslandReturn(GameObject instance)

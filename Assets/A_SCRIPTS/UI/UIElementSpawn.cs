@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class UIElementSpawn : MonoBehaviour
@@ -9,30 +10,53 @@ public class UIElementSpawn : MonoBehaviour
     [SerializeField] private float _duration = 0.5f;
     [SerializeField] private AnimationCurve _curve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-
     [Header("Elementos activar")]
-    [SerializeField]  private GameObject _dataTarjetaUI ;
-    [SerializeField] private GameObject _dataTarjetaUI1 ;
-    [SerializeField] private GameObject _dataTarjetaUI2 ;
+    [SerializeField] private GameObject[] _dataTarjetasUI;
 
     private float _originalVal;
     private Vector2 _originalPos;
-
-    private bool secuenciaIniciada;
+    private bool _secuenciaIniciada;
+    private GameObject _tarjetaActiva;
 
     private void Awake()
     {
         _originalVal = _pergaminoMaterial.GetFloat("_valorScroll");
         _originalPos = _rectTransform.anchoredPosition;
     }
+
+    private void OnEnable()
+    {
+        IniciarSecuencia();
+    }
+
+    private void OnDisable()
+    {
+        _secuenciaIniciada = false;
+        _pergaminoMaterial.SetFloat("_valorScroll", _originalVal);
+        _rectTransform.anchoredPosition = _originalPos;
+
+        if (_tarjetaActiva != null)
+        {
+            _tarjetaActiva.SetActive(false);
+            _tarjetaActiva = null;
+        }
+    }
+
+    public void IniciarSecuencia()
+    {
+        if (_secuenciaIniciada) return;
+        _secuenciaIniciada = true;
+        StartCoroutine(OpenPergamino());
+    }
+
     private IEnumerator OpenPergamino()
     {
         float startVal = _pergaminoMaterial.GetFloat("_valorScroll");
         float endVal = -0.64f;
         Vector2 startPos = _rectTransform.anchoredPosition;
         Vector2 endPos = new Vector2(startPos.x, -24.8f);
-
         float t = 0f;
+
         while (t < _duration)
         {
             t += Time.unscaledDeltaTime;
@@ -44,41 +68,22 @@ public class UIElementSpawn : MonoBehaviour
 
         _pergaminoMaterial.SetFloat("_valorScroll", endVal);
         _rectTransform.anchoredPosition = endPos;
-        ActivarElementos();
+        ActivarRandom();
     }
 
-    void ActivarElementos()
+    private void ActivarRandom()
     {
-        if (_dataTarjetaUI != null) _dataTarjetaUI.SetActive(true);
-        if (_dataTarjetaUI1 != null) _dataTarjetaUI1.SetActive(true);
-        if (_dataTarjetaUI2 != null) _dataTarjetaUI2.SetActive(true);
+        if (_dataTarjetasUI.Length == 0) return;
+
+        int index = Random.Range(0, _dataTarjetasUI.Length);
+        _tarjetaActiva = _dataTarjetasUI[index];
+        _tarjetaActiva.SetActive(true);
     }
 
-    private void OnDisable()
+    public void MarcarSeleccionada()
     {
-        secuenciaIniciada = false;
-        _pergaminoMaterial.SetFloat("_valorScroll", _originalVal);
-        _rectTransform.anchoredPosition = _originalPos;
-
-        if (_dataTarjetaUI != null) _dataTarjetaUI.SetActive(false);
-        if (_dataTarjetaUI1 != null) _dataTarjetaUI1.SetActive(false);
-        if (_dataTarjetaUI2 != null) _dataTarjetaUI2.SetActive(false);
+        if (_tarjetaActiva == null) return;
+        _tarjetaActiva.SetActive(false);
+        _tarjetaActiva = null;
     }
-    private void OnEnable()
-    {
-
-        IniciarSecuencia();
-    }
-    public void IniciarSecuencia()
-    {
-        if (secuenciaIniciada) return;
-
-        secuenciaIniciada = true;
-        StartCoroutine(OpenPergamino());
-    }
-
-
-
-
-
 }

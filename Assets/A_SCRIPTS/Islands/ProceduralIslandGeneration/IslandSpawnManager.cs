@@ -28,7 +28,6 @@ public class IslandSpawnManager : MonoBehaviour
     private void Start()
     {
         _player = GameObject.FindWithTag("Player").transform;
-        StartCoroutine(SpawnRoutine());
     }
     private void Update()
     {
@@ -38,7 +37,13 @@ public class IslandSpawnManager : MonoBehaviour
         }
     }
 
-    private IEnumerator SpawnRoutine()
+    public void StartSpawning() 
+    {
+        StartCoroutine(SpawnRoutine());
+    }
+
+
+    public IEnumerator SpawnRoutine()
     {
         while (true)
         {
@@ -115,7 +120,7 @@ public class IslandSpawnManager : MonoBehaviour
         _islandSpawner.DespawnAll();
         _spawnedPositions.Clear();
         _currentIslandCount = 0;
-        StartCoroutine(SpawnRoutine());
+        //StartCoroutine(SpawnRoutine());
     }
 
     private void OnDrawGizmos()

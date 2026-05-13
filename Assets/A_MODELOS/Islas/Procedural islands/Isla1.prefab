@@ -538,6 +538,7 @@ Transform:
   - {fileID: 8632524711717148880}
   - {fileID: 5609632923863230523}
   - {fileID: 1577086197901064160}
+  - {fileID: 9028305756401201735}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1642286549166082368
@@ -673,7 +674,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IslandIndicator
   _edgePadding: 5
-  _hideDistance: 50
+  _hideDistance: 30
+  _minDistance: 50
+  _maxDistance: 500
+  _minScale: 0.2
+  _maxScale: 1
 --- !u!1 &7697455933452372875
 GameObject:
   m_ObjectHideFlags: 0
@@ -834,6 +839,80 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IslandSpawnPoint
   pointType: 2
   spawnChance: 1
+--- !u!1001 &592795025046745487
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3551527975978804922}
+    m_Modifications:
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 21.236115
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 21.236115
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 21.236115
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 62
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 116
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.8660259
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.49999917
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9095911168515479922, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: m_Name
+      value: Treasure chest(With Gold)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+--- !u!4 &9028305756401201735 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+  m_PrefabInstance: {fileID: 592795025046745487}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1226571069866062978
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -979,6 +1058,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: af25dca2a886d024b9ca66502f059719, type: 3}
       propertyPath: m_Name
       value: PrisionWood
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: af25dca2a886d024b9ca66502f059719, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1879428697330835280, guid: af25dca2a886d024b9ca66502f059719, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'

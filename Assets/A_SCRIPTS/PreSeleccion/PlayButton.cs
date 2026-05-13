@@ -11,6 +11,7 @@ public class PlayButton : MonoBehaviour
     [SerializeField] private GameObject camaramMain;
     [SerializeField] private Movement _movement;
     [SerializeField] private EnemySpawner _enemySpawner;
+    [SerializeField] private IslandSpawnManager _islandSpawner;
 
     private void Awake()
     {
@@ -50,6 +51,7 @@ public class PlayButton : MonoBehaviour
     public void StartGame()
     {
         _movement.SetMovementEnabled(true);
+        _islandSpawner.StartSpawning();
         _enemySpawner.ResumeSpawning();
         canvas.SetActive(false);
         cameraPreSeleciion.SetActive(false);

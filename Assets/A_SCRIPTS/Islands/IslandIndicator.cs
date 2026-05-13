@@ -1,17 +1,21 @@
 using UnityEngine;
-
 public class IslandIndicator : MonoBehaviour
 {
     [SerializeField] float _edgePadding = 60f;
     [SerializeField] float _hideDistance = 50f;
-
+    [SerializeField] float _minDistance = 50f;
+    [SerializeField] float _maxDistance = 500f;
+    [SerializeField] float _minScale = 0.3f;
+    [SerializeField] float _maxScale = 1f;
     RectTransform _indicator;
+    RectTransform _islaImage;
     Camera _cam;
     bool _active;
 
     public void Init(RectTransform indicator)
     {
         _indicator = indicator;
+        _islaImage = _indicator.GetChild(0).GetComponent<RectTransform>();
         _cam = Camera.main;
         Show();
     }
@@ -37,7 +41,6 @@ public class IslandIndicator : MonoBehaviour
         if (!_active || _indicator == null) return;
 
         Vector3 screenPos = _cam.WorldToScreenPoint(transform.position);
-
         bool isOnScreen = screenPos.z > 0
             && screenPos.x > 0 && screenPos.x < Screen.width
             && screenPos.y > 0 && screenPos.y < Screen.height;
@@ -75,7 +78,15 @@ public class IslandIndicator : MonoBehaviour
         }
 
         _indicator.anchoredPosition = clamped;
+
         float rot = Mathf.Atan2(screenPos.y, screenPos.x) * Mathf.Rad2Deg;
-        _indicator.rotation = Quaternion.Euler(0, 0, rot);
+        _indicator.rotation = Quaternion.Euler(0, 0, rot + 90f);
+
+        if (_islaImage != null)
+            _islaImage.rotation = Quaternion.identity;
+
+        float t = Mathf.InverseLerp(_minDistance, _maxDistance, dist);
+        float scale = Mathf.Lerp(_maxScale, _minScale, t);
+        _indicator.localScale = Vector3.one * scale;
     }
 }
