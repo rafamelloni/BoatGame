@@ -847,6 +847,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3551527975978804922}
     m_Modifications:
+    - target: {fileID: 7359243022622292719, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+      propertyPath: _lidTransform
+      value: 
+      objectReference: {fileID: 7519922035219219151}
     - target: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
       propertyPath: m_LocalScale.x
       value: 21.236115
@@ -908,6 +912,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+--- !u!4 &7519922035219219151 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6946282152532669248, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}
+  m_PrefabInstance: {fileID: 592795025046745487}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &9028305756401201735 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8462540430501725128, guid: 404f12c0804d78f4fa0c44b2efb37317, type: 3}

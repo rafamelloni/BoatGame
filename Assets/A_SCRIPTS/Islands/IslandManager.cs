@@ -20,6 +20,7 @@ public class IslandManager : MonoBehaviour
 
     [SerializeField] float _tiempoDesactivarIslas = 15f;
     IslandIndicator _indicator;
+    ChestAnimation _chestAnim;
 
     private void Start()
     {
@@ -29,6 +30,7 @@ public class IslandManager : MonoBehaviour
     public void Init()
     {
         _totalDefenses = GetComponentsInChildren<IslandDefense>().Length;
+        _chestAnim = GetComponentInChildren<ChestAnimation>();
         _wasDefeated = false;
         _destroyedDefenses = 0;
         _indicator?.Show();
@@ -52,6 +54,8 @@ public class IslandManager : MonoBehaviour
 
     public void IslandDefeated()
     {
+        _chestAnim.StopAnimation();
+        _chestAnim.OpenChest();
         _canvasExample.SetActive(true);
         OnIslandDefeated?.Invoke();
         OnAnyIslandDefeated.Invoke();

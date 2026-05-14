@@ -16,4 +16,7 @@ public class SO_BASESTATS : ScriptableObject
 
     [Header("Health")]
     public float maxHealth = 100f;
+
+    [Header("Ability")]
+    public SelectedAbility ability;
 }

@@ -8,6 +8,7 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private followPlayer _camera;
     [SerializeField] private CannonRecoil _recoilCannonR;
     [SerializeField] private CannonRecoil _recoilCannonL;
+    [SerializeField] private CannonUpgrades _rougelikeUpgrades;
 
     [Header("Mortar")]
     [SerializeField] private SO_MorterData _morterData;
@@ -85,6 +86,7 @@ public class AbilityController : MonoBehaviour
         _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory, _camera, _recoilCannonR, _recoilCannonL);
         _upgradeSystem.RegisterAbility(_abilityE);
         _abilityE.OnCooldownStarted += _cannonCooldownUI.PlayCooldown;
+        _rougelikeUpgrades.Setup(_abilityE._rtData);
 
         _statsUI.RegisterBase("Cannon", StatType.Damage, _cannonsData.damage);
         _statsUI.RegisterBase("Cannon", StatType.Cooldown, _cannonsData.cooldown);

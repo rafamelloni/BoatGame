@@ -12,6 +12,7 @@ public class PlayButton : MonoBehaviour
     [SerializeField] private Movement _movement;
     [SerializeField] private EnemySpawner _enemySpawner;
     [SerializeField] private IslandSpawnManager _islandSpawner;
+    [SerializeField] private PlayerUpgrades _playerUpgrades;
 
     private void Awake()
     {
@@ -22,7 +23,7 @@ public class PlayButton : MonoBehaviour
     {
         if (PreselectionData.Ability == SelectedAbility.None)
         {
-            Debug.LogWarning("[PlayButton] No se eligió ninguna habilidad.");
+            Debug.LogWarning("[PlayButton] No se eligió ningún barco.");
             return;
         }
 
@@ -32,18 +33,10 @@ public class PlayButton : MonoBehaviour
             return;
         }
 
-        // Aplicar stats del barco elegido
         playerStats.SetBaseStats(PreselectionData.SelectedShipStats);
+        _playerUpgrades.Setup(playerStats);
 
-        switch (PreselectionData.Ability)
-        {
-            case SelectedAbility.Cannon:
-                abilityController.CannonAveilable();
-                break;
-            case SelectedAbility.Mortar:
-                abilityController.MortarAveilable();
-                break;
-        }
+       
 
         StartGame();
     }

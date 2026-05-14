@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class RT_CannonData 
 {
+
+    public GameObject bulletPrefab;
     public float bulletSpeed;
     public float verticalArc;
     public int shotsPerBurst;
@@ -25,5 +27,6 @@ public class RT_CannonData
 
         waterSplashVFX = so.waterSplash;
         explosionVFX = so.explosionVfx;
+        bulletPrefab = so.bulletPrefab;
     }
 }

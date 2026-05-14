@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class ShipButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -9,27 +8,28 @@ public class ShipButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     [TextArea(2, 5)]
     [SerializeField] private string shipDescription;
     [SerializeField] private SO_BASESTATS shipStats;
-
     [Header("GameObjects")]
-    [SerializeField] private GameObject previewModel; // RawImage
-    [SerializeField] private GameObject shipMesh;     // visual del juego, persiste al click
-
+    [SerializeField] private GameObject shipMesh;
     [Header("Selección visual")]
     [SerializeField] private GameObject selectedIndicator;
+    [SerializeField] private AbilityController abilityController;
 
-    private RectTransform rectTransform;
     private Coroutine hideCoroutine;
-
-    private void Awake()
-    {
-        rectTransform = GetComponent<RectTransform>();
-    }
 
     public void OnClick()
     {
         PreselectionData.SetShip(shipStats, shipMesh);
+        PreselectionData.SetAbility(shipStats.ability, shipMesh);
         ShipPreselectionManager.Instance?.OnShipSelected(this);
-        SkillPreselectionManager.Instance?.UnlockSkillButtons();
+        switch (shipStats.ability)
+        {
+            case SelectedAbility.Cannon:
+                abilityController.CannonAveilable();
+                break;
+            case SelectedAbility.Mortar:
+                abilityController.MortarAveilable();
+                break;
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -39,8 +39,7 @@ public class ShipButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             StopCoroutine(hideCoroutine);
             hideCoroutine = null;
         }
-        // previewModel va al Show — se activa/desactiva con el hover
-        SkillHoverPanel.Instance.Show(shipName, shipDescription, rectTransform, null, previewModel);
+        SkillHoverPanel.Instance.Show(shipName, shipDescription, null);
     }
 
     public void OnPointerExit(PointerEventData eventData)
