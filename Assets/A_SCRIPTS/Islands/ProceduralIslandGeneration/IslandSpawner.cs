@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 [System.Serializable]
 public class IslandEntry
@@ -19,10 +20,13 @@ public class IslandSpawner : MonoBehaviour
     [Header("Indicator")]
     [SerializeField] private RectTransform _indicatorPrefab;
     [SerializeField] private Transform _canvasParent;
+    public event Action<Vector3> OnIslandReturned;
 
     private Dictionary<GameObject, ObjectPool<GameObject>> _islandPools = new();
     private Dictionary<GameObject, IslandEntry> _prefabToEntry = new();
     private Dictionary<GameObject, (GameObject prefab, GameObject instance)> _activeIslands = new();
+
+
 
     private void Awake()
     {
@@ -48,7 +52,7 @@ public class IslandSpawner : MonoBehaviour
         if (entry == null) return;
 
         GameObject instance = _islandPools[entry.islandPrefab].Get();
-        instance.transform.SetPositionAndRotation(position, Quaternion.Euler(0, Random.Range(0, 360f), 0));
+        instance.transform.SetPositionAndRotation(position, Quaternion.Euler(0, UnityEngine.Random.Range(0, 360f), 0));
 
         IslandManager manager = instance.GetComponent<IslandManager>();
         if (manager != null)
@@ -59,10 +63,12 @@ public class IslandSpawner : MonoBehaviour
         }
 
         // Instanciar y asignar indicador
+        IslandIndicator indicator = instance.GetComponent<IslandIndicator>();
         if (_indicatorPrefab != null && _canvasParent != null)
         {
             RectTransform arrow = Instantiate(_indicatorPrefab, _canvasParent);
-            instance.GetComponent<IslandIndicator>()?.Init(arrow);
+            indicator?.Init(arrow);
+            manager?.SetIndicator(indicator);  // <-- esto
         }
 
         SpawnDecorations(instance, entry);
@@ -76,7 +82,7 @@ public class IslandSpawner : MonoBehaviour
         var normalPoints = allPoints.Where(p => p.pointType != SpawnPointType.Defense);
         var defensePoints = allPoints
             .Where(p => p.pointType == SpawnPointType.Defense)
-            .OrderBy(_ => Random.value)
+            .OrderBy(_ => UnityEngine.Random.value)
             .Take(2);
 
         foreach (var point in normalPoints.Concat(defensePoints))
@@ -123,6 +129,7 @@ public class IslandSpawner : MonoBehaviour
     private void HandleIslandReturn(GameObject instance)
     {
         if (!_activeIslands.TryGetValue(instance, out var entry)) return;
+        OnIslandReturned?.Invoke(instance.transform.position);
         _activeIslands.Remove(instance);
         ReturnIsland(entry.prefab, instance);
     }
@@ -132,7 +139,7 @@ public class IslandSpawner : MonoBehaviour
         int total = 0;
         foreach (var i in islands) total += i.weight;
 
-        int roll = Random.Range(0, total);
+        int roll = UnityEngine.Random.Range(0, total);
         int cumulative = 0;
 
         foreach (var i in islands)

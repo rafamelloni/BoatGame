@@ -78,6 +78,7 @@ public class EnemyGroup : MonoBehaviour
         {
             if (member == null) continue;
             member.OnDeath -= OnMemberDied;
+            member.Revive();
         }
         _aliveCount = 0;
     }

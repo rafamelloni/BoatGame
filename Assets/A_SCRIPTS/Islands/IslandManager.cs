@@ -13,12 +13,16 @@ public class IslandManager : MonoBehaviour
     [Header("Canvas Example")]
     [SerializeField] private GameObject _canvasExample;
 
+    [Header("Sink")]
+    [SerializeField] private float _sinkDepth = 5f;
+    [SerializeField] private float _shakeIntensity = 0.1f;
+
     public event Action OnIslandDefeated;
     public event Action<GameObject> OnReadyToReturn;
 
     public static event Action OnAnyIslandDefeated;
 
-    [SerializeField] float _tiempoDesactivarIslas = 15f;
+    [SerializeField] float _tiempoDesactivarIslas = 5f;
     IslandIndicator _indicator;
     ChestAnimation _chestAnim;
 
@@ -61,7 +65,10 @@ public class IslandManager : MonoBehaviour
         OnAnyIslandDefeated.Invoke();
         StartCoroutine(DeactivateIsland());
     }
-
+    public void SetIndicator(IslandIndicator indicator)
+    {
+        _indicator = indicator;
+    }
     public void ResetIsland()
     {
         Init();
@@ -74,8 +81,31 @@ public class IslandManager : MonoBehaviour
 
     private IEnumerator DeactivateIsland()
     {
-        yield return new WaitForSeconds(_tiempoDesactivarIslas);
+
+        yield return StartCoroutine(SinkIsland());
         _indicator?.Hide();
         OnReadyToReturn?.Invoke(gameObject);
+    }
+
+    private IEnumerator SinkIsland()
+    {
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = new Vector3(startPos.x, startPos.y - _sinkDepth, startPos.z);
+        float t = 0f;
+
+        while (t < _tiempoDesactivarIslas)
+        {
+            t += Time.deltaTime;
+            float progress = t / _tiempoDesactivarIslas;
+
+            float sinkY = Mathf.Lerp(startPos.y, targetPos.y, progress);
+            float shakeX = Mathf.Sin(t * 20f) * _shakeIntensity * (1f - progress);
+            float shakeZ = Mathf.Cos(t * 17f) * _shakeIntensity * (1f - progress);
+
+            transform.position = new Vector3(startPos.x + shakeX, sinkY, startPos.z + shakeZ);
+            yield return null;
+        }
+
+        transform.position = targetPos;
     }
 }

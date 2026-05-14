@@ -279,11 +279,11 @@ public class EnemySpawner : MonoBehaviour
             _owner = owner;
 
             _pool = new ObjectPool<T>(
-                () => { var go = UnityEngine.Object.Instantiate(prefab); go.SetActive(false); return go.GetComponent<T>(); },
-                t => t.gameObject.SetActive(true),
-                t => t.gameObject.SetActive(false),
-                initialStock
-            );
+    () => { var go = UnityEngine.Object.Instantiate(prefab); go.SetActive(false); return go.GetComponent<T>(); },
+    t => { },  // <-- acá
+    t => t.gameObject.SetActive(false),
+    initialStock
+);
         }
 
         public void StartLoop()
@@ -332,6 +332,7 @@ public class EnemySpawner : MonoBehaviour
         {
             var instance = _pool.Get();
             instance.transform.position = position + new Vector3(0f, _owner._spawnYOffset, 0f);
+            instance.gameObject.SetActive(true);
             _onSpawn(instance);
             _activeCount++;
         }

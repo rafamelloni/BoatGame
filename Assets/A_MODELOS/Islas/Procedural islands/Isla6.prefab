@@ -330,6 +330,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IslandManager
   _totalDefenses: 0
   _canvasExample: {fileID: 0}
+  _sinkDepth: 5
+  _shakeIntensity: 0.1
   _tiempoDesactivarIslas: 15
 --- !u!135 &-3356588191632747803
 SphereCollider:
@@ -367,8 +369,8 @@ MonoBehaviour:
   _edgePadding: 5
   _hideDistance: 30
   _minDistance: 50
-  _maxDistance: 500
-  _minScale: 0.2
+  _maxDistance: 120
+  _minScale: 0.25
   _maxScale: 1
 --- !u!1 &3328247736937286630
 GameObject:

@@ -23,6 +23,7 @@ public class CannonBullet : BulletsBase
         _rb = GetComponent<Rigidbody>();
         _trail = GetComponent<TrailRenderer>();
         _impactIndicator = GetComponent<CannonBulletImpactIndicator>();
+        transform.localScale = Vector3.one;
     }
 
     public override void TurnOff()

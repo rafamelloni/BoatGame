@@ -28,6 +28,7 @@ public class IslandSpawnManager : MonoBehaviour
     private void Start()
     {
         _player = GameObject.FindWithTag("Player").transform;
+        _islandSpawner.OnIslandReturned += OnIslandRemoved;
     }
     private void Update()
     {

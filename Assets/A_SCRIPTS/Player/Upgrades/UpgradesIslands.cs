@@ -38,6 +38,8 @@ public class UpgradesIslands : MonoBehaviour
     public void CannonBulletSizeOnClick()
     {
         _cannonUpgrades.IncreaseBulletSize();
+        canvas.SetActive(false);
+        OnRouglikeExit();
     }
 
     //MORTAR
