@@ -29,7 +29,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _VelaText:
-        m_Texture: {fileID: 2800000, guid: ed900d54f85b007448d4b8bb90c50f1e, type: 3}
+        m_Texture: {fileID: 2800000, guid: e90ae8480b8f98645966fc9a79e9c87e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -47,6 +47,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _BreakAmount: -0.1
+    - _BreakMaskScale: 1
     - _EdgeSoftness: 0.05
     - _QueueControl: 0
     - _QueueOffset: 0
