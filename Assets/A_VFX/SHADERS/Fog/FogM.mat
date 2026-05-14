@@ -46,11 +46,19 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Fuerza: 0.24
+    - _Float: 0.9
+    - _Frequency: 10.2
+    - _Fuerza: -0.4
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Radius: 1
-    m_Colors: []
+    - _Radius: 0.32585186
+    - _Scale: 0.4
+    - _speed: 0
+    - _vernoiE: 2.32
+    - _vernoiE1: 1.6
+    m_Colors:
+    - _ColorCLlaro: {r: 0, g: 0, b: 0, a: 1}
+    - _colorbegri: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &8645369730215173530
