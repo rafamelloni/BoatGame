@@ -592,7 +592,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60871fc336a145d4782ecedf898df87f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IslandIndicator
-  _edgePadding: 5
+  _edgePadding: 6.5
   _hideDistance: 30
   _minDistance: 50
   _maxDistance: 120

@@ -34,6 +34,10 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float _healthPercentToShowVignette = 0.5f;
     [SerializeField] private float _lowHealthCurve = 2f;
 
+    [Header("Vignette pior Heal")]
+    [SerializeField] Material _lifeVignette;
+
+
     [Header("Latido al recibir daño")]
     [SerializeField] private float _damagePulseExtraIntensity = 0.45f;
     [SerializeField] private float _damagePulseInDuration = 0.06f;
@@ -84,8 +88,16 @@ public class RT_PlayerHealth : MonoBehaviour
         if (_isDead) return;
 
         _stats.currentHealth = Mathf.Min(_stats.currentHealth + amount, _stats.maxHealth);
-
+        _lifeVignette.SetFloat("_VignetteIntensity", 1.35f);
+        StartCoroutine(resetVignette());
         UpdateVisuals();
+    }
+
+    IEnumerator resetVignette()
+    {
+        yield return new WaitForSeconds(1.5f);
+        _lifeVignette.SetFloat("_VignetteIntensity", 0f);
+
     }
 
     private IEnumerator DeathRoutine()
