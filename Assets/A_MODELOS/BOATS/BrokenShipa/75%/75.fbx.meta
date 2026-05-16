@@ -3,7 +3,12 @@ guid: a2f94f52e9352ba4daaf5ab628b84ac4
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Barco
+    second: {fileID: 2100000, guid: 6059ab70c8ff16447a8192f127de9096, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

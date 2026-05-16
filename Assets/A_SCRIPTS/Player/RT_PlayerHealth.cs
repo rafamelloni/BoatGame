@@ -13,14 +13,29 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField] private float _vignetteMaxIntensity = 1.5f;
     [SerializeField] private float _vignetteMinIntensity = 0f;
 
+    [Header("Modelos por vida")]
+    [SerializeField] private GameObject _ship100;
+    [SerializeField] private GameObject _ship75;
+    [SerializeField] private GameObject _ship50;
+    [SerializeField] private GameObject _ship25;
+
     [Header("Shader Daño Barco")]
     [SerializeField] private Renderer _shipRenderer;
     [SerializeField] private string _grietaProperty = "_grietaStrenght";
     [SerializeField] private string _normalProperty = "_NormalStrenght";
-    [SerializeField] private float _maxGrietaStrenght = 1f;
-    [SerializeField] private float _maxNormalStrenght = 1.5f;
-    [SerializeField, Range(0f, 1f)] private float _healthPercentToStartCracks = 0.9f;
-    [SerializeField] private AnimationCurve _crackCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
+    [Header("Valores de grietas por modelo")]
+    [SerializeField] private float _grieta100 = 0f;
+    [SerializeField] private float _normal100 = 0f;
+
+    [SerializeField] private float _grieta75 = 0.25f;
+    [SerializeField] private float _normal75 = 0.4f;
+
+    [SerializeField] private float _grieta50 = 0.55f;
+    [SerializeField] private float _normal50 = 0.9f;
+
+    [SerializeField] private float _grieta25 = 1f;
+    [SerializeField] private float _normal25 = 1.5f;
 
     [Header("Shader Daño Velas")]
     [SerializeField] private Renderer _sailRenderer;
@@ -30,13 +45,16 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float _healthPercentToStartSailDamage = 0.9f;
     [SerializeField] private AnimationCurve _sailDamageCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
+    [Header("Fuego en velas por vida")]
+    [SerializeField] private GameObject _fireVela50;
+    [SerializeField] private GameObject _fireVela25;
+
     [Header("Vignette por vida baja")]
     [SerializeField, Range(0f, 1f)] private float _healthPercentToShowVignette = 0.5f;
     [SerializeField] private float _lowHealthCurve = 2f;
 
-    [Header("Vignette pior Heal")]
-    [SerializeField] Material _lifeVignette;
-
+    [Header("Vignette por Heal")]
+    [SerializeField] private Material _lifeVignette;
 
     [Header("Latido al recibir daño")]
     [SerializeField] private float _damagePulseExtraIntensity = 0.45f;
@@ -88,16 +106,22 @@ public class RT_PlayerHealth : MonoBehaviour
         if (_isDead) return;
 
         _stats.currentHealth = Mathf.Min(_stats.currentHealth + amount, _stats.maxHealth);
-        _lifeVignette.SetFloat("_VignetteIntensity", 1.35f);
-        StartCoroutine(resetVignette());
+
+        if (_lifeVignette != null)
+        {
+            _lifeVignette.SetFloat("_VignetteIntensity", 1.35f);
+            StartCoroutine(ResetHealVignette());
+        }
+
         UpdateVisuals();
     }
 
-    IEnumerator resetVignette()
+    private IEnumerator ResetHealVignette()
     {
         yield return new WaitForSeconds(1.5f);
-        _lifeVignette.SetFloat("_VignetteIntensity", 0f);
 
+        if (_lifeVignette != null)
+            _lifeVignette.SetFloat("_VignetteIntensity", 0f);
     }
 
     private IEnumerator DeathRoutine()
@@ -122,9 +146,122 @@ public class RT_PlayerHealth : MonoBehaviour
     private void UpdateVisuals()
     {
         UpdateVignette();
+        UpdateShipModelByHealth();
         UpdateDamageShader();
         UpdateSailDamageShader();
+        UpdateSailFireByHealth();
         UpdateDestroyedVFX();
+    }
+
+    private void UpdateShipModelByHealth()
+    {
+        if (_stats == null || _stats.maxHealth <= 0f)
+            return;
+
+        float healthPercent = (_stats.currentHealth / _stats.maxHealth) * 100f;
+
+        if (_ship100 != null) _ship100.SetActive(false);
+        if (_ship75 != null) _ship75.SetActive(false);
+        if (_ship50 != null) _ship50.SetActive(false);
+        if (_ship25 != null) _ship25.SetActive(false);
+
+        if (healthPercent > 75f)
+        {
+            if (_ship100 != null) _ship100.SetActive(true);
+        }
+        else if (healthPercent > 50f)
+        {
+            if (_ship75 != null) _ship75.SetActive(true);
+        }
+        else if (healthPercent > 25f)
+        {
+            if (_ship50 != null) _ship50.SetActive(true);
+        }
+        else
+        {
+            if (_ship25 != null) _ship25.SetActive(true);
+        }
+
+        UpdateCurrentShipRenderer();
+    }
+
+    private void UpdateCurrentShipRenderer()
+    {
+        if (_ship100 != null && _ship100.activeSelf)
+            _shipRenderer = _ship100.GetComponentInChildren<Renderer>();
+
+        else if (_ship75 != null && _ship75.activeSelf)
+            _shipRenderer = _ship75.GetComponentInChildren<Renderer>();
+
+        else if (_ship50 != null && _ship50.activeSelf)
+            _shipRenderer = _ship50.GetComponentInChildren<Renderer>();
+
+        else if (_ship25 != null && _ship25.activeSelf)
+            _shipRenderer = _ship25.GetComponentInChildren<Renderer>();
+
+        if (_shipRenderer != null)
+            _shipMaterial = _shipRenderer.material;
+    }
+
+    private void UpdateDamageShader()
+    {
+        if (_shipMaterial == null || _stats == null || _stats.maxHealth <= 0f)
+            return;
+
+        float healthPercent = (_stats.currentHealth / _stats.maxHealth) * 100f;
+
+        if (healthPercent > 75f)
+        {
+            SetShipCrackValues(_grieta100, _normal100);
+        }
+        else if (healthPercent > 50f)
+        {
+            SetShipCrackValues(_grieta75, _normal75);
+        }
+        else if (healthPercent > 25f)
+        {
+            SetShipCrackValues(_grieta50, _normal50);
+        }
+        else
+        {
+            SetShipCrackValues(_grieta25, _normal25);
+        }
+    }
+
+    private void SetShipCrackValues(float grietaValue, float normalValue)
+    {
+        _shipMaterial.SetFloat(_grietaProperty, grietaValue);
+        _shipMaterial.SetFloat(_normalProperty, normalValue);
+    }
+
+    private void UpdateSailDamageShader()
+    {
+        if (_sailMaterial == null)
+            return;
+
+        float damagePercent = GetDamagePercent(_healthPercentToStartSailDamage, _sailDamageCurve);
+
+        float sailBreakValue = Mathf.Lerp(
+            _minSailBreakAmount,
+            _maxSailBreakAmount,
+            damagePercent
+        );
+
+        _sailMaterial.SetFloat(_sailBreakProperty, sailBreakValue);
+    }
+
+    private void UpdateSailFireByHealth()
+    {
+        if (_stats == null || _stats.maxHealth <= 0f)
+            return;
+
+        float healthPercent = (_stats.currentHealth / _stats.maxHealth) * 100f;
+
+        if (_fireVela50 != null)
+            _fireVela50.SetActive(healthPercent <= 50f);
+
+        if (_fireVela25 != null)
+            _fireVela25.SetActive(healthPercent <= 25f);
     }
 
     private void UpdateVignette()
@@ -171,36 +308,6 @@ public class RT_PlayerHealth : MonoBehaviour
             damagePercent = curve.Evaluate(damagePercent);
 
         return damagePercent;
-    }
-
-    private void UpdateDamageShader()
-    {
-        if (_shipMaterial == null)
-            return;
-
-        float damagePercent = GetDamagePercent(_healthPercentToStartCracks, _crackCurve);
-
-        float grietaValue = damagePercent * _maxGrietaStrenght;
-        float normalValue = damagePercent * _maxNormalStrenght;
-
-        _shipMaterial.SetFloat(_grietaProperty, grietaValue);
-        _shipMaterial.SetFloat(_normalProperty, normalValue);
-    }
-
-    private void UpdateSailDamageShader()
-    {
-        if (_sailMaterial == null)
-            return;
-
-        float damagePercent = GetDamagePercent(_healthPercentToStartSailDamage, _sailDamageCurve);
-
-        float sailBreakValue = Mathf.Lerp(
-            _minSailBreakAmount,
-            _maxSailBreakAmount,
-            damagePercent
-        );
-
-        _sailMaterial.SetFloat(_sailBreakProperty, sailBreakValue);
     }
 
     private void PlayDamageVignettePulse()
@@ -271,17 +378,21 @@ public class RT_PlayerHealth : MonoBehaviour
             _vignettePulseRoutine = null;
         }
 
+        UpdateShipModelByHealth();
+
         if (_vignetteMaterial != null)
             _vignetteMaterial.SetFloat(VignetteIntensityID, _vignetteMinIntensity);
 
-        if (_shipMaterial != null)
-        {
-            _shipMaterial.SetFloat(_grietaProperty, 0f);
-            _shipMaterial.SetFloat(_normalProperty, 0f);
-        }
+        UpdateDamageShader();
 
         if (_sailMaterial != null)
             _sailMaterial.SetFloat(_sailBreakProperty, _minSailBreakAmount);
+
+        if (_fireVela50 != null)
+            _fireVela50.SetActive(false);
+
+        if (_fireVela25 != null)
+            _fireVela25.SetActive(false);
 
         if (_vfxDestroyed != null)
             _vfxDestroyed.SetActive(false);
