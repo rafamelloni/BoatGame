@@ -21,11 +21,15 @@ public class ChestAnimation : MonoBehaviour
     private Vector3 _originalScale;
     private bool _animating = false;
 
+    private Quaternion _originalLidRot;
+
     private void OnEnable()
     {
         _originalPos = transform.localPosition;
         _originalRot = transform.localRotation;
         _originalScale = transform.localScale;
+        if (_lidTransform != null)
+            _originalLidRot = _lidTransform.localRotation; // guardar tapa
         StartLoop();
     }
 
@@ -36,6 +40,8 @@ public class ChestAnimation : MonoBehaviour
         transform.localPosition = _originalPos;
         transform.localRotation = _originalRot;
         transform.localScale = _originalScale;
+        if (_lidTransform != null)
+            _lidTransform.localRotation = _originalLidRot; // resetear tapa
     }
 
     public void StartLoop()

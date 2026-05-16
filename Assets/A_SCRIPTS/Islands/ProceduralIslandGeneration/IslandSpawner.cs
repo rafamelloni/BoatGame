@@ -58,23 +58,21 @@ public class IslandSpawner : MonoBehaviour
         if (manager != null)
         {
             manager.SetCanvas(_canvasExample);
-            manager.Init();
             manager.OnReadyToReturn += HandleIslandReturn;
         }
 
-        // Instanciar y asignar indicador
         IslandIndicator indicator = instance.GetComponent<IslandIndicator>();
         if (_indicatorPrefab != null && _canvasParent != null)
         {
             RectTransform arrow = Instantiate(_indicatorPrefab, _canvasParent);
             indicator?.Init(arrow);
-            manager?.SetIndicator(indicator);  // <-- esto
+            manager?.SetIndicator(indicator);
         }
 
         SpawnDecorations(instance, entry);
+        manager?.Init(); // ahora cuenta las defensas ya spawneadas
         _activeIslands[instance] = (entry.islandPrefab, instance);
     }
-
     private void SpawnDecorations(GameObject instance, IslandEntry entry)
     {
         var allPoints = instance.GetComponentsInChildren<IslandSpawnPoint>();
