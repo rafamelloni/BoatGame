@@ -17,6 +17,8 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private GameObject _cameraPreSeleccion;
     [SerializeField] private GameObject _canvasPreSeleccion;
 
+    
+
     [Header("Player")]
     [SerializeField] private Transform _playerTransform;
     [SerializeField] private Vector3 _playerStartPosition;
@@ -94,6 +96,7 @@ public class SceneResetter : MonoBehaviour
         _playerHealth.ResetHealth();
 
         // Abilities - Stats
+      
         _islandSpawnManager.ResetIslands();
         _enemySpawner.DespawnAll();
         _abilityUpgradeSystem.ResetAllUpgradesStats();
