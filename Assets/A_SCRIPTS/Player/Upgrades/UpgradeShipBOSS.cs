@@ -18,11 +18,14 @@ public class UpgradeShipBOSS : MonoBehaviour
 
     [SerializeField] GameObject _particulasPuff;
     [SerializeField] GameObject _canvasShipUpgrades;
+    [SerializeField] EnemySpawner _enemySpawner;
 
     public void Onclick()
     {
         AnimateShip();
         _canvasShipUpgrades.SetActive(false);
+        //_enemySpawner.ResumeSpawning();
+
     }
 
     private void AnimateShip()
