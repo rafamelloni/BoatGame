@@ -20,12 +20,12 @@ public class AbilityUpgradeSystem : MonoBehaviour
 
     private void OnEnable()
     {
-        EnemyHealth.OnAnyEnemyDied += HandleEnemyDied;
+        //EnemyHealth.OnAnyEnemyDied += HandleEnemyDied;
     }
 
     private void OnDisable()
     {
-        EnemyHealth.OnAnyEnemyDied -= HandleEnemyDied;
+        //EnemyHealth.OnAnyEnemyDied -= HandleEnemyDied;
     }
 
     public void RegisterAbility(IUpgradeable ability)
