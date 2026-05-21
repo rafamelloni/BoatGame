@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Path_Damagee
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
   pathName: Damage
-  pathIcon: {fileID: 21300000, guid: 88cd866ea9bf36e41ac482d98ea4f87f, type: 3}
+  pathIcon: {fileID: 21300000, guid: 3caeea2e03da90f4d8ab0ed3ccc41009, type: 3}
   pathDescription: Damage Path
   steps:
   - {fileID: 11400000, guid: 261aaef5845923849ae966f246568811, type: 2}
