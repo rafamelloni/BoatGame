@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70ea4c955e87a8641b45a26ef02f3add, type: 3}
+  m_Name: Path_AttackSpeed
+  m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
+  pathName: Attack Speed
+  pathIcon: {fileID: 21300000, guid: af34f4863b8716843b098564341f4e4f, type: 3}
+  pathDescription: 'Attack Speed Path
+
+'
+  steps:
+  - {fileID: 11400000, guid: 6a9bb2a5ee884ab48a35996da9ba69d3, type: 2}
+  - {fileID: 11400000, guid: bd507fcaaefcef64e8f00ff9ca5262d5, type: 2}
+  - {fileID: 11400000, guid: d1ec72b873b0eb14d83d0022844975af, type: 2}
+  - {fileID: 11400000, guid: 8f40a37170ca0014980136f465c07b82, type: 2}

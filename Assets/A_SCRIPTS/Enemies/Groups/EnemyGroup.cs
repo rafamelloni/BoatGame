@@ -87,7 +87,6 @@ public class EnemyGroup : MonoBehaviour
     {
         _aliveCount--;
 
-        Debug.Log($"Member died, aliveCount: {_aliveCount}");
         if (_aliveCount <= 0) {
             OnGroupDead?.Invoke(this);
         }

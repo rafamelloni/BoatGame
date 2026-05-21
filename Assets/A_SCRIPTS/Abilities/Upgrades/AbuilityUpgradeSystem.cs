@@ -4,6 +4,8 @@ using System.Linq;
 
 public class AbilityUpgradeSystem : MonoBehaviour
 {
+
+    //ESTE SCIRIPT QUEDO OBSOLETO, SOLO SE MANTIENE PORQUE TIENE LA DATA DE QUE RESETEA TODO Y DE QUE TE DA LA HABILIDAD DEL MORTERO...
     [System.Serializable]
     public struct UpgradeRule
     {
@@ -74,4 +76,5 @@ public class AbilityUpgradeSystem : MonoBehaviour
         EnemyUpgradeDisplay popup = Instantiate(_popupPrefab, position, Quaternion.identity);
         popup.Play(icon, position);
     }
+    //ESTE SCIRIPT QUEDO OBSOLETO, SOLO SE MANTIENE PORQUE TIENE LA DATA DE QUE RESETEA TODO Y DE QUE TE DA LA HABILIDAD DEL MORTERO...
 }

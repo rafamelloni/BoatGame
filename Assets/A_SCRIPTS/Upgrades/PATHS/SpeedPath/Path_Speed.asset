@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70ea4c955e87a8641b45a26ef02f3add, type: 3}
+  m_Name: Path_Speed
+  m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
+  pathName: Speed
+  pathIcon: {fileID: 0}
+  pathDescription: 
+  steps:
+  - {fileID: 11400000, guid: a2385c25531515345b43b1446a9665dd, type: 2}
+  - {fileID: 11400000, guid: 8fa457eda550a3149bb0bbb92a9858d3, type: 2}
+  - {fileID: 11400000, guid: ea07a086b7610434e8b5972681f4f877, type: 2}
+  - {fileID: 11400000, guid: 7b05963ab27c8864ab43dc0205fc8aec, type: 2}

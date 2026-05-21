@@ -8,7 +8,6 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private followPlayer _camera;
     [SerializeField] private CannonRecoil _recoilCannonR;
     [SerializeField] private CannonRecoil _recoilCannonL;
-    [SerializeField] private CannonUpgrades _rougelikeUpgrades;
 
     [Header("Mortar")]
     [SerializeField] private SO_MorterData _morterData;
@@ -16,20 +15,7 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private Transform _mortarShootPointReal;
     [SerializeField] private MortarChargeUI _mortarChargeUI;
 
-
-    [Header("Mortar Data To Activate")]
-    public GameObject mortarGo;
-    public GameObject mortargoAbilityUI;
-    public GameObject mortargoAbilityNumber;
-    public GameObject mortargoAbilityStats;
-    public GameObject mortargoAbilityKey;
-    public GameObject barra;
-    public GameObject TEXTDamage;
-    public GameObject cooldownM;
-
-    public bool _wasUMortar = false;
-
-    [Header("Cannon Data To Activate")]
+    [Header("Cannon UI")]
     public GameObject cannonMesh;
     public GameObject cannonUI;
     public GameObject cannonTecla;
@@ -38,22 +24,18 @@ public class AbilityController : MonoBehaviour
     public GameObject cooldownC;
     public bool _wasUCannon = false;
 
+    [Header("Mortar UI")]
+    public GameObject mortarGo;
+    public GameObject mortargoAbilityUI;
+    public GameObject mortargoAbilityNumber;
+    public GameObject mortargoAbilityStats;
+    public GameObject mortargoAbilityKey;
+    public GameObject barra;
+    public GameObject TEXTDamage;
+    public GameObject cooldownM;
+    public bool _wasUMortar = false;
 
-    [Header("hardcodeado insta")]
-    [SerializeField] private GameObject _mortarPhoto;
-    [SerializeField] private GameObject _mortarText;
-    [SerializeField] private GameObject _mortarMesh;
-    [SerializeField] private ParticleSystem _mortarE;
-
-    [Header("Factories")]
-    [SerializeField] private BulletFactory _bulletFactory;
-    [SerializeField] private BulletFactory _barrelFactory;
-
-    [Header("Systems")]
-    [SerializeField] private AbilityUpgradeSystem _upgradeSystem;
-    [SerializeField] private UpgradeStatsUI _statsUI;
-
-    [Header("Data para cuando matemos al Boss")]
+    [Header("Ship Upgrade Positions")]
     [SerializeField] private GameObject _cannonR;
     [SerializeField] private GameObject _cannonL;
     [SerializeField] private GameObject _mortar;
@@ -61,15 +43,21 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private Transform _newCannonPosL;
     [SerializeField] private Transform _newMortarPos;
 
+    [Header("Mortar VFX")]
+    [SerializeField] private ParticleSystem _mortarE;
 
-
-
+    [Header("Factories")]
+    [SerializeField] private BulletFactory _bulletFactory;
+    [SerializeField] private BulletFactory _barrelFactory;
 
     private CannonStrategy _abilityE;
     private MorterStrategy _abilityQ;
 
-  
+    public RT_PlayerUpgrades _playerUpgrades;
 
+
+    // Referencia publica para que UpgradeSystem pueda modificar RT_CannonData
+    public CannonStrategy CannonAbility => _abilityE;
 
     private void Awake()
     {
@@ -83,61 +71,26 @@ public class AbilityController : MonoBehaviour
 
     private void SetupCannon(ShipHardpoints hardpoints, CoroutineRunner runner)
     {
-        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory, _camera, _recoilCannonR, _recoilCannonL);
-        _upgradeSystem.RegisterAbility(_abilityE);
+        _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory,
+            _camera, _recoilCannonR, _recoilCannonL, _playerUpgrades);
         _abilityE.OnCooldownStarted += _cannonCooldownUI.PlayCooldown;
-        _rougelikeUpgrades.Setup(_abilityE._rtData);
-
-        _statsUI.RegisterBase("Cannon", StatType.Damage, _cannonsData.damage);
-        _statsUI.RegisterBase("Cannon", StatType.Cooldown, _cannonsData.cooldown);
-        _statsUI.RegisterBase("Cannon", StatType.FireRate, _cannonsData.timeBetweenShots);
     }
 
     private void SetupMortar(CoroutineRunner runner)
     {
-        _abilityQ = new MorterStrategy(_morterData, _mortarShootPointReal, _mortarShootPoint, runner, _barrelFactory, _mortarE);
+        _abilityQ = new MorterStrategy(_morterData, _mortarShootPointReal, _mortarShootPoint,
+            runner, _barrelFactory, _mortarE);
         _mortarChargeUI.Init(_morterData.cooldown, () => _abilityQ.RestoreCharge());
         _abilityQ.OnChargeConsumed += _ => _mortarChargeUI.OnShot();
-        _upgradeSystem.RegisterAbility(_abilityQ);
-
-        _statsUI.RegisterBase("Mortar", StatType.Damage, _morterData.damage);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E) && _wasUCannon)
+        if (Input.GetMouseButtonDown(1) && _wasUCannon)
             _abilityE.TryExecute();
 
         if (Input.GetKeyDown(KeyCode.Q) && _wasUMortar)
             _abilityQ.TryExecute();
-    }
-
-    private void OnDestroy()
-    {
-        _upgradeSystem.UnregisterAbility(_abilityE);
-        _upgradeSystem.UnregisterAbility(_abilityQ);
-    }
-    public void Upgrade()
-    {
-        _abilityE._rtData.shotsPerBurst = 2;
-    }
-
-    public void MortarAveilable()
-    {
-        _wasUMortar = true;
-        mortarGo.SetActive(true);
-
-
-        mortargoAbilityUI.SetActive(true);
-        mortargoAbilityNumber.SetActive(true);
-        mortargoAbilityStats.SetActive(true);
-        mortargoAbilityKey.SetActive(true);
-        cooldownM.SetActive(true);
-       
-        
-        barra.SetActive(true);
-        TEXTDamage.SetActive(true);
-        LetMortarBeUpgraded();
     }
 
     public void CannonAveilable()
@@ -149,22 +102,34 @@ public class AbilityController : MonoBehaviour
         cannonBarra.SetActive(true);
         cannonText.SetActive(true);
         cooldownC.SetActive(true);
+        _abilityE.SetUnlocked(true);
+    }
 
-        LetCannonBeUpgraded();
-
-}
-
+    public void MortarAveilable()
+    {
+        _wasUMortar = true;
+        mortarGo.SetActive(true);
+        mortargoAbilityUI.SetActive(true);
+        mortargoAbilityNumber.SetActive(true);
+        mortargoAbilityStats.SetActive(true);
+        mortargoAbilityKey.SetActive(true);
+        cooldownM.SetActive(true);
+        barra.SetActive(true);
+        TEXTDamage.SetActive(true);
+        _abilityQ.SetUnlocked(true);
+    }
 
     public void ResetAbilities()
     {
-        // Flags
         _wasUCannon = false;
         _wasUMortar = false;
 
         _cannonCooldownUI.TurnOff();
         _mortarChargeUI.TurnOff();
 
-        // Cannon
+        _abilityE.ResetUpgrades();
+        _abilityQ.ResetUpgrades();
+
         cannonMesh.SetActive(false);
         cannonUI.SetActive(false);
         cannonTecla.SetActive(false);
@@ -172,8 +137,6 @@ public class AbilityController : MonoBehaviour
         cannonText.SetActive(false);
         cooldownC.SetActive(false);
 
-
-        // Mortar
         mortarGo.SetActive(false);
         mortargoAbilityUI.SetActive(false);
         mortargoAbilityNumber.SetActive(false);
@@ -182,26 +145,13 @@ public class AbilityController : MonoBehaviour
         barra.SetActive(false);
         TEXTDamage.SetActive(false);
         cooldownM.SetActive(false);
-
-    }
-
-    public void LetCannonBeUpgraded()
-    {
-        _abilityE.SetUnlocked(true);
-        Debug.Log($"Mortar unlocked: {_abilityQ.IsUnlocked}");
-    }
-    public void LetMortarBeUpgraded()
-    {
-        _abilityQ.SetUnlocked(true);
-        Debug.Log($"Mortar unlocked: {_abilityQ.IsUnlocked}");
     }
 
     public void ShipUpgraded()
     {
-        _cannonR.transform.position = _newCannonPosR.transform.position;
-        _cannonL.transform.position = _newCannonPosL.transform.position;
-        _mortar.transform.position = _newMortarPos.transform.position;
-
+        _cannonR.transform.position = _newCannonPosR.position;
+        _cannonL.transform.position = _newCannonPosL.position;
+        _mortar.transform.position = _newMortarPos.position;
 
         _recoilCannonR.UpdateLocalOrgin();
         _recoilCannonL.UpdateLocalOrgin();

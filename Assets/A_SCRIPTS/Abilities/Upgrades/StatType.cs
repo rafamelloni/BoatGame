@@ -1,8 +1,12 @@
 public enum StatType
 {
+    None,
     Damage,
     Cooldown,
-    FireRate,
-    Duration,
-    Range
+    MoveSpeed,
+    MaxHealth,
+    MolotovDamage,
+    MolotovArea,
+    BladeDamage,
+    BladeSpeed
 }

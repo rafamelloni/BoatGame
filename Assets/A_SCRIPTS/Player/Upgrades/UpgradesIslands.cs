@@ -46,7 +46,7 @@ public class UpgradesIslands : MonoBehaviour
     public void MortarAbilityOnClick()
     {
         ability.MortarAveilable();
-        ability.LetMortarBeUpgraded();
+        //ability.LetMortarBeUpgraded();
         canvas.SetActive(false);
         OnRouglikeExit();
     }

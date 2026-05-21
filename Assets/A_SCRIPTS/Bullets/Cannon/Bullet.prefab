@@ -194,6 +194,15 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 192
   _collider: {fileID: 5686219697770468697}
+  _enemyLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  _splitDelay: 0.15
+  _spreadAngle: 30
+  _splitDamageMultiplier: 0.5
+  _maxRicochetBounces: 7
+  debugRicochet: 1
+  debugSplit: 1
 --- !u!114 &8522850598336236742
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -52,9 +52,11 @@ MonoBehaviour:
   speed: 3.5
   rotationSpeed: 5
   steerSpeed: 0.8
-  chargeRange: 25
+  chargeRange: 19
   chargeSpeed: 18
   chargeOvershoot: 20
+  chargeCooldown: 1.5
+  aimDuration: 0.8
 --- !u!114 &8522432005511929917
 MonoBehaviour:
   m_ObjectHideFlags: 0
