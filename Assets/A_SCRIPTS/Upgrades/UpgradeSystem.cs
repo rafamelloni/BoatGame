@@ -47,7 +47,7 @@ public class UpgradeSystem : MonoBehaviour
                 break;
 
             // Estos los completás cuando implementes Molotov y Blades
-            case StatType.MolotovDamage:
+            case StatType.MolotovDamage: 
             case StatType.MolotovArea:
             case StatType.BladeDamage:
             case StatType.BladeSpeed:
@@ -81,6 +81,8 @@ public class UpgradeSystem : MonoBehaviour
                 break;
 
             case SpecialAbilityType.TripleMolotov:
+                abilityController.MolotovAbility.SetUnlocked(true);
+                break;
             case SpecialAbilityType.ExplosiveBlades:
                 break;
         }

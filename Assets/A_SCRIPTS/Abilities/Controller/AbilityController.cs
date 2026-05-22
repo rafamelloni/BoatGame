@@ -1,4 +1,5 @@
 using UnityEngine;
+using static Unity.Collections.Unicode;
 
 public class AbilityController : MonoBehaviour
 {
@@ -14,6 +15,13 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private Transform _mortarShootPoint;
     [SerializeField] private Transform _mortarShootPointReal;
     [SerializeField] private MortarChargeUI _mortarChargeUI;
+
+    [Header("Molotov")]
+    [SerializeField] private SO_MolotovData _molotovData;
+    [SerializeField] private Transform _molotovLaunchPoint;
+    [SerializeField] private LayerMask _molotovEnemyLayers;
+    public MolotovStrategy MolotovAbility => _molotovStrategy;
+
 
     [Header("Cannon UI")]
     public GameObject cannonMesh;
@@ -52,6 +60,8 @@ public class AbilityController : MonoBehaviour
 
     private CannonStrategy _abilityE;
     private MorterStrategy _abilityQ;
+    private MolotovStrategy _molotovStrategy;
+
 
     public RT_PlayerUpgrades _playerUpgrades;
 
@@ -67,6 +77,7 @@ public class AbilityController : MonoBehaviour
 
         SetupCannon(hardpoints, runner);
         SetupMortar(runner);
+        SetupMolotov(runner);
     }
 
     private void SetupCannon(ShipHardpoints hardpoints, CoroutineRunner runner)
@@ -83,7 +94,10 @@ public class AbilityController : MonoBehaviour
         _mortarChargeUI.Init(_morterData.cooldown, () => _abilityQ.RestoreCharge());
         _abilityQ.OnChargeConsumed += _ => _mortarChargeUI.OnShot();
     }
-
+    void SetupMolotov(CoroutineRunner runner)
+    {
+        _molotovStrategy = new MolotovStrategy(_molotovData, _molotovLaunchPoint, runner, _molotovEnemyLayers, _playerUpgrades, GetComponent<Collider>());
+    }
     private void Update()
     {
         if (Input.GetMouseButtonDown(1) && _wasUCannon)
