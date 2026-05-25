@@ -7,8 +7,6 @@ public class Movement : MonoBehaviour
     private RT_PlayerStats _stats;
     private Rigidbody _rb;
     public ParticleSystem trail;
-    public ParticleSystem trail1;
-    public ParticleSystem trail2;
     public ParticleSystem trailSprint;
     public ParticleSystem trailSprint1;
     public PlayerWaveMovement playerWave;

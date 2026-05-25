@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fca64284a53ed5141a83c2ccf9e1bbf3, type: 3}
+  m_Name: SO_BladesData
+  m_EditorClassIdentifier: Assembly-CSharp::SO_BladesData
+  bladePrefab: {fileID: 1179142849087709931, guid: f38b48ade78e75d409e80d0bc7dacddd, type: 3}
+  orbitRadius: 11
+  orbitSpeed: 180
+  erraticAmount: 3.7
+  radiusVariation: 2.86
+  noiseSpeed: 1.6
+  damage: 15
+  damageCooldownPerEnemy: 0.8
+  bladeCount: 1

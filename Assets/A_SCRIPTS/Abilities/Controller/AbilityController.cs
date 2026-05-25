@@ -1,5 +1,4 @@
 using UnityEngine;
-using static Unity.Collections.Unicode;
 
 public class AbilityController : MonoBehaviour
 {
@@ -22,6 +21,9 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private LayerMask _molotovEnemyLayers;
     public MolotovStrategy MolotovAbility => _molotovStrategy;
 
+    [Header("Blades")]
+    [SerializeField] private SO_BladesData _bladesData;
+    public BladesStrategy BladesAbility => _abilityBlades;
 
     [Header("Cannon UI")]
     public GameObject cannonMesh;
@@ -61,12 +63,10 @@ public class AbilityController : MonoBehaviour
     private CannonStrategy _abilityE;
     private MorterStrategy _abilityQ;
     private MolotovStrategy _molotovStrategy;
-
+    private BladesStrategy _abilityBlades;
 
     public RT_PlayerUpgrades _playerUpgrades;
 
-
-    // Referencia publica para que UpgradeSystem pueda modificar RT_CannonData
     public CannonStrategy CannonAbility => _abilityE;
 
     private void Awake()
@@ -78,6 +78,7 @@ public class AbilityController : MonoBehaviour
         SetupCannon(hardpoints, runner);
         SetupMortar(runner);
         SetupMolotov(runner);
+        SetupBlades();
     }
 
     private void SetupCannon(ShipHardpoints hardpoints, CoroutineRunner runner)
@@ -94,10 +95,18 @@ public class AbilityController : MonoBehaviour
         _mortarChargeUI.Init(_morterData.cooldown, () => _abilityQ.RestoreCharge());
         _abilityQ.OnChargeConsumed += _ => _mortarChargeUI.OnShot();
     }
-    void SetupMolotov(CoroutineRunner runner)
+
+    private void SetupMolotov(CoroutineRunner runner)
     {
-        _molotovStrategy = new MolotovStrategy(_molotovData, _molotovLaunchPoint, runner, _molotovEnemyLayers, _playerUpgrades, GetComponent<Collider>());
+        _molotovStrategy = new MolotovStrategy(_molotovData, _molotovLaunchPoint, runner,
+            _molotovEnemyLayers, _playerUpgrades, GetComponent<Collider>());
     }
+
+    private void SetupBlades()
+    {
+        _abilityBlades = new BladesStrategy(_bladesData, transform);
+    }
+
     private void Update()
     {
         if (Input.GetMouseButtonDown(1) && _wasUCannon)
@@ -105,6 +114,14 @@ public class AbilityController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Q) && _wasUMortar)
             _abilityQ.TryExecute();
+
+        _abilityBlades?.Tick();
+    }
+
+    public void BladesAvailable()
+    {
+        _abilityBlades.EnableBlades();
+        _abilityBlades.SetUnlocked(true);
     }
 
     public void CannonAveilable()
@@ -143,6 +160,9 @@ public class AbilityController : MonoBehaviour
 
         _abilityE.ResetUpgrades();
         _abilityQ.ResetUpgrades();
+
+        _abilityBlades.Dispose();
+        SetupBlades();
 
         cannonMesh.SetActive(false);
         cannonUI.SetActive(false);

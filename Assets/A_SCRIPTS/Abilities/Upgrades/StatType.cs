@@ -8,5 +8,7 @@ public enum StatType
     MolotovDamage,
     MolotovArea,
     BladeDamage,
-    BladeSpeed
+    BladeSpeed,
+    BladeCount,
+    OrbitRadius
 }
