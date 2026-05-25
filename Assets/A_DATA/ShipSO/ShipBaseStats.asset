@@ -17,5 +17,5 @@ MonoBehaviour:
   acceleration: 2
   deceleration: 1
   sprintMultiplier: 1.3
-  maxHealth: 100
+  maxHealth: 10000
   ability: 1

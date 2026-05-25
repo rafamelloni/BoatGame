@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,27 +12,70 @@ public class BladesStrategy : IAbilityStrategy
 
     private Transform _playerTransform;
     private GameObject _bladePrefab;
-    private List<GameObject> _blades = new();
+    private GameObject _burstProjectilePrefab;
+    private CoroutineRunner _runner;
+    private RT_PlayerUpgrades _playerUpgrades;
 
-    // Offset de ruido independiente por blade
+    private List<GameObject> _blades = new();
     private List<float> _noiseOffsets = new();
     private float _currentAngleOffset = 0f;
 
-    public BladesStrategy(SO_BladesData data, Transform playerTransform)
+    public BladesStrategy(SO_BladesData data, Transform playerTransform, CoroutineRunner runner, RT_PlayerUpgrades playerUpgrades)
     {
         _data = data;
         _bladePrefab = data.bladePrefab;
+        _burstProjectilePrefab = data.burstProjectilePrefab;
         _playerTransform = playerTransform;
+        _runner = runner;
+        _playerUpgrades = playerUpgrades;
         _rtData = new RT_BladesData(data);
     }
 
     public void TryExecute() { }
+
     public void SetUnlocked(bool value) { IsUnlocked = value; }
 
     public void EnableBlades()
     {
         if (_blades.Count == 0)
             SpawnBlades(_rtData.bladeCount);
+
+        _runner.StartCoroutine(BurstLoop());
+    }
+
+    private IEnumerator BurstLoop()
+    {
+        while (IsUnlocked)
+        {
+            yield return new WaitForSeconds(_rtData.burstInterval);
+            bool hasBurst = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.BladesBurst);
+            Debug.Log($"[BurstLoop] hasBurst={hasBurst} | IsUnlocked={IsUnlocked}");
+
+            if (hasBurst)
+                TriggerBurst();
+        }
+    }
+
+    public void TriggerBurst()
+    {
+        if (_burstProjectilePrefab == null) return;
+
+        float angleStep = 360f / _rtData.burstCount;
+        for (int i = 0; i < _rtData.burstCount; i++)
+        {
+            float angleRad = (angleStep * i) * Mathf.Deg2Rad;
+            Vector3 direction = new Vector3(Mathf.Cos(angleRad), 0f, Mathf.Sin(angleRad));
+
+            var proj = Object.Instantiate(_burstProjectilePrefab, _playerTransform.position, Quaternion.identity);
+            proj.GetComponent<BladeBurstProjectile>()?.Init(
+                direction,
+                _rtData.burstDamage,
+                _rtData.burstSpeed,
+                _rtData.burstMaxDistance,
+                _data.damageCooldownPerEnemy,
+                _data.enemyLayers
+            );
+        }
     }
 
     public void Tick()
@@ -48,7 +92,6 @@ public class BladesStrategy : IAbilityStrategy
             float angleDeg = _currentAngleOffset + angleStep * i;
             float angleRad = angleDeg * Mathf.Deg2Rad;
 
-            // Radio base + variacion errática con Perlin noise
             float noiseTime = Time.time * _rtData.noiseSpeed + _noiseOffsets[i];
             float noiseX = (Mathf.PerlinNoise(noiseTime, _noiseOffsets[i]) - 0.5f) * 2f;
             float noiseZ = (Mathf.PerlinNoise(_noiseOffsets[i], noiseTime) - 0.5f) * 2f;
@@ -61,7 +104,6 @@ public class BladesStrategy : IAbilityStrategy
                 Mathf.Sin(angleRad) * dynamicRadius
             );
 
-            // Desplazamiento lateral errático
             Vector3 erraticOffset = new Vector3(
                 noiseX * _rtData.erraticAmount,
                 0f,
@@ -94,6 +136,18 @@ public class BladesStrategy : IAbilityStrategy
         }
     }
 
+    public void ResetUpgrades()
+    {
+        SetUnlocked(false);
+        _rtData.damage = _data.damage;
+        _rtData.bladeCount = _data.bladeCount;
+        _rtData.orbitRadius = _data.orbitRadius;
+        _rtData.orbitSpeed = _data.orbitSpeed;
+        _rtData.burstDamage = _data.burstDamage;
+        _rtData.burstInterval = _data.burstInterval;
+        _rtData.burstCount = _data.burstCount;
+    }
+
     private void SetBladeCount(int newCount)
     {
         foreach (var b in _blades)
@@ -109,9 +163,8 @@ public class BladesStrategy : IAbilityStrategy
         for (int i = 0; i < count; i++)
         {
             var blade = Object.Instantiate(_bladePrefab, null, false);
-            blade.GetComponent<BladeOrbitBehaviour>()?.Init(_rtData.damage, _rtData.damageCooldownPerEnemy);
+            blade.GetComponent<BladeOrbitBehaviour>()?.Init(_rtData.damage, _rtData.damageCooldownPerEnemy, _data.enemyLayers);
             _blades.Add(blade);
-            // Offset random para que cada blade tenga su propio patron de ruido
             _noiseOffsets.Add(Random.Range(0f, 100f));
         }
     }
@@ -119,14 +172,7 @@ public class BladesStrategy : IAbilityStrategy
     private void RefreshBladeData()
     {
         foreach (var b in _blades)
-            b.GetComponent<BladeOrbitBehaviour>()?.Init(_rtData.damage, _rtData.damageCooldownPerEnemy);
+            b.GetComponent<BladeOrbitBehaviour>()?.Init(_rtData.damage, _rtData.damageCooldownPerEnemy, _data.enemyLayers);
     }
 
-    public void Dispose()
-    {
-        foreach (var b in _blades)
-            if (b != null) Object.Destroy(b);
-        _blades.Clear();
-        _noiseOffsets.Clear();
-    }
 }

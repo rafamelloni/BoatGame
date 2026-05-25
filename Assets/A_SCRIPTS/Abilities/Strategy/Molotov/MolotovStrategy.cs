@@ -104,6 +104,7 @@ public class MolotovStrategy : IAbilityStrategy
 
     public void ResetUpgrades()
     {
+        SetUnlocked(false);
         _rtData.damage = _baseData.damage;
         _rtData.launchInterval = _baseData.launchInterval;
         _rtData.explosionRadius = _baseData.explosionRadius;

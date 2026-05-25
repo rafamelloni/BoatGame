@@ -13,11 +13,20 @@ MonoBehaviour:
   m_Name: SO_BladesData
   m_EditorClassIdentifier: Assembly-CSharp::SO_BladesData
   bladePrefab: {fileID: 1179142849087709931, guid: f38b48ade78e75d409e80d0bc7dacddd, type: 3}
+  burstProjectilePrefab: {fileID: 2314367571817234470, guid: be86ff5801da2c74895bd9975574c6a2, type: 3}
   orbitRadius: 11
   orbitSpeed: 180
   erraticAmount: 3.7
   radiusVariation: 2.86
   noiseSpeed: 1.6
-  damage: 15
+  damage: 50
   damageCooldownPerEnemy: 0.8
   bladeCount: 1
+  burstCount: 10
+  burstSpeed: 22
+  burstMaxDistance: 30
+  burstDamage: 9999
+  burstInterval: 5
+  enemyLayers:
+    serializedVersion: 2
+    m_Bits: 64

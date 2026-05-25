@@ -16,8 +16,8 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private GameObject _MESH;
     [SerializeField] private GameObject _cameraPreSeleccion;
     [SerializeField] private GameObject _canvasPreSeleccion;
-
-    
+    [SerializeField] private UpgradeSystem _upgradeSystem;
+    [SerializeField] private RT_PlayerUpgrades _playerUpgrades;
 
     [Header("Player")]
     [SerializeField] private Transform _playerTransform;
@@ -95,17 +95,22 @@ public class SceneResetter : MonoBehaviour
         _playerTransform.GetComponent<RT_PlayerStats>().ResetToBase();
         _playerHealth.ResetHealth();
 
-        // Abilities - Stats
-      
-        _islandSpawnManager.ResetIslands();
-        _enemySpawner.DespawnAll();
+        // Abilities
+        _abilityController.ResetAbilities();
+        _upgradeSystem.ResetAll();         // resetea RT_PlayerUpgrades + AbilityController
+
+        // UI
         _abilityUpgradeSystem.ResetAllUpgradesStats();
         _upgradeStatsUI.ResetStats();
-        _abilityController.ResetAbilities();
+
+        // World
+        _islandSpawnManager.ResetIslands();
+        _enemySpawner.DespawnAll();
         _timerBoss.ResetTimer();
+
+        // Preselección
         PreselectionData.Reset();
         ShipPreselectionManager.Instance.Reset();
-
 
         // Boss
         BOSS.SetActive(false);
@@ -128,10 +133,9 @@ public class SceneResetter : MonoBehaviour
         // 2. Cerrar vignette del todo
         yield return StartCoroutine(AnimateRadiusUnscaled(_vignetteClosedRadius, 0f, _fadeOutDuration));
 
-        // 3. Reset — pantalla completamente negra, cámara main todavía activa
+        // 3. Reset — pantalla completamente negra
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
-        //_mainCamera.fieldOfView = 50f;
 
         ResetAll();
 
@@ -140,17 +144,17 @@ public class SceneResetter : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(_holdAfterResetDuration);
 
-        // 4. Abrir vignette — todavía con la main camera
+        // 4. Abrir vignette
         _MESH.SetActive(true);
         yield return StartCoroutine(AnimateRadiusUnscaled(0f, 0.3f, _fadeOutDuration));
 
         StartCoroutine(LerpFOV(_mainCamera.fieldOfView, 50, 0.1f));
 
-        // 5. Vignette terminó — recién acá swapeamos cámaras y mostramos preselección
+        // 5. Swap cámaras y preselección
         _vignetteImage.gameObject.SetActive(false);
         _Canvas.SetActive(false);
         _mainCamera.gameObject.SetActive(false);
-       
+
         _cameraPreSeleccion.SetActive(true);
         _canvasPreSeleccion.SetActive(true);
 
@@ -207,6 +211,5 @@ public class SceneResetter : MonoBehaviour
             _mainCamera.fieldOfView = Mathf.Lerp(from, to, elapsed / realDuration);
             yield return null;
         }
-       // _mainCamera.fieldOfView = 50;
     }
 }

@@ -28,5 +28,8 @@ public class MolotovDebug : MonoBehaviour
         // V - agrega una blade extra (simula upgrade de BladeCount)
         if (Input.GetKeyDown(KeyCode.V))
             abilityController.BladesAbility.ApplyUpgrade(StatType.BladeCount, abilityController.BladesAbility._rtData.bladeCount + 1);
+
+        if (Input.GetKeyDown(KeyCode.G))
+            abilityController.BladesAbility.TriggerBurst();
     }
 }

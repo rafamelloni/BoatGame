@@ -31,26 +31,29 @@ public class UpgradeSystem : MonoBehaviour
             case StatType.Damage:
                 abilityController.CannonAbility._rtData.damage *= 1f + step.statValue / 100f;
                 break;
-
             case StatType.Cooldown:
                 abilityController.CannonAbility._rtData.cooldown *= 1f - step.statValue / 100f;
                 break;
-
             case StatType.MoveSpeed:
                 playerStats.moveSpeed *= 1f + step.statValue / 100f;
                 break;
-
             case StatType.MaxHealth:
                 float extra = playerStats.maxHealth * (step.statValue / 100f);
                 playerStats.maxHealth += extra;
                 playerStats.currentHealth += extra;
                 break;
-
-            // Estos los completás cuando implementes Molotov y Blades
-            case StatType.MolotovDamage: 
+            case StatType.MolotovDamage:
+                abilityController.MolotovAbility._rtData.damage *= 1f + step.statValue / 100f;
+                break;
             case StatType.MolotovArea:
+                abilityController.MolotovAbility._rtData.explosionRadius *= 1f + step.statValue / 100f;
+                break;
             case StatType.BladeDamage:
+                abilityController.BladesAbility._rtData.damage += step.statValue;
+                break;
             case StatType.BladeSpeed:
+                abilityController.BladesAbility._rtData.orbitSpeed += step.statValue;
+                break;
             case StatType.None:
                 break;
         }
@@ -80,10 +83,20 @@ public class UpgradeSystem : MonoBehaviour
                 // RegenController leerá HasAbility(PassiveRegen)
                 break;
 
-            case SpecialAbilityType.TripleMolotov:
+            case SpecialAbilityType.UnlockMolotov:
                 abilityController.MolotovAbility.SetUnlocked(true);
                 break;
-            case SpecialAbilityType.ExplosiveBlades:
+
+            case SpecialAbilityType.TripleMolotov:
+                // MolotovStrategy leerá HasAbility(TripleMolotov) para disparar en rafaga
+                break;
+
+            case SpecialAbilityType.UnlockBlades:
+                abilityController.BladesAvailable();
+                break;
+
+            case SpecialAbilityType.BladesBurst:
+                Debug.Log("[UpgradeSystem] BladesBurst desbloqueado");
                 break;
         }
     }
@@ -92,6 +105,5 @@ public class UpgradeSystem : MonoBehaviour
     {
         playerUpgrades.ResetAll();
         abilityController.ResetAbilities();
-        // playerStats se resetea desde donde ya lo manejás
     }
 }

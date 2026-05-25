@@ -8,6 +8,11 @@ public class RT_BladesData
     public float erraticAmount;
     public float radiusVariation;
     public float noiseSpeed;
+    public int burstCount;
+    public float burstSpeed;
+    public float burstMaxDistance;
+    public float burstDamage;
+    public float burstInterval;
 
     public RT_BladesData(SO_BladesData data)
     {
@@ -19,5 +24,10 @@ public class RT_BladesData
         erraticAmount = data.erraticAmount;
         radiusVariation = data.radiusVariation;
         noiseSpeed = data.noiseSpeed;
+        burstCount = data.burstCount;
+        burstSpeed = data.burstSpeed;
+        burstMaxDistance = data.burstMaxDistance;
+        burstDamage = data.burstDamage;
+        burstInterval = data.burstInterval;
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using static Unity.Collections.Unicode;
 
 public class AbilityController : MonoBehaviour
 {
@@ -78,7 +79,7 @@ public class AbilityController : MonoBehaviour
         SetupCannon(hardpoints, runner);
         SetupMortar(runner);
         SetupMolotov(runner);
-        SetupBlades();
+        SetupBlades(runner);
     }
 
     private void SetupCannon(ShipHardpoints hardpoints, CoroutineRunner runner)
@@ -102,9 +103,9 @@ public class AbilityController : MonoBehaviour
             _molotovEnemyLayers, _playerUpgrades, GetComponent<Collider>());
     }
 
-    private void SetupBlades()
+    private void SetupBlades(CoroutineRunner runner)
     {
-        _abilityBlades = new BladesStrategy(_bladesData, transform);
+        _abilityBlades = new BladesStrategy(_bladesData, transform, runner, _playerUpgrades);
     }
 
     private void Update()
@@ -120,8 +121,9 @@ public class AbilityController : MonoBehaviour
 
     public void BladesAvailable()
     {
-        _abilityBlades.EnableBlades();
         _abilityBlades.SetUnlocked(true);
+
+        _abilityBlades.EnableBlades();
     }
 
     public void CannonAveilable()
@@ -161,8 +163,7 @@ public class AbilityController : MonoBehaviour
         _abilityE.ResetUpgrades();
         _abilityQ.ResetUpgrades();
 
-        _abilityBlades.Dispose();
-        SetupBlades();
+        _abilityBlades.ResetUpgrades();
 
         cannonMesh.SetActive(false);
         cannonUI.SetActive(false);
