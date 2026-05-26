@@ -6,89 +6,89 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
 {
     [Header("Barra visual")]
     [SerializeField] private Image fillBar;
-
     [Header("Objeto padre de la UI")]
     [SerializeField] private GameObject pergaminoPadre;
-
     [Header("Movimiento")]
     [SerializeField] private float targetX = 0f;
     [SerializeField] private float duration = 0.35f;
     [SerializeField] private float overshootAmount = 20f;
-
+    public float closeDuration = 0.25f;
 
     private RectTransform rectTransform;
     private Coroutine routine;
-    private bool alreadyOpened;
+    private bool _isOpen = false;
+    private float _startX;
 
     private void Awake()
     {
         if (pergaminoPadre == null)
             pergaminoPadre = gameObject;
-
         rectTransform = pergaminoPadre.GetComponent<RectTransform>();
+        _startX = rectTransform.anchoredPosition.x;
     }
 
     private void Update()
     {
-        if (alreadyOpened) return;
+        if (_isOpen) return;
         if (fillBar == null) return;
-
         if (fillBar.fillAmount >= 0.99f)
         {
-            alreadyOpened = true;
+            _isOpen = true;
             OpenPergamino();
         }
     }
 
     private void OpenPergamino()
     {
-
-        if (routine != null)
-            StopCoroutine(routine);
-
+        Time.timeScale = 0f;
+        if (routine != null) StopCoroutine(routine);
         routine = StartCoroutine(OpenRoutine());
+    }
+
+    public void ClosePergamino(System.Action onComplete = null)
+    {
+        if (routine != null) StopCoroutine(routine);
+        routine = StartCoroutine(CloseRoutine(onComplete));
     }
 
     private IEnumerator OpenRoutine()
     {
         Vector2 startPos = rectTransform.anchoredPosition;
+        Vector2 overshootPos = new Vector2(targetX + overshootAmount, startPos.y);
+        Vector2 finalPos = new Vector2(targetX, startPos.y);
 
-        // Se pasa un poquito
-        Vector2 overshootPos =
-            new Vector2(targetX + overshootAmount, startPos.y);
-
-        // Posición final real
-        Vector2 finalPos =
-            new Vector2(targetX, startPos.y);
-
-        // Movimiento principal
         yield return MoveTo(startPos, overshootPos, duration);
-
-        // Rebote suave de vuelta
         yield return MoveTo(overshootPos, finalPos, 0.12f);
 
         routine = null;
     }
 
+    private IEnumerator CloseRoutine(System.Action onComplete)
+    {
+        Vector2 startPos = rectTransform.anchoredPosition;
+        Vector2 finalPos = new Vector2(_startX, startPos.y);
+
+        yield return MoveTo(startPos, finalPos, closeDuration);
+
+        _isOpen = false;
+        fillBar.fillAmount = 0f;
+        Time.timeScale = 1f;
+        routine = null;
+
+        onComplete?.Invoke();
+    }
+
     private IEnumerator MoveTo(Vector2 from, Vector2 to, float moveDuration)
     {
         float time = 0f;
-
         while (time < moveDuration)
         {
-            time += Time.deltaTime;
-
+            time += Time.unscaledDeltaTime;
             float t = time / moveDuration;
-
-            // Ease Out Cubic
             float smoothT = 1f - Mathf.Pow(1f - t, 3f);
-
-            rectTransform.anchoredPosition =
-                Vector2.Lerp(from, to, smoothT);
-
+            rectTransform.anchoredPosition = Vector2.Lerp(from, to, smoothT);
             yield return null;
         }
-
         rectTransform.anchoredPosition = to;
     }
 }

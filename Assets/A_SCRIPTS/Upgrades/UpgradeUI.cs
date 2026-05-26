@@ -9,24 +9,19 @@ public class UpgradeUI : MonoBehaviour
     [SerializeField] private UpgradeOfferSystem offerSystem;
     [SerializeField] private UpgradeSystem upgradeSystem;
     [SerializeField] private RT_PlayerUpgrades playerUpgrades;
-
     [Header("Mapa")]
     [SerializeField] private UpgradePathMap pathMap;
-
-
     [Header("Botones de paths")]
     [SerializeField] private Button[] pathButtons;
-   // [SerializeField] private TextMeshProUGUI[] pathNames;
-
     [Header("Info del path seleccionado")]
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI descriptionText;
-
     [Header("Confirmar")]
     [SerializeField] private Button confirmButton;
-
     [Header("Rebordes seleccionados")]
     [SerializeField] private GameObject[] selectedRebordes;
+    [Header("Pergamino")]
+    [SerializeField] private PergaminoSlideByVisualBar pergamino;
 
     private List<SO_UpgradePath> _currentOffer;
     private SO_UpgradePath _selectedPath;
@@ -34,23 +29,21 @@ public class UpgradeUI : MonoBehaviour
     private void Awake()
     {
         confirmButton.onClick.AddListener(OnConfirm);
-
         for (int i = 0; i < pathButtons.Length; i++)
         {
             int index = i;
             pathButtons[i].onClick.AddListener(() => OnPathSelected(index));
         }
-
         confirmButton.interactable = false;
     }
 
     private void OnEnable()
     {
-        Show();
+        RefreshOffer();
         pathMap.ResetMap();
     }
 
-    public void Show()
+    private void RefreshOffer()
     {
         _selectedPath = null;
         _currentOffer = offerSystem.GetOffer(3);
@@ -61,8 +54,6 @@ public class UpgradeUI : MonoBehaviour
             {
                 pathButtons[i].gameObject.SetActive(true);
                 pathButtons[i].GetComponent<Image>().sprite = _currentOffer[i].pathIcon;
-
-                //pathNames[i].text = _currentOffer[i].pathName;
             }
             else
             {
@@ -76,26 +67,20 @@ public class UpgradeUI : MonoBehaviour
         titleText.text = "";
         descriptionText.text = "";
         confirmButton.interactable = false;
-
-        gameObject.SetActive(true);
     }
 
     private void OnPathSelected(int index)
     {
         if (index >= _currentOffer.Count) return;
 
-        // Resetear todos al sprite normal
         for (int i = 0; i < _currentOffer.Count; i++)
             pathButtons[i].GetComponent<Image>().sprite = _currentOffer[i].pathIcon;
 
-        // Seleccionado usa el sprite alternativo
         pathButtons[index].GetComponent<Image>().sprite = _currentOffer[index].pathIconSelected;
 
-        // Resetear todos los rebordes
         for (int i = 0; i < selectedRebordes.Length; i++)
             selectedRebordes[i].SetActive(false);
 
-        // Activar el seleccionado
         selectedRebordes[index].SetActive(true);
 
         _selectedPath = _currentOffer[index];
@@ -113,15 +98,8 @@ public class UpgradeUI : MonoBehaviour
     private void OnConfirm()
     {
         if (_selectedPath == null) return;
-
         upgradeSystem.ApplyUpgrade(_selectedPath);
-        Hide();
-    }
-
-    private void Hide()
-    {
-        Time.timeScale = 1f;
-        _selectedPath = null;
-        gameObject.SetActive(false);
+        confirmButton.interactable = false;
+        pergamino.ClosePergamino(() => RefreshOffer());
     }
 }
