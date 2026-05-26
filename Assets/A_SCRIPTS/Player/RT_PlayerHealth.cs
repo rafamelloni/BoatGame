@@ -7,6 +7,7 @@ public class RT_PlayerHealth : MonoBehaviour
     private bool _isDead = false;
 
     public event System.Action OnDeath;
+    public event System.Action OnDamage;
 
     [Header("Vignette")]
     [SerializeField] private Material _vignetteMaterial;
@@ -27,13 +28,10 @@ public class RT_PlayerHealth : MonoBehaviour
     [Header("Valores de grietas por modelo")]
     [SerializeField] private float _grieta100 = 0f;
     [SerializeField] private float _normal100 = 0f;
-
     [SerializeField] private float _grieta75 = 0.25f;
     [SerializeField] private float _normal75 = 0.4f;
-
     [SerializeField] private float _grieta50 = 0.55f;
     [SerializeField] private float _normal50 = 0.9f;
-
     [SerializeField] private float _grieta25 = 1f;
     [SerializeField] private float _normal25 = 1.5f;
 
@@ -91,6 +89,8 @@ public class RT_PlayerHealth : MonoBehaviour
         _stats.currentHealth -= amount;
         _stats.currentHealth = Mathf.Max(_stats.currentHealth, 0f);
 
+        OnDamage?.Invoke();
+
         UpdateVisuals();
         PlayDamageVignettePulse();
 
@@ -127,11 +127,8 @@ public class RT_PlayerHealth : MonoBehaviour
     private IEnumerator DeathRoutine()
     {
         OnDeath?.Invoke();
-
         yield return new WaitForSeconds(1f);
-
         Debug.Log("Player muerto");
-
         UpdateVisuals();
     }
 
@@ -139,7 +136,6 @@ public class RT_PlayerHealth : MonoBehaviour
     {
         _isDead = false;
         _stats.currentHealth = _stats.maxHealth;
-
         ResetVisuals();
     }
 
@@ -155,8 +151,7 @@ public class RT_PlayerHealth : MonoBehaviour
 
     private void UpdateShipModelByHealth()
     {
-        if (_stats == null || _stats.maxHealth <= 0f)
-            return;
+        if (_stats == null || _stats.maxHealth <= 0f) return;
 
         float healthPercent = (_stats.currentHealth / _stats.maxHealth) * 100f;
 
@@ -189,13 +184,10 @@ public class RT_PlayerHealth : MonoBehaviour
     {
         if (_ship100 != null && _ship100.activeSelf)
             _shipRenderer = _ship100.GetComponentInChildren<Renderer>();
-
         else if (_ship75 != null && _ship75.activeSelf)
             _shipRenderer = _ship75.GetComponentInChildren<Renderer>();
-
         else if (_ship50 != null && _ship50.activeSelf)
             _shipRenderer = _ship50.GetComponentInChildren<Renderer>();
-
         else if (_ship25 != null && _ship25.activeSelf)
             _shipRenderer = _ship25.GetComponentInChildren<Renderer>();
 
@@ -205,27 +197,18 @@ public class RT_PlayerHealth : MonoBehaviour
 
     private void UpdateDamageShader()
     {
-        if (_shipMaterial == null || _stats == null || _stats.maxHealth <= 0f)
-            return;
+        if (_shipMaterial == null || _stats == null || _stats.maxHealth <= 0f) return;
 
         float healthPercent = (_stats.currentHealth / _stats.maxHealth) * 100f;
 
         if (healthPercent > 75f)
-        {
             SetShipCrackValues(_grieta100, _normal100);
-        }
         else if (healthPercent > 50f)
-        {
             SetShipCrackValues(_grieta75, _normal75);
-        }
         else if (healthPercent > 25f)
-        {
             SetShipCrackValues(_grieta50, _normal50);
-        }
         else
-        {
             SetShipCrackValues(_grieta25, _normal25);
-        }
     }
 
     private void SetShipCrackValues(float grietaValue, float normalValue)
@@ -236,38 +219,26 @@ public class RT_PlayerHealth : MonoBehaviour
 
     private void UpdateSailDamageShader()
     {
-        if (_sailMaterial == null)
-            return;
+        if (_sailMaterial == null) return;
 
         float damagePercent = GetDamagePercent(_healthPercentToStartSailDamage, _sailDamageCurve);
-
-        float sailBreakValue = Mathf.Lerp(
-            _minSailBreakAmount,
-            _maxSailBreakAmount,
-            damagePercent
-        );
-
+        float sailBreakValue = Mathf.Lerp(_minSailBreakAmount, _maxSailBreakAmount, damagePercent);
         _sailMaterial.SetFloat(_sailBreakProperty, sailBreakValue);
     }
 
     private void UpdateSailFireByHealth()
     {
-        if (_stats == null || _stats.maxHealth <= 0f)
-            return;
+        if (_stats == null || _stats.maxHealth <= 0f) return;
 
         float healthPercent = (_stats.currentHealth / _stats.maxHealth) * 100f;
 
-        if (_fireVela50 != null)
-            _fireVela50.SetActive(healthPercent <= 50f);
-
-        if (_fireVela25 != null)
-            _fireVela25.SetActive(healthPercent <= 25f);
+        if (_fireVela50 != null) _fireVela50.SetActive(healthPercent <= 50f);
+        if (_fireVela25 != null) _fireVela25.SetActive(healthPercent <= 25f);
     }
 
     private void UpdateVignette()
     {
-        if (_vignetteMaterial == null)
-            return;
+        if (_vignetteMaterial == null) return;
 
         float baseIntensity = GetBaseVignetteIntensity();
         _vignetteMaterial.SetFloat(VignetteIntensityID, baseIntensity);
@@ -275,8 +246,7 @@ public class RT_PlayerHealth : MonoBehaviour
 
     private float GetBaseVignetteIntensity()
     {
-        if (_stats == null || _stats.maxHealth <= 0f)
-            return _vignetteMinIntensity;
+        if (_stats == null || _stats.maxHealth <= 0f) return _vignetteMinIntensity;
 
         float healthNormalized = Mathf.Clamp01(_stats.currentHealth / _stats.maxHealth);
 
@@ -291,17 +261,10 @@ public class RT_PlayerHealth : MonoBehaviour
 
     private float GetDamagePercent(float startHealthPercent, AnimationCurve curve)
     {
-        if (_stats == null || _stats.maxHealth <= 0f)
-            return 0f;
+        if (_stats == null || _stats.maxHealth <= 0f) return 0f;
 
         float healthPercent = Mathf.Clamp01(_stats.currentHealth / _stats.maxHealth);
-
-        float damagePercent = Mathf.InverseLerp(
-            startHealthPercent,
-            0f,
-            healthPercent
-        );
-
+        float damagePercent = Mathf.InverseLerp(startHealthPercent, 0f, healthPercent);
         damagePercent = Mathf.Clamp01(damagePercent);
 
         if (curve != null)
@@ -312,8 +275,7 @@ public class RT_PlayerHealth : MonoBehaviour
 
     private void PlayDamageVignettePulse()
     {
-        if (_vignetteMaterial == null)
-            return;
+        if (_vignetteMaterial == null) return;
 
         if (_vignettePulseRoutine != null)
             StopCoroutine(_vignettePulseRoutine);
@@ -324,37 +286,26 @@ public class RT_PlayerHealth : MonoBehaviour
     private IEnumerator DamageVignettePulseRoutine()
     {
         float baseIntensity = GetBaseVignetteIntensity();
-        float pulseIntensity = baseIntensity + _damagePulseExtraIntensity;
-
-        pulseIntensity = Mathf.Clamp(
-            pulseIntensity,
+        float pulseIntensity = Mathf.Clamp(
+            baseIntensity + _damagePulseExtraIntensity,
             _vignetteMinIntensity,
             _vignetteMaxIntensity
         );
 
         float t = 0f;
-
         while (t < 1f)
         {
             t += Time.deltaTime / _damagePulseInDuration;
-
-            float value = Mathf.Lerp(baseIntensity, pulseIntensity, t);
-            _vignetteMaterial.SetFloat(VignetteIntensityID, value);
-
+            _vignetteMaterial.SetFloat(VignetteIntensityID, Mathf.Lerp(baseIntensity, pulseIntensity, t));
             yield return null;
         }
 
         t = 0f;
-
         while (t < 1f)
         {
             t += Time.deltaTime / _damagePulseOutDuration;
-
             baseIntensity = GetBaseVignetteIntensity();
-
-            float value = Mathf.Lerp(pulseIntensity, baseIntensity, t);
-            _vignetteMaterial.SetFloat(VignetteIntensityID, value);
-
+            _vignetteMaterial.SetFloat(VignetteIntensityID, Mathf.Lerp(pulseIntensity, baseIntensity, t));
             yield return null;
         }
 
@@ -364,9 +315,7 @@ public class RT_PlayerHealth : MonoBehaviour
 
     private void UpdateDestroyedVFX()
     {
-        if (_vfxDestroyed == null || _stats == null)
-            return;
-
+        if (_vfxDestroyed == null || _stats == null) return;
         _vfxDestroyed.SetActive(_stats.currentHealth <= _vidaParaActivarFuego);
     }
 
@@ -388,13 +337,8 @@ public class RT_PlayerHealth : MonoBehaviour
         if (_sailMaterial != null)
             _sailMaterial.SetFloat(_sailBreakProperty, _minSailBreakAmount);
 
-        if (_fireVela50 != null)
-            _fireVela50.SetActive(false);
-
-        if (_fireVela25 != null)
-            _fireVela25.SetActive(false);
-
-        if (_vfxDestroyed != null)
-            _vfxDestroyed.SetActive(false);
+        if (_fireVela50 != null) _fireVela50.SetActive(false);
+        if (_fireVela25 != null) _fireVela25.SetActive(false);
+        if (_vfxDestroyed != null) _vfxDestroyed.SetActive(false);
     }
 }

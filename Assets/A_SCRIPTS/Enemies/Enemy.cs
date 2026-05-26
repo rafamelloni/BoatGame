@@ -19,7 +19,6 @@ public abstract class Enemy : MonoBehaviour
 
         if (_enemyHealth != null)
         {
-            print("enemt init");
             _enemyHealth.InitializeComponent(_baseData);
         }
 

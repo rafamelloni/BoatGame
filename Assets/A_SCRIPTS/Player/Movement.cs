@@ -6,6 +6,9 @@ public class Movement : MonoBehaviour
 {
     private RT_PlayerStats _stats;
     private Rigidbody _rb;
+    private DashMovement _dashMovement;
+    private bool _sprintEnabled = true;
+
     public ParticleSystem trail;
     public ParticleSystem trailSprint;
     public ParticleSystem trailSprint1;
@@ -30,6 +33,7 @@ public class Movement : MonoBehaviour
     private bool _isSprinting = false;
     private float _currentSpeed = 0f;
     private float _smoothTurn = 0f;
+
     public float GetCurrentBankZ() => _currentBankZ;
 
     private void Awake()
@@ -37,6 +41,7 @@ public class Movement : MonoBehaviour
         _stats = GetComponent<RT_PlayerStats>();
         _rb = GetComponent<Rigidbody>();
         _sprintStamina = sprintMaxDuration;
+        _dashMovement = GetComponent<DashMovement>();
     }
 
     private void Start()
@@ -56,7 +61,11 @@ public class Movement : MonoBehaviour
         float targetTurn = horizontal * _stats.turnSpeed;
         _smoothTurn = Mathf.Lerp(_smoothTurn, targetTurn, Time.deltaTime * 5f);
 
-        float targetSpeed = _stats.moveSpeed * (_isSprinting ? sprintSpeedMultiplier : 1f);
+        float dashMult = (_dashMovement != null && _dashMovement.IsDashing)
+            ? _dashMovement.DashSpeedMultiplier
+            : 1f;
+        float sprintMult = (_isSprinting && _sprintEnabled) ? sprintSpeedMultiplier : 1f;
+        float targetSpeed = _stats.moveSpeed * Mathf.Max(dashMult, sprintMult);
 
         if (vertical != 0)
         {
@@ -65,7 +74,7 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            trail.Stop(); 
+            trail.Stop();
             _currentSpeed = Mathf.Lerp(_currentSpeed, 0f, Time.deltaTime * _stats.deceleration);
         }
 
@@ -97,6 +106,8 @@ public class Movement : MonoBehaviour
 
     void HandleSprint()
     {
+        if (!_sprintEnabled) return;
+
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift);
         float vertical = Input.GetAxisRaw("Vertical");
         bool canSprint = _sprintStamina > 0f && vertical > 0f;
@@ -155,6 +166,8 @@ public class Movement : MonoBehaviour
         trailSprint.Stop();
         trailSprint1.Stop();
     }
+
+    public void SetSprintEnabled(bool value) => _sprintEnabled = value;
 
     public void SetMovementEnabled(bool enabled)
     {

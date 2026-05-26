@@ -75,11 +75,11 @@ public class UpgradeSystem : MonoBehaviour
                 abilityController.CannonAbility._rtData.shotsPerBurst *= 2;
                 break;
 
-            case SpecialAbilityType.InfiniteSprint:
+            case SpecialAbilityType.Dashes:
                 // SprintController leerá HasAbility(InfiniteSprint)
                 break;
 
-            case SpecialAbilityType.PassiveRegen:
+            case SpecialAbilityType.ClearScreen:
                 // RegenController leerá HasAbility(PassiveRegen)
                 break;
 

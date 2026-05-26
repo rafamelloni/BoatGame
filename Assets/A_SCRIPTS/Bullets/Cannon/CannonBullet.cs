@@ -49,7 +49,6 @@ public class CannonBullet : BulletsBase
 
     public override void TurnOff()
     {
-        Debug.Log($"TurnOff en: {gameObject.name}");
 
         StopAllCoroutines();
         _rb.useGravity = false;

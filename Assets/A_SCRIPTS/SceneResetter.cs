@@ -65,8 +65,6 @@ public class SceneResetter : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyUp(KeyCode.L))
-            HandlePlayerDeath();
 
         if (Input.GetKeyUp(KeyCode.B))
             BOSS.SetActive(true);
