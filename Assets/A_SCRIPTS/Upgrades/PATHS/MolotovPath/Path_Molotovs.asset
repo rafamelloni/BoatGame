@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Path_Molotovs
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
   pathName: Molotovs
-  pathIcon: {fileID: 21300000, guid: 451edbdeb4b031844a7812301d3aab33, type: 3}
+  pathIcon: {fileID: 21300000, guid: eea0ecce8d3ddbb438dd19b00e62a6dc, type: 3}
+  pathIconSelected: {fileID: 21300000, guid: 451edbdeb4b031844a7812301d3aab33, type: 3}
   pathDescription: 
   steps:
   - {fileID: 11400000, guid: b8bea96b5fc30d64fb5f44e03373a2ec, type: 2}

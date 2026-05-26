@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: Blades2
   description: Blades2
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c5c9a4c52446f424ab8e600f72a4ee53, type: 3}
   statType: 7
   statValue: 2
   specialAbility: 0

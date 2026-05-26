@@ -16,8 +16,16 @@ public class UpgradePathMap : MonoBehaviour
     [Header("Referencias")]
     [SerializeField] private RT_PlayerUpgrades playerUpgrades;
 
+    [Header("Tooltip Cofre")]
+    [SerializeField] private GameObject tooltipPanel;
+    [SerializeField] private TextMeshProUGUI tooltipTitle;
+    [SerializeField] private TextMeshProUGUI tooltipDescription;
+
+    private SO_UpgradePath _currentPath;
+
     public void UpdateMap(SO_UpgradePath path)
     {
+        _currentPath = path;
         int currentLevel = playerUpgrades.GetLevel(path);
 
         for (int i = 0; i < nodeTexts.Length; i++)
@@ -38,6 +46,24 @@ public class UpgradePathMap : MonoBehaviour
                 nodeCircles[i].enabled = false;
             }
         }
+    }
+
+
+    public void ShowTooltip()
+    {
+        if (_currentPath == null) return;
+
+        SO_UpgradeStep tier4 = _currentPath.GetStep(3);
+        if (tier4 == null) return;
+
+        tooltipTitle.text = tier4.displayName;
+        tooltipDescription.text = tier4.description;
+        tooltipPanel.SetActive(true);
+    }
+
+    public void HideTooltip()
+    {
+        tooltipPanel.SetActive(false);
     }
 
     public void ResetMap()

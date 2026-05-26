@@ -25,6 +25,9 @@ public class UpgradeUI : MonoBehaviour
     [Header("Confirmar")]
     [SerializeField] private Button confirmButton;
 
+    [Header("Rebordes seleccionados")]
+    [SerializeField] private GameObject[] selectedRebordes;
+
     private List<SO_UpgradePath> _currentOffer;
     private SO_UpgradePath _selectedPath;
 
@@ -67,6 +70,9 @@ public class UpgradeUI : MonoBehaviour
             }
         }
 
+        foreach (var r in selectedRebordes)
+            r.SetActive(false);
+
         titleText.text = "";
         descriptionText.text = "";
         confirmButton.interactable = false;
@@ -78,14 +84,28 @@ public class UpgradeUI : MonoBehaviour
     {
         if (index >= _currentOffer.Count) return;
 
-        _selectedPath = _currentOffer[index];
+        // Resetear todos al sprite normal
+        for (int i = 0; i < _currentOffer.Count; i++)
+            pathButtons[i].GetComponent<Image>().sprite = _currentOffer[i].pathIcon;
 
+        // Seleccionado usa el sprite alternativo
+        pathButtons[index].GetComponent<Image>().sprite = _currentOffer[index].pathIconSelected;
+
+        // Resetear todos los rebordes
+        for (int i = 0; i < selectedRebordes.Length; i++)
+            selectedRebordes[i].SetActive(false);
+
+        // Activar el seleccionado
+        selectedRebordes[index].SetActive(true);
+
+        _selectedPath = _currentOffer[index];
         SO_UpgradeStep nextStep = playerUpgrades.GetNextStep(_selectedPath);
         if (nextStep != null)
         {
             titleText.text = _selectedPath.pathName;
             descriptionText.text = nextStep.description;
         }
+
         pathMap.UpdateMap(_selectedPath);
         confirmButton.interactable = true;
     }
