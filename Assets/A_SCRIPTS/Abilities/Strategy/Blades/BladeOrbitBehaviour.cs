@@ -10,6 +10,13 @@ public class BladeOrbitBehaviour : MonoBehaviour
     private Dictionary<GameObject, float> _hitTimers = new();
     private LayerMask _enemyLayers;
 
+    [SerializeField] private float rotationSpeed = 720f;
+
+    private void Update()
+    {
+        transform.Rotate(0f, rotationSpeed * Time.deltaTime, 0f);
+    }
+
     public void Init(float damage, float damageCooldown, LayerMask enemyLayers)
     {
         _damage = damage;
