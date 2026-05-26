@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CoinBarScrollSlide : MonoBehaviour
+public class PergaminoSlideByVisualBar : MonoBehaviour
 {
     [Header("Barra visual")]
     [SerializeField] private Image fillBar;
@@ -10,12 +10,11 @@ public class CoinBarScrollSlide : MonoBehaviour
     [Header("Objeto padre de la UI")]
     [SerializeField] private GameObject pergaminoPadre;
 
-    [Header("Posición final en X")]
+    [Header("Movimiento")]
     [SerializeField] private float targetX = 0f;
+    [SerializeField] private float duration = 0.35f;
+    [SerializeField] private float overshootAmount = 20f;
 
-    [Header("Animación")]
-    [SerializeField] private float duration = 0.5f;
-    [SerializeField] private AnimationCurve curve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     private RectTransform rectTransform;
     private Coroutine routine;
@@ -37,39 +36,59 @@ public class CoinBarScrollSlide : MonoBehaviour
         if (fillBar.fillAmount >= 0.99f)
         {
             alreadyOpened = true;
-            SlideToCenter();
+            OpenPergamino();
         }
     }
 
-    private void SlideToCenter()
+    private void OpenPergamino()
     {
+
         if (routine != null)
             StopCoroutine(routine);
 
-        routine = StartCoroutine(SlideRoutine());
+        routine = StartCoroutine(OpenRoutine());
     }
 
-    private IEnumerator SlideRoutine()
+    private IEnumerator OpenRoutine()
     {
         Vector2 startPos = rectTransform.anchoredPosition;
-        Vector2 endPos = new Vector2(targetX, startPos.y);
 
+        // Se pasa un poquito
+        Vector2 overshootPos =
+            new Vector2(targetX + overshootAmount, startPos.y);
+
+        // Posición final real
+        Vector2 finalPos =
+            new Vector2(targetX, startPos.y);
+
+        // Movimiento principal
+        yield return MoveTo(startPos, overshootPos, duration);
+
+        // Rebote suave de vuelta
+        yield return MoveTo(overshootPos, finalPos, 0.12f);
+
+        routine = null;
+    }
+
+    private IEnumerator MoveTo(Vector2 from, Vector2 to, float moveDuration)
+    {
         float time = 0f;
 
-        while (time < duration)
+        while (time < moveDuration)
         {
             time += Time.deltaTime;
 
-            float t = time / duration;
-            float smoothT = curve.Evaluate(t);
+            float t = time / moveDuration;
+
+            // Ease Out Cubic
+            float smoothT = 1f - Mathf.Pow(1f - t, 3f);
 
             rectTransform.anchoredPosition =
-                Vector2.Lerp(startPos, endPos, smoothT);
+                Vector2.Lerp(from, to, smoothT);
 
             yield return null;
         }
 
-        rectTransform.anchoredPosition = endPos;
-        routine = null;
+        rectTransform.anchoredPosition = to;
     }
 }
