@@ -17,4 +17,4 @@ MonoBehaviour:
   icon: {fileID: 0}
   statType: 1
   statValue: 20
-  specialAbility: 1
+  specialAbility: 0

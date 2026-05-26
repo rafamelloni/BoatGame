@@ -24,7 +24,13 @@ public class Coin : MonoBehaviour
     private float _orbitAngle;
 
     public event System.Action<Coin> OnCollected;
+    [SerializeField] private TrailRenderer _trail;
 
+    private void OnDisable()
+    {
+        if (_trail != null)
+            _trail.Clear();
+    }
     public void Init(Transform player, Vector3 spawnPos)
     {
         _player = player;
@@ -36,7 +42,6 @@ public class Coin : MonoBehaviour
     private void Update()
     {
         if (_player == null) return;
-
         switch (_state)
         {
             case State.Float:
@@ -44,15 +49,14 @@ public class Coin : MonoBehaviour
                 if (Vector3.Distance(transform.position, _player.position) <= _magnetRadius)
                     _state = State.Pull;
                 break;
-
             case State.Pull:
                 DoPull();
                 if (Vector3.Distance(transform.position, _player.position) <= _orbitRadius)
-                    EnterOrbit();
-                break;
-
-            case State.Orbit:
-                DoOrbit();
+                {
+                    OnCollected?.Invoke(this);
+                    gameObject.SetActive(false);
+                    CoinManager.Instance.AddCoin();
+                }
                 break;
         }
     }
@@ -72,7 +76,7 @@ public class Coin : MonoBehaviour
     {
         float newY = _baseY + Mathf.Sin(Time.time * _bobSpeed) * _bobAmplitude;
         transform.position = new Vector3(transform.position.x, newY, transform.position.z);
-        transform.Rotate(Vector3.up, _rotationSpeed * Time.deltaTime);
+        transform.Rotate(Vector3.up, _rotationSpeed * Time.deltaTime, Space.World);
     }
 
     private void DoPull()
@@ -88,31 +92,31 @@ public class Coin : MonoBehaviour
         transform.Rotate(Vector3.up, _rotationSpeed * speedMultiplier * Time.deltaTime);
     }
 
-    private void DoOrbit()
-    {
-        _orbitTimer += Time.deltaTime;
-        _orbitAngle += _orbitSpeed * Time.deltaTime;
+    //private void DoOrbit()
+    //{
+    //    _orbitTimer += Time.deltaTime;
+    //    _orbitAngle += _orbitSpeed * Time.deltaTime;
 
-        float t = _orbitTimer / _orbitDuration;
-        float currentRadius = Mathf.Lerp(_orbitRadius, 0f, t);
+    //    float t = _orbitTimer / _orbitDuration;
+    //    float currentRadius = Mathf.Lerp(_orbitRadius, 0f, t);
 
-        float rad = _orbitAngle * Mathf.Deg2Rad;
-        Vector3 offset = new Vector3(Mathf.Cos(rad), 0f, Mathf.Sin(rad)) * currentRadius;
+    //    float rad = _orbitAngle * Mathf.Deg2Rad;
+    //    Vector3 offset = new Vector3(Mathf.Cos(rad), 0f, Mathf.Sin(rad)) * currentRadius;
 
-        transform.position = new Vector3(
-            _player.position.x + offset.x,
-            transform.position.y,
-            _player.position.z + offset.z
-        );
+    //    transform.position = new Vector3(
+    //        _player.position.x + offset.x,
+    //        transform.position.y,
+    //        _player.position.z + offset.z
+    //    );
 
-        transform.Rotate(Vector3.up, _rotationSpeed * (1f + t * 8f) * Time.deltaTime); // acelera al espiralizar
+    //    transform.Rotate(Vector3.up, _rotationSpeed * (1f + t * 8f) * Time.deltaTime); // acelera al espiralizar
 
-        if (_orbitTimer >= _orbitDuration)
-        {
-            OnCollected?.Invoke(this);
-            gameObject.SetActive(false);
-            CoinManager.Instance.AddCoin();
+    //    if (_orbitTimer >= _orbitDuration)
+    //    {
+    //        OnCollected?.Invoke(this);
+    //        gameObject.SetActive(false);
+    //        CoinManager.Instance.AddCoin();
 
-        }
-    }
+    //    }
+    //}
 }

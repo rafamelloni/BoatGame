@@ -1,10 +1,22 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class UpgradeSystem : MonoBehaviour
 {
     [SerializeField] private RT_PlayerStats playerStats;
     [SerializeField] private RT_PlayerUpgrades playerUpgrades;
     [SerializeField] private AbilityController abilityController;
+    [SerializeField] private SpecialAbilityHUD abilityHUD;
+
+    [Header("Sprites HUD")]
+    [SerializeField] private Sprite spriteRicochet;
+    [SerializeField] private Sprite spriteDoubleShot;
+    [SerializeField] private Sprite spriteDashes;
+    [SerializeField] private Sprite spriteClearScreen;
+    [SerializeField] private Sprite spriteUnlockMolotov;
+    [SerializeField] private Sprite spriteTripleMolotov;
+    [SerializeField] private Sprite spriteUnlockBlades;
+    [SerializeField] private Sprite spriteBladesBurst;
 
     public void ApplyUpgrade(SO_UpgradePath path)
     {
@@ -13,14 +25,11 @@ public class UpgradeSystem : MonoBehaviour
             Debug.LogWarning($"Path {path.pathName} ya esta completo.");
             return;
         }
-
         SO_UpgradeStep step = playerUpgrades.GetNextStep(path);
         if (step == null) return;
-
         ApplyStat(step);
         ApplySpecialAbility(step);
         playerUpgrades.AdvancePath(path);
-
         Debug.Log($"[UpgradeSystem] {path.pathName} → {step.displayName}");
     }
 
@@ -62,41 +71,39 @@ public class UpgradeSystem : MonoBehaviour
     private void ApplySpecialAbility(SO_UpgradeStep step)
     {
         if (step.specialAbility == SpecialAbilityType.None) return;
-
         playerUpgrades.UnlockAbility(step.specialAbility);
 
         switch (step.specialAbility)
         {
             case SpecialAbilityType.Ricochet:
-                // CannonBullet leerá HasAbility(Ricochet) desde RT_PlayerUpgrades
+                abilityHUD.UnlockNext(spriteRicochet);
                 break;
-
             case SpecialAbilityType.DoubleShot:
                 abilityController.CannonAbility._rtData.shotsPerBurst *= 2;
+                abilityHUD.UnlockNext(spriteDoubleShot);
                 break;
-
             case SpecialAbilityType.Dashes:
-                // SprintController leerá HasAbility(InfiniteSprint)
+                GetComponent<DashMovement>().Unlock();
+                abilityHUD.UnlockNext(spriteDashes);
                 break;
-
             case SpecialAbilityType.ClearScreen:
-                // RegenController leerá HasAbility(PassiveRegen)
+                GetComponent<LastStand>().Unlock();
+                abilityHUD.UnlockNext(spriteClearScreen);
                 break;
-
             case SpecialAbilityType.UnlockMolotov:
                 abilityController.MolotovAbility.SetUnlocked(true);
+                abilityHUD.UnlockNext(spriteUnlockMolotov);
                 break;
-
             case SpecialAbilityType.TripleMolotov:
-                // MolotovStrategy leerá HasAbility(TripleMolotov) para disparar en rafaga
+                abilityHUD.UnlockNext(spriteTripleMolotov);
                 break;
-
             case SpecialAbilityType.UnlockBlades:
                 abilityController.BladesAvailable();
+                abilityHUD.UnlockNext(spriteUnlockBlades);
                 break;
-
             case SpecialAbilityType.BladesBurst:
                 Debug.Log("[UpgradeSystem] BladesBurst desbloqueado");
+                abilityHUD.UnlockNext(spriteBladesBurst);
                 break;
         }
     }
@@ -105,5 +112,6 @@ public class UpgradeSystem : MonoBehaviour
     {
         playerUpgrades.ResetAll();
         abilityController.ResetAbilities();
+        abilityHUD.ResetAll();
     }
 }
