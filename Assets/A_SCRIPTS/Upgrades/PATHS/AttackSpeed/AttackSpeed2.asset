@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AttackSpeed2
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: AttackSpeed2
-  description: AttackSpeed2
+  description: Basic Attack Colldown -0.1s
   icon: {fileID: 0}
   statType: 2
   statValue: 0.1

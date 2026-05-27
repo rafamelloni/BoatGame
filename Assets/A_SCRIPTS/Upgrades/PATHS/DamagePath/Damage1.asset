@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d57ff8f0c17a0f4b825461db54f66a7, type: 3}
   m_Name: Damage1
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
-  displayName: Damage 1
-  description: Damage 1
+  displayName: Damage
+  description: +8 Cannon Damage
   icon: {fileID: 0}
   statType: 1
   statValue: 20

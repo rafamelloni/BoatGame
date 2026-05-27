@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d57ff8f0c17a0f4b825461db54f66a7, type: 3}
   m_Name: Molotov4
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
-  displayName: Molotov4
-  description: Triple Molotov
+  displayName: Molotov
+  description: Every X seconds throw a wave of molotovs to all nearby enemies
   icon: {fileID: 0}
   statType: 0
   statValue: 0

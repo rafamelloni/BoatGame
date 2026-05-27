@@ -14,7 +14,7 @@ public class ChestAnimationUI : MonoBehaviour
 
     private void Update()
     {
-        float z = Mathf.Sin(Time.time * speed) * rotationAmount;
+        float z = Mathf.Sin(Time.unscaledTime * speed) * rotationAmount;
         _rect.localRotation = Quaternion.Euler(0f, 0f, z);
     }
 }

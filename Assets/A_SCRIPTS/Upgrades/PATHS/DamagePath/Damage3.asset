@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Damage3
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: Damage 3
-  description: Damage 3
+  description: +9 Cannon Damage
   icon: {fileID: 0}
   statType: 1
   statValue: 20

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Life4
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: Life Ability
-  description: Life Ability
+  description: On 30% Health cast a wave that clears all enemies
   icon: {fileID: 0}
   statType: 0
   statValue: 0

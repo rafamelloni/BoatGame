@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Damage4
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: Damage 4 R
-  description: Damage 4 R
+  description: 'Cannon Bullet Has Richchet '
   icon: {fileID: 0}
   statType: 1
   statValue: 20

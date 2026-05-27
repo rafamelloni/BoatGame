@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d57ff8f0c17a0f4b825461db54f66a7, type: 3}
   m_Name: Life3
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
-  displayName: Life1
-  description: Life1
+  displayName: 'Max Hp '
+  description: '+35 Max Hp '
   icon: {fileID: 0}
   statType: 4
-  statValue: 0
+  statValue: 34
   specialAbility: 0

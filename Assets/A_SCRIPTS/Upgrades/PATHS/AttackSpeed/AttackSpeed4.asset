@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: AttackSpeed4
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: AttackSpeed4
-  description: Double Shoot
+  description: Bullets Spread into 3 mid air
   icon: {fileID: 0}
-  statType: 2
-  statValue: 0.1
+  statType: 0
+  statValue: 0
   specialAbility: 2
