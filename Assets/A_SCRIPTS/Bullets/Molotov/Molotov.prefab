@@ -32,7 +32,8 @@ Transform:
   m_LocalPosition: {x: 1, y: 9.76, z: 1}
   m_LocalScale: {x: 0.47829, y: 0.45711, z: 1.0802}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 8254925154938948995}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6989767594268265697
@@ -67,8 +68,7 @@ MeshRenderer:
   m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  m_Materials: []
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -125,3 +125,77 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39fff486eabfe4d45bd32f3c1c0e77f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MolotovProjectile
+--- !u!1001 &7302114133029747480
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1701799182895474407}
+    m_Modifications:
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.028257126
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.011957614
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.027005823
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.06794411
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 2058954270697991201, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+      propertyPath: m_Name
+      value: MolotovPrefab
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+--- !u!4 &8254925154938948995 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1718458250309564059, guid: 5fa2e46f7d8c94744b27ed2cb3931b47, type: 3}
+  m_PrefabInstance: {fileID: 7302114133029747480}
+  m_PrefabAsset: {fileID: 0}
