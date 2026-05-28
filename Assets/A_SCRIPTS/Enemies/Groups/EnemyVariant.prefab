@@ -405,9 +405,6 @@ MonoBehaviour:
   - {fileID: 993597476663654327}
   - {fileID: 5775289687523802252}
   - {fileID: 2503559608147710761}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   stopDistance: 12
   fireRate: 2
 --- !u!1 &2410303733367977102

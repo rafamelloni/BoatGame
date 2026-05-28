@@ -30,4 +30,10 @@ public class CoinManager : MonoBehaviour
             OnBarFilled?.Invoke();
         }
     }
+
+    public void SetCoinsRequired(int amount)
+    {
+        _coinsToFill = amount;
+        OnCoinChanged?.Invoke(Mathf.Clamp01((float)_coins / _coinsToFill));
+    }
 }

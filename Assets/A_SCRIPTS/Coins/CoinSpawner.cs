@@ -52,4 +52,10 @@ public class CoinSpawner : MonoBehaviour
     }
 
     private void ReturnToPool(Coin coin) => _pool.Return(coin);
+    public void DespawnAll()
+    {
+        var active = FindObjectsByType<Coin>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var coin in active)
+            _pool.Return(coin);
+    }
 }

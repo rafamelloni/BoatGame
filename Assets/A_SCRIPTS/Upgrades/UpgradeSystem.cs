@@ -18,6 +18,8 @@ public class UpgradeSystem : MonoBehaviour
     [SerializeField] private Sprite spriteUnlockBlades;
     [SerializeField] private Sprite spriteBladesBurst;
 
+    [SerializeField] private DashMovement dashMovement;
+    [SerializeField] private LastStand lastStand;
     public void ApplyUpgrade(SO_UpgradePath path)
     {
         if (!playerUpgrades.CanUpgrade(path))
@@ -83,11 +85,11 @@ public class UpgradeSystem : MonoBehaviour
                 abilityHUD.UnlockNext(spriteDoubleShot);
                 break;
             case SpecialAbilityType.Dashes:
-                GetComponent<DashMovement>().Unlock();
+                dashMovement.Unlock();
                 abilityHUD.UnlockNext(spriteDashes);
                 break;
             case SpecialAbilityType.ClearScreen:
-                GetComponent<LastStand>().Unlock();
+                lastStand.Unlock();
                 abilityHUD.UnlockNext(spriteClearScreen);
                 break;
             case SpecialAbilityType.UnlockMolotov:
@@ -95,7 +97,7 @@ public class UpgradeSystem : MonoBehaviour
                 abilityHUD.UnlockNext(spriteUnlockMolotov);
                 break;
             case SpecialAbilityType.TripleMolotov:
-                abilityHUD.UnlockNext(spriteTripleMolotov);
+               // abilityHUD.UnlockNext(spriteTripleMolotov);
                 break;
             case SpecialAbilityType.UnlockBlades:
                 abilityController.BladesAvailable();
@@ -103,7 +105,7 @@ public class UpgradeSystem : MonoBehaviour
                 break;
             case SpecialAbilityType.BladesBurst:
                 Debug.Log("[UpgradeSystem] BladesBurst desbloqueado");
-                abilityHUD.UnlockNext(spriteBladesBurst);
+                //abilityHUD.UnlockNext(spriteBladesBurst);
                 break;
         }
     }

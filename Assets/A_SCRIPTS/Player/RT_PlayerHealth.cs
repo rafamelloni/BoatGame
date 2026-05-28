@@ -68,7 +68,10 @@ public class RT_PlayerHealth : MonoBehaviour
     private Coroutine _vignettePulseRoutine;
 
     private static readonly int VignetteIntensityID = Shader.PropertyToID("_VignetteIntensity");
-
+    private void OnApplicationQuit()
+    {
+        _lifeVignette.SetFloat("_NombreDelProperty", 0f);
+    }
     private void Awake()
     {
         _stats = GetComponent<RT_PlayerStats>();

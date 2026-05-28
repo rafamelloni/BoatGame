@@ -113,7 +113,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShipEnemy
   baseData: {fileID: 11400000, guid: 461a22b217275fe43910476286acd63c, type: 2}
   _enemyHealth: {fileID: 8154749399199304049}
-  speed: 2
+  speed: 3.5
   rotationSpeed: 1
   playerAimPoint: {fileID: 0}
   broadSideDistance: 12

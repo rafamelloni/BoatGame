@@ -18,6 +18,7 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private GameObject _canvasPreSeleccion;
     [SerializeField] private UpgradeSystem _upgradeSystem;
     [SerializeField] private RT_PlayerUpgrades _playerUpgrades;
+    [SerializeField] private CoinSpawner _coinSpawner;
 
     [Header("Player")]
     [SerializeField] private Transform _playerTransform;
@@ -105,6 +106,7 @@ public class SceneResetter : MonoBehaviour
         _islandSpawnManager.ResetIslands();
         _enemySpawner.DespawnAll();
         _timerBoss.ResetTimer();
+        _coinSpawner.DespawnAll();
 
         // Preselección
         PreselectionData.Reset();

@@ -56,6 +56,11 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         IsDying = false;
     }
 
+    public void SetMaxHealth(float newHealth)
+    {
+
+    }
+
     public float GetHealthNormalized()
     {
         return _rtData.currentHealth / _rtData.maxHealth;
