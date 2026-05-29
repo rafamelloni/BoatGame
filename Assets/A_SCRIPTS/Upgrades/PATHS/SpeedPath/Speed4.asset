@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: Speed4
   description: Dash
-  icon: {fileID: 21300000, guid: af34f4863b8716843b098564341f4e4f, type: 3}
+  icon: {fileID: 21300000, guid: cc377fcf359424441bb2faaff54d7be1, type: 3}
   statType: 3
   statValue: 2
   specialAbility: 3

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: Life Ability
   description: On 30% Health cast a wave that clears all enemies
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: d63f1d3079289d64fa06237562c8a5cb, type: 3}
   statType: 0
   statValue: 0
   specialAbility: 4
