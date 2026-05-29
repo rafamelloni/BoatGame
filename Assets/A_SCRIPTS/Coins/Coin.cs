@@ -11,8 +11,6 @@ public class Coin : MonoBehaviour
     [SerializeField] private float _magnetRadius = 6f;
     [SerializeField] private float _orbitRadius = 1.2f;
     [SerializeField] private float _magnetSpeed = 8f;
-    [SerializeField] private float _orbitSpeed = 270f;
-    [SerializeField] private float _orbitDuration = 0.6f;
 
     private float _baseY;
     private Transform _player;
@@ -20,8 +18,7 @@ public class Coin : MonoBehaviour
     private enum State { Float, Pull, Orbit }
     private State _state = State.Float;
 
-    private float _orbitTimer;
-    private float _orbitAngle;
+
 
     public event System.Action<Coin> OnCollected;
     [SerializeField] private TrailRenderer _trail;
@@ -64,14 +61,7 @@ public class Coin : MonoBehaviour
 
 
 
-    private void EnterOrbit()
-    {
-        Vector3 dir = transform.position - _player.position;
-        dir.y = 0f;
-        _orbitAngle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
-        _orbitTimer = 0f;
-        _state = State.Orbit;
-    }
+
     private void DoFloat()
     {
         float newY = _baseY + Mathf.Sin(Time.time * _bobSpeed) * _bobAmplitude;

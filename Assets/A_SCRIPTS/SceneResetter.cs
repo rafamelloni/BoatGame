@@ -41,7 +41,6 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private float _slowMotionScale = 0.15f;
     [SerializeField] private float _slowMoFadeInDuration = 0.3f;
     [SerializeField] private float _zoomFOV = 40f;
-    [SerializeField] private float _zoomDuration = 0.4f;
     [SerializeField] private float _particleDelay = 0.2f;
 
     [SerializeField] private Movement _movement;

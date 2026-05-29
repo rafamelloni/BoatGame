@@ -4,7 +4,6 @@ using UnityEngine;
 public class DashBossMovement : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float _speed = 3f;
     [SerializeField] private float _rotationSpeed = 4f;
     [SerializeField] private float _rotationAngle;
     [Header("Dash")]

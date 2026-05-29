@@ -4,7 +4,7 @@ public class SO_UpgradePath : ScriptableObject
 {
     [Header("Info")]
     public string pathName;
-    public Sprite pathIcon;
+    public Sprite pathIconGrey;
     public Sprite pathIconSelected;
     [TextArea] public string pathDescription;
 

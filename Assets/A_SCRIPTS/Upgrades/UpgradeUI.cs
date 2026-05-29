@@ -53,7 +53,7 @@ public class UpgradeUI : MonoBehaviour
             if (i < _currentOffer.Count)
             {
                 pathButtons[i].gameObject.SetActive(true);
-                pathButtons[i].GetComponent<Image>().sprite = _currentOffer[i].pathIcon;
+                pathButtons[i].GetComponent<Image>().sprite = _currentOffer[i].pathIconGrey;
             }
             else
             {
@@ -74,7 +74,7 @@ public class UpgradeUI : MonoBehaviour
         if (index >= _currentOffer.Count) return;
 
         for (int i = 0; i < _currentOffer.Count; i++)
-            pathButtons[i].GetComponent<Image>().sprite = _currentOffer[i].pathIcon;
+            pathButtons[i].GetComponent<Image>().sprite = _currentOffer[i].pathIconGrey;
 
         pathButtons[index].GetComponent<Image>().sprite = _currentOffer[index].pathIconSelected;
 

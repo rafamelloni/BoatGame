@@ -21,8 +21,7 @@ public class UpgradeStatsUI : MonoBehaviour
     [SerializeField] private Slider _barMortar;
     [SerializeField] private float _barMax = 5f;
 
-    [Header("Flash")]
-    [SerializeField] private float _flashDuration = 0.5f;
+
 
     private readonly Dictionary<(string, StatType), float> _baseValues = new();
 

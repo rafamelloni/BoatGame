@@ -10,7 +10,6 @@ public class TabUI : MonoBehaviour
 
     Vector3 containerStartPos;
     Vector3 containerUpPos;
-    bool isOpen = false;
     Coroutine currentRoutine;
 
     void Start()

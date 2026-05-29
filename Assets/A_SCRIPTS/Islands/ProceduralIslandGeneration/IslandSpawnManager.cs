@@ -12,7 +12,6 @@ public class IslandSpawnManager : MonoBehaviour
 
     [Header("Placement")]
     [SerializeField] private float _minDistanceBetweenIslands = 20f;
-    [SerializeField] private float _spawnRadius = 100f;
     [SerializeField] private float _minDistanceFromPlayer = 50f;
     [SerializeField] private LayerMask _overlapCheckMask;
 

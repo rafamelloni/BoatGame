@@ -10,10 +10,7 @@ public class CannonBulletIsland : BulletsBase
     float _side;
     private CannonBulletImpactIndicator _impactIndicator;
 
-    [Header("Explosion")]
-    [SerializeField] private float _explosionRadius = 2f;
-    [SerializeField] private LayerMask _damageLayers;
-
+  
 
 
     private void Awake()

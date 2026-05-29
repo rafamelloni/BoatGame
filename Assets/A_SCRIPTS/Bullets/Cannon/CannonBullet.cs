@@ -30,9 +30,7 @@ public class CannonBullet : BulletsBase
     public bool debugRicochet = false;
     public bool debugSplit = false;
 
-    private Vector3 _lastExplosionPoint;
-    private bool _showLastExplosion;
-    private bool _hasRicocheted = false;
+   
     private bool _isSplitBullet = false;
     private RT_PlayerUpgrades _playerUpgrades;
     private Collider _ignoredCollider;
@@ -58,7 +56,6 @@ public class CannonBullet : BulletsBase
         if (_impactIndicator != null)
             _impactIndicator.ResetIndicator();
         _trail.Clear();
-        _hasRicocheted = false;
         _ricochetCount = 0;
         _ignoredCollider = null;
         _isSplitBullet = false;
@@ -208,8 +205,7 @@ public class CannonBullet : BulletsBase
 
     private void Explode(Vector3 center)
     {
-        _lastExplosionPoint = center;
-        _showLastExplosion = true;
+        
         Collider[] hits = Physics.OverlapSphere(center, _explosionRadius, _damageLayers);
         for (int i = 0; i < hits.Length; i++)
         {

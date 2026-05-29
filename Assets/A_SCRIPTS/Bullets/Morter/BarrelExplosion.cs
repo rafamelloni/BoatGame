@@ -19,8 +19,6 @@ public class BarrelExplosion : BulletsBase
     [SerializeField] private float _explosionRadius = 2f;
     [SerializeField] private LayerMask _damageLayers;
 
-    private Vector3 _lastExplosionPoint;
-    private bool _showLastExplosion;
     private Vector3 _spawnOffset;
 
     private void Awake()
@@ -93,8 +91,7 @@ public class BarrelExplosion : BulletsBase
 
     private void Explode(Vector3 center)
     {
-        _lastExplosionPoint = center;
-        _showLastExplosion = true;
+       
 
         Collider[] hits = Physics.OverlapSphere(center, _explosionRadius, _damageLayers);
 

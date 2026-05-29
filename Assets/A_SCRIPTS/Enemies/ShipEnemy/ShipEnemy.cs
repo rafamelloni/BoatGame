@@ -20,9 +20,7 @@ public class ShipEnemy : Enemy
     [SerializeField] private LayerMask obstacleLayer;
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private float obstacleRadius = 8f;
-    [SerializeField] private float separationRadius = 4f;
     [SerializeField] private float avoidanceWeight = 3f;
-    [SerializeField] private float separationWeight = 1.5f;
 
     [Header("Broadside Obstacle")]
     [SerializeField] private float broadsideRayLength = 6f;

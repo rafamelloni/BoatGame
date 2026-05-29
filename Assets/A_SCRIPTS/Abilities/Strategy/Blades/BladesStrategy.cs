@@ -5,7 +5,7 @@ using UnityEngine;
 public class BladesStrategy : IAbilityStrategy
 {
     public bool IsUnlocked { get; private set; } = false;
-    public event System.Action<float> OnCooldownStarted;
+    //public event System.Action<float> OnCooldownStarted;
 
     private SO_BladesData _data;
     public RT_BladesData _rtData;
