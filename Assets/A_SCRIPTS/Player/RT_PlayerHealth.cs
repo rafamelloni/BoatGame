@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
+using TMPro;
 
 public class RT_PlayerHealth : MonoBehaviour
 {
@@ -62,6 +64,11 @@ public class RT_PlayerHealth : MonoBehaviour
     [Header("VFX Destrucción")]
     [SerializeField] private GameObject _vfxDestroyed;
     [SerializeField] private float _vidaParaActivarFuego = 30f;
+
+    [Header("UI")]
+    [SerializeField] private TextMeshProUGUI _healthText;
+    [SerializeField] private Material _healthBarMaterial;
+    [SerializeField] private float _fillMax = 1.9f;
 
     private Material _shipMaterial;
     private Material _sailMaterial;
@@ -150,6 +157,7 @@ public class RT_PlayerHealth : MonoBehaviour
         UpdateSailDamageShader();
         UpdateSailFireByHealth();
         UpdateDestroyedVFX();
+        UpdateHealthUI();
     }
 
     private void UpdateShipModelByHealth()
@@ -322,6 +330,20 @@ public class RT_PlayerHealth : MonoBehaviour
         _vfxDestroyed.SetActive(_stats.currentHealth <= _vidaParaActivarFuego);
     }
 
+    private void UpdateHealthUI()
+    {
+        if (_stats == null || _stats.maxHealth <= 0f) return;
+
+        if (_healthText != null)
+            _healthText.text = $"{Mathf.CeilToInt(_stats.currentHealth)}/{Mathf.CeilToInt(_stats.maxHealth)}";
+
+        if (_healthBarMaterial != null)
+        {
+            float fillValue = (_stats.currentHealth / _stats.maxHealth) * _fillMax;
+            _healthBarMaterial.SetFloat("_FillLevel", fillValue);
+        }
+    }
+
     private void ResetVisuals()
     {
         if (_vignettePulseRoutine != null)
@@ -343,5 +365,7 @@ public class RT_PlayerHealth : MonoBehaviour
         if (_fireVela50 != null) _fireVela50.SetActive(false);
         if (_fireVela25 != null) _fireVela25.SetActive(false);
         if (_vfxDestroyed != null) _vfxDestroyed.SetActive(false);
+
+        UpdateHealthUI();
     }
 }

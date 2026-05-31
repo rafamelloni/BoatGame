@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Path_AttackSpeed
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
   pathName: Attack Speed
-  pathIcon: {fileID: 21300000, guid: 8871eccd270ae8c4c8b3723bf74ef5d4, type: 3}
+  pathIconGrey: {fileID: 21300000, guid: 8871eccd270ae8c4c8b3723bf74ef5d4, type: 3}
   pathIconSelected: {fileID: 21300000, guid: abd14d9217f5d934d9a3d569ab3962ad, type: 3}
   pathDescription: 'Attack Speed Path
 

@@ -5,6 +5,7 @@ public class CannonAimManager : MonoBehaviour
     [SerializeField] private Transform _cannonRight;
     [SerializeField] private Transform _cannonLeft;
     [SerializeField] private float _rotationSpeed = 10f;
+    [SerializeField] private Camera cam;
 
     private void Update()
     {
@@ -51,10 +52,14 @@ public class CannonAimManager : MonoBehaviour
 
     private Vector3? GetCursorWorldPos()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Plane plane = new Plane(Vector3.up, transform.position);
-        if (plane.Raycast(ray, out float distance))
-            return ray.GetPoint(distance);
+        if(cam.gameObject.activeSelf)
+        {
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+            Plane plane = new Plane(Vector3.up, transform.position);
+            if (plane.Raycast(ray, out float distance))
+                return ray.GetPoint(distance);
+            return null;
+        }
         return null;
     }
 

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Path_Blades
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
   pathName: Blades
-  pathIcon: {fileID: 21300000, guid: 5c8411812c9a0cf4f883d351d9cfaad2, type: 3}
+  pathIconGrey: {fileID: 21300000, guid: 5c8411812c9a0cf4f883d351d9cfaad2, type: 3}
   pathIconSelected: {fileID: 21300000, guid: 7b0553e697e9323428ea84386c806694, type: 3}
   pathDescription: 'Spinning Blades '
   steps:

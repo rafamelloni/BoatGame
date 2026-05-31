@@ -30,8 +30,6 @@ public class AbilityController : MonoBehaviour
     public GameObject cannonMesh;
     public GameObject cannonUI;
     public GameObject cannonTecla;
-    public GameObject cannonBarra;
-    public GameObject cannonText;
     public GameObject cooldownC;
     public bool _wasUCannon = false;
 
@@ -132,8 +130,6 @@ public class AbilityController : MonoBehaviour
         cannonMesh.SetActive(true);
         cannonUI.SetActive(true);
         cannonTecla.SetActive(true);
-        cannonBarra.SetActive(true);
-        cannonText.SetActive(true);
         cooldownC.SetActive(true);
         _abilityE.SetUnlocked(true);
     }
@@ -168,8 +164,6 @@ public class AbilityController : MonoBehaviour
         cannonMesh.SetActive(false);
         cannonUI.SetActive(false);
         cannonTecla.SetActive(false);
-        cannonBarra.SetActive(false);
-        cannonText.SetActive(false);
         cooldownC.SetActive(false);
 
         mortarGo.SetActive(false);
