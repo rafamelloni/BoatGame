@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Path_Speed
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
   pathName: Speed
-  pathIcon: {fileID: 21300000, guid: cc377fcf359424441bb2faaff54d7be1, type: 3}
+  pathIconGrey: {fileID: 21300000, guid: b49b5455e2654a549bf4a5e5382bd528, type: 3}
   pathIconSelected: {fileID: 21300000, guid: cc377fcf359424441bb2faaff54d7be1, type: 3}
   pathDescription: 
   steps:

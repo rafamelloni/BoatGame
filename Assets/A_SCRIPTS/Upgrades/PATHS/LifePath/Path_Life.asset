@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Path_Life
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
   pathName: Life
-  pathIcon: {fileID: 21300000, guid: d63f1d3079289d64fa06237562c8a5cb, type: 3}
+  pathIconGrey: {fileID: 21300000, guid: a62f92efdf2bb004481a5f6392c3ce9a, type: 3}
   pathIconSelected: {fileID: 21300000, guid: d63f1d3079289d64fa06237562c8a5cb, type: 3}
   pathDescription: Lifess
   steps:
