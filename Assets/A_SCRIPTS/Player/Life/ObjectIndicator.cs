@@ -1,34 +1,29 @@
 using UnityEngine;
-
 public class ObjectIndicator : MonoBehaviour
 {
-    [SerializeField] private Transform _target;
-    [SerializeField] private float _edgePadding = 60f;
-    [SerializeField] private float _hideDistance = 50f;
-    [SerializeField] private float _minDistance = 50f;
-    [SerializeField] private float _maxDistance = 500f;
-    [SerializeField] private float _minScale = 0.3f;
-    [SerializeField] private float _maxScale = 1f;
-
-    [SerializeField] private RectTransform _indicator;
-    [SerializeField] private RectTransform _targetImage;
-
-    [SerializeField] private float _maxShowDistance = 300f;
-
+    [SerializeField] float _edgePadding = 60f;
+    [SerializeField] float _hideDistance = 50f;
+    [SerializeField] float _minDistance = 50f;
+    [SerializeField] float _maxDistance = 500f;
+    [SerializeField] float _minScale = 0.3f;
+    [SerializeField] float _maxScale = 1f;
+    [SerializeField] float _maxShowDistance = 300f;
+    [SerializeField] RectTransform _indicator;
+    [SerializeField] RectTransform _islaImage;
     public Camera _cam;
 
+  
 
-
-    private void Update()
+    void Update()
     {
-        if (_target == null || _indicator == null) return;
+        if (_indicator == null) return;
 
-        Vector3 screenPos = _cam.WorldToScreenPoint(_target.position);
+        Vector3 screenPos = _cam.WorldToScreenPoint(transform.position);
         bool isOnScreen = screenPos.z > 0
             && screenPos.x > 0 && screenPos.x < Screen.width
             && screenPos.y > 0 && screenPos.y < Screen.height;
 
-        float dist = Vector3.Distance(_cam.transform.position, _target.position);
+        float dist = Vector3.Distance(_cam.transform.position, transform.position);
 
         if (isOnScreen || dist < _hideDistance || dist > _maxShowDistance)
         {
@@ -65,8 +60,8 @@ public class ObjectIndicator : MonoBehaviour
         float rot = Mathf.Atan2(screenPos.y, screenPos.x) * Mathf.Rad2Deg;
         _indicator.rotation = Quaternion.Euler(0, 0, rot + 90f);
 
-        if (_targetImage != null)
-            _targetImage.rotation = Quaternion.identity;
+        if (_islaImage != null)
+            _islaImage.rotation = Quaternion.identity;
 
         float t = Mathf.InverseLerp(_minDistance, _maxDistance, dist);
         float scale = Mathf.Lerp(_maxScale, _minScale, t);
