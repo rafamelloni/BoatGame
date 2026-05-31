@@ -4,9 +4,11 @@ using UnityEngine.UI;
 public class UpgradeSystem : MonoBehaviour
 {
     [SerializeField] private RT_PlayerStats playerStats;
+    [SerializeField] private RT_PlayerHealth playerH;
     [SerializeField] private RT_PlayerUpgrades playerUpgrades;
     [SerializeField] private AbilityController abilityController;
     [SerializeField] private SpecialAbilityHUD abilityHUD;
+    [SerializeField] private Movement movement;
 
     [Header("Sprites HUD")]
     [SerializeField] private Sprite spriteRicochet;
@@ -20,6 +22,8 @@ public class UpgradeSystem : MonoBehaviour
 
     [SerializeField] private DashMovement dashMovement;
     [SerializeField] private LastStand lastStand;
+
+
     public void ApplyUpgrade(SO_UpgradePath path)
     {
         if (!playerUpgrades.CanUpgrade(path))
@@ -52,6 +56,10 @@ public class UpgradeSystem : MonoBehaviour
                 float extra = playerStats.maxHealth * (step.statValue / 100f);
                 playerStats.maxHealth += extra;
                 playerStats.currentHealth += extra;
+                playerH.RefreshUI();
+                break;
+            case StatType.HealthRegen:
+                playerH.StartRegen(0.5f);
                 break;
             case StatType.MolotovDamage:
                 abilityController.MolotovAbility._rtData.damage *= 1f + step.statValue / 100f;
@@ -85,7 +93,7 @@ public class UpgradeSystem : MonoBehaviour
                 abilityHUD.UnlockNext(spriteDoubleShot);
                 break;
             case SpecialAbilityType.Dashes:
-                dashMovement.Unlock();
+                movement.UpgradeSprintDuration();
                 abilityHUD.UnlockNext(spriteDashes);
                 break;
             case SpecialAbilityType.ClearScreen:

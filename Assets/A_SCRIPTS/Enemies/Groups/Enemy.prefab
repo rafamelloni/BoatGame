@@ -53,7 +53,7 @@ MonoBehaviour:
   - {fileID: 559045322725610574}
   - {fileID: 174596643746797839}
   - {fileID: 5462108269405984583}
-  stopDistance: 15
+  stopDistance: 12
   fireRate: 2.3
 --- !u!1 &1300345625809637489
 GameObject:

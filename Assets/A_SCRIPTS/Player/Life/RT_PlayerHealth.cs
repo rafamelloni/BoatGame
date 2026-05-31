@@ -70,6 +70,10 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField] private Material _healthBarMaterial;
     [SerializeField] private float _fillMax = 1.9f;
 
+    [Header("Regeneración")]
+    [SerializeField] private float _regenRate = 0f;
+    private Coroutine _regenRoutine;
+
     private Material _shipMaterial;
     private Material _sailMaterial;
     private Coroutine _vignettePulseRoutine;
@@ -78,6 +82,11 @@ public class RT_PlayerHealth : MonoBehaviour
     private void OnApplicationQuit()
     {
         _lifeVignette.SetFloat("_NombreDelProperty", 0f);
+    }
+
+    public void RefreshUI()
+    {
+        UpdateHealthUI();
     }
     private void Awake()
     {
@@ -367,5 +376,26 @@ public class RT_PlayerHealth : MonoBehaviour
         if (_vfxDestroyed != null) _vfxDestroyed.SetActive(false);
 
         UpdateHealthUI();
+    }
+
+    public void StartRegen(float ratePerSecond)
+    {
+        _regenRate = ratePerSecond;
+        if (_regenRoutine != null) StopCoroutine(_regenRoutine);
+        _regenRoutine = StartCoroutine(RegenRoutine());
+    }
+
+    private IEnumerator RegenRoutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1f);
+            if (_isDead) yield break;
+            if (_stats.currentHealth < _stats.maxHealth)
+            {
+                _stats.currentHealth = Mathf.Min(_stats.currentHealth + _regenRate, _stats.maxHealth);
+                UpdateVisuals();
+            }
+        }
     }
 }

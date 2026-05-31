@@ -13,7 +13,7 @@ public class CannonBulletImpactIndicator : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float maxPredictTime = 10f;
     [SerializeField] private float simulationStep = 0.05f;
-    [SerializeField] private float groundOffset = 0.05f;
+    [SerializeField] private float groundOffset = 0.5f;
 
     [Header("Shader Values")]
     [SerializeField] private float startValue = 1f;
@@ -119,6 +119,30 @@ public class CannonBulletImpactIndicator : MonoBehaviour
             indicatorVisual.localRotation = Quaternion.identity;
             indicatorVisual.localScale = _originalLocalScale;
         }
+    }
+
+    public void SetPosition(Vector3 worldPoint)
+    {
+        _initialized = false;
+        _currentTime = 0f;
+        _flightTime = 1f; // valor dummy para el shader
+
+        if (indicatorVisual != null)
+        {
+            indicatorVisual.SetParent(null, true);
+            indicatorVisual.position = new Vector3(worldPoint.x, 6.3f, worldPoint.z);
+            indicatorVisual.rotation = Quaternion.identity;
+            indicatorVisual.gameObject.SetActive(true);
+        }
+
+        if (indicatorRenderer != null)
+        {
+            indicatorRenderer.GetPropertyBlock(_mpb);
+            _mpb.SetFloat(_shaderFloatID, startValue);
+            indicatorRenderer.SetPropertyBlock(_mpb);
+        }
+
+        _initialized = true;
     }
 }
 

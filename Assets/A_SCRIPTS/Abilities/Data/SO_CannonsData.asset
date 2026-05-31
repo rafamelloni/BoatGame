@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_CannonData
   bulletPrefab: {fileID: 8034590942499124795, guid: 03d3d9e452ce62340962d353c7a01990, type: 3}
   bulletSpeed: 20
-  verticalArc: 0
+  verticalArc: 3
   damage: 50
   dropDelay: 0.25
   shotsPerBurst: 1
@@ -23,3 +23,4 @@ MonoBehaviour:
   explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
   waterSplash: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}
   trasilRederer: {fileID: 3430440030359892173, guid: 03d3d9e452ce62340962d353c7a01990, type: 3}
+  launchSpeed: 15

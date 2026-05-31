@@ -22,6 +22,9 @@ public class SO_CannonData : ScriptableObject
     public  GameObject waterSplash;
     public TrailRenderer trasilRederer;
 
+    [Header("Parábola")]
+    public float launchSpeed = 25f;
+
 
 
 }

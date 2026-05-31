@@ -30,12 +30,13 @@ public class CannonBullet : BulletsBase
     public bool debugRicochet = false;
     public bool debugSplit = false;
 
-   
     private bool _isSplitBullet = false;
     private RT_PlayerUpgrades _playerUpgrades;
     private Collider _ignoredCollider;
 
     public event Action<Vector3, Vector3, float> OnSplit;
+
+    private Vector3 _targetPoint;
 
     private void Awake()
     {
@@ -47,7 +48,6 @@ public class CannonBullet : BulletsBase
 
     public override void TurnOff()
     {
-
         StopAllCoroutines();
         _rb.useGravity = false;
         _rb.linearVelocity = Vector3.zero;
@@ -63,13 +63,14 @@ public class CannonBullet : BulletsBase
         gameObject.SetActive(false);
     }
 
-    public void Setup(Transform point, RT_CannonData rtData, float side, RT_PlayerUpgrades playerUpgrades)
+    public void Setup(Transform point, RT_CannonData rtData, float side, RT_PlayerUpgrades playerUpgrades, Vector3 targetPoint)
     {
         _pointShoot = point;
         _rtData = rtData;
         _side = side;
         _playerUpgrades = playerUpgrades;
         _isSplitBullet = false;
+        _targetPoint = targetPoint;
         Launch();
     }
 
@@ -80,10 +81,10 @@ public class CannonBullet : BulletsBase
         _isSplitBullet = true;
 
         transform.position = position;
-        transform.rotation = Quaternion.LookRotation(direction); // agregar esto
+        transform.rotation = Quaternion.LookRotation(direction);
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
-        _rb.position = position; // agregar esto
+        _rb.position = position;
         _rb.useGravity = false;
         _rb.linearVelocity = direction * rtData.bulletSpeed;
 
@@ -99,20 +100,49 @@ public class CannonBullet : BulletsBase
         _rb.angularVelocity = Vector3.zero;
         _rb.position = _pointShoot.position;
         _rb.rotation = _pointShoot.rotation;
-        _rb.useGravity = false;
-        Vector3 dir = _pointShoot.right * _side;
-        dir.y = 0f;
-        dir.Normalize();
-        Vector3 startVelocity = dir * _rtData.bulletSpeed;
+        _rb.useGravity = true;
+
+        Vector3 startVelocity = CalculateLaunchVelocity(_pointShoot.position, _targetPoint);
         _rb.linearVelocity = startVelocity;
+
         if (_impactIndicator != null)
-            _impactIndicator.Init(_pointShoot.position, startVelocity);
+            _impactIndicator.SetPosition(_targetPoint);
+
         StartCoroutine(ActivateColliderBulelt());
-        StartCoroutine(DropBullet());
 
         bool hasSplit = debugSplit || (_playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.DoubleShot));
         if (hasSplit && !_isSplitBullet)
             StartCoroutine(SplitCoroutine());
+    }
+
+    private Vector3 CalculateLaunchVelocity(Vector3 origin, Vector3 target)
+    {
+        float gravity = Mathf.Abs(Physics.gravity.y);
+        Vector3 toTarget = target - origin;
+        Vector3 toTargetXZ = new Vector3(toTarget.x, 0f, toTarget.z);
+        float distance = toTargetXZ.magnitude;
+        float yOffset = toTarget.y;
+        float v = _rtData.launchSpeed;
+
+        if (distance < 0.1f)
+            return Vector3.up * v;
+
+        float angle = Mathf.Clamp(distance * 1f, 15f, 75f) * Mathf.Deg2Rad;
+        float cosAngle = Mathf.Cos(angle);
+        float sinAngle = Mathf.Sin(angle);
+
+        float denom = 2f * cosAngle * cosAngle * (distance * Mathf.Tan(angle) - yOffset);
+        if (denom <= 0f)
+        {
+            float fallbackAngle = 45f * Mathf.Deg2Rad;
+            Vector3 fallbackDir = toTargetXZ.normalized * Mathf.Cos(fallbackAngle) + Vector3.up * Mathf.Sin(fallbackAngle);
+            return fallbackDir * v;
+        }
+
+        v = Mathf.Sqrt((gravity * distance * distance) / denom);
+        v = Mathf.Clamp(v, 5f, _rtData.launchSpeed);
+
+        return toTargetXZ.normalized * v * cosAngle + Vector3.up * v * sinAngle;
     }
 
     private IEnumerator SplitCoroutine()
@@ -205,7 +235,6 @@ public class CannonBullet : BulletsBase
 
     private void Explode(Vector3 center)
     {
-        
         Collider[] hits = Physics.OverlapSphere(center, _explosionRadius, _damageLayers);
         for (int i = 0; i < hits.Length; i++)
         {

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d57ff8f0c17a0f4b825461db54f66a7, type: 3}
   m_Name: Speed3
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
-  displayName: Speed3
-  description: Speed3
+  displayName: Speed Upgrade
+  description: Speed +1
   icon: {fileID: 21300000, guid: cc377fcf359424441bb2faaff54d7be1, type: 3}
   statType: 3
-  statValue: 2
+  statValue: 1
   specialAbility: 0

@@ -129,7 +129,6 @@ public class AbilityController : MonoBehaviour
         _wasUCannon = true;
         cannonMesh.SetActive(true);
         cannonUI.SetActive(true);
-        cannonTecla.SetActive(true);
         cooldownC.SetActive(true);
         _abilityE.SetUnlocked(true);
     }

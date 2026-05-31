@@ -178,4 +178,10 @@ public class Movement : MonoBehaviour
         _rb.position = pos;
         playerWave.SetBaseHeight(targetY);
     }
+
+    public void UpgradeSprintDuration()
+    {
+        sprintMaxDuration *= 2f;
+        _sprintStamina = Mathf.Min(_sprintStamina * 2f, sprintMaxDuration);
+    }
 }

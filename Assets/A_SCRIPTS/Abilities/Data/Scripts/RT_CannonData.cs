@@ -11,6 +11,7 @@ public class RT_CannonData
     public float cooldown;
     public float damage;
     public float dropDelay;
+    public float launchSpeed;
 
     public GameObject waterSplashVFX;
     public GameObject explosionVFX;
@@ -28,5 +29,6 @@ public class RT_CannonData
         waterSplashVFX = so.waterSplash;
         explosionVFX = so.explosionVfx;
         bulletPrefab = so.bulletPrefab;
+        launchSpeed = so.launchSpeed;
     }
 }

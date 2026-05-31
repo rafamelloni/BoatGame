@@ -10,5 +10,6 @@ public enum StatType
     BladeDamage,
     BladeSpeed,
     BladeCount,
-    OrbitRadius
+    OrbitRadius,
+    HealthRegen
 }

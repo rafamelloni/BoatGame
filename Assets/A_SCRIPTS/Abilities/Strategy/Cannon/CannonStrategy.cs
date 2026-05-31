@@ -42,16 +42,27 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         if (Time.time < nextFireTime) return;
         nextFireTime = Time.time + _rtData.cooldown;
         OnCooldownStarted?.Invoke(_rtData.cooldown);
-        runner.StartCoroutine(FireBurst());
+        Vector3 targetPoint = GetMouseWorldPoint();
+        runner.StartCoroutine(FireBurst(targetPoint));
     }
 
-    private IEnumerator FireBurst()
+    private IEnumerator FireBurst(Vector3 targetPoint)
     {
+        Vector3 shipPos = hardpoints.transform.position;
+        Vector3 toTarget = targetPoint - shipPos;
+        Vector3 mirroredTarget = shipPos + Vector3.Reflect(toTarget, hardpoints.transform.right);
+
+        // Detectar de qué lado está el target
+        float side = Vector3.Dot(toTarget, hardpoints.transform.right);
+
+        Vector3 rightTarget = side >= 0f ? targetPoint : mirroredTarget;
+        Vector3 leftTarget = side >= 0f ? mirroredTarget : targetPoint;
+
         for (int i = 0; i < _rtData.shotsPerBurst; i++)
         {
             foreach (Transform p in hardpoints.rightShootPoints)
             {
-                FireFromPoint(p, 1f);
+                FireFromPoint(p, 1f, rightTarget);
                 _camera.ApplyCannonImpact();
                 _recoilRight.Fire(_rtData.timeBetweenShots);
                 _recoilLeft.Fire(_rtData.timeBetweenShots);
@@ -59,7 +70,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
             }
             foreach (Transform p in hardpoints.leftShootPoints)
             {
-                FireFromPoint(p, -1f);
+                FireFromPoint(p, -1f, leftTarget);
                 hardpoints._cannonSmokeShootL.Play();
             }
             if (i < _rtData.shotsPerBurst - 1)
@@ -67,7 +78,15 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         }
     }
 
-    private void FireFromPoint(Transform point, float side)
+    private Vector3 GetMouseWorldPoint()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Plane plane = new Plane(Vector3.up, new Vector3(0f, hardpoints.transform.position.y, 0f));
+        if (plane.Raycast(ray, out float distance))
+            return ray.GetPoint(distance);
+        return Vector3.zero;
+    }
+    private void FireFromPoint(Transform point, float side, Vector3 targetPoint)
     {
         var b = _cannonBullet.Create();
         var cb = b.GetComponent<CannonBullet>();
@@ -75,7 +94,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         {
             cb.OnSplit -= SpawnSplitBullet;
             cb.OnSplit += SpawnSplitBullet;
-            cb.Setup(point, _rtData, side, _playerUpgrades);
+            cb.Setup(point, _rtData, side, _playerUpgrades, targetPoint);
         }
     }
 

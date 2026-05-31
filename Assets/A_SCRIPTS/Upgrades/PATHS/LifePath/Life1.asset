@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d57ff8f0c17a0f4b825461db54f66a7, type: 3}
   m_Name: Life1
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
-  displayName: Max Hp
-  description: '+30 Max Hp '
+  displayName: Health Regen
+  description: 0.5 health per second
   icon: {fileID: 21300000, guid: d63f1d3079289d64fa06237562c8a5cb, type: 3}
-  statType: 4
-  statValue: 30
+  statType: 11
+  statValue: 0
   specialAbility: 0
