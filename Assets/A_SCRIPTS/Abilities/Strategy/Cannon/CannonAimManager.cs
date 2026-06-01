@@ -63,8 +63,8 @@ public class CannonAimManager : MonoBehaviour
             Vector3 to = _cannonRight.position + Quaternion.Euler(0f, (i + 10), 0f) * transform.right * 3f;
             Gizmos.DrawLine(from, to);
         }
-        UnityEditor.Handles.Label(_cannonRight.position + Vector3.up * 0.5f,
-            $"R: {_cannonRight.localEulerAngles.y:F1}°");
+        //UnityEditor.Handles.Label(_cannonRight.position + Vector3.up * 0.5f,
+        //    $"R: {_cannonRight.localEulerAngles.y:F1}°");
         Gizmos.color = Color.blue;
         Gizmos.DrawRay(_cannonLeft.position, -transform.right * 3f);
         for (int i = -90; i < 90; i += 10)
@@ -73,7 +73,7 @@ public class CannonAimManager : MonoBehaviour
             Vector3 to = _cannonLeft.position + Quaternion.Euler(0f, (i + 10), 0f) * (-transform.right) * 3f;
             Gizmos.DrawLine(from, to);
         }
-        UnityEditor.Handles.Label(_cannonLeft.position + Vector3.up * 0.5f,
-            $"L: {_cannonLeft.localEulerAngles.y:F1}°");
+        //UnityEditor.Handles.Label(_cannonLeft.position + Vector3.up * 0.5f,
+        //    $"L: {_cannonLeft.localEulerAngles.y:F1}°");
     }
 }

@@ -162,16 +162,16 @@ public class AbilityController : MonoBehaviour
 
         cannonMesh.SetActive(false);
         cannonUI.SetActive(false);
-        cannonTecla.SetActive(false);
+     //   cannonTecla.SetActive(false);
         cooldownC.SetActive(false);
 
         mortarGo.SetActive(false);
         mortargoAbilityUI.SetActive(false);
         mortargoAbilityNumber.SetActive(false);
-        mortargoAbilityStats.SetActive(false);
+       // mortargoAbilityStats.SetActive(false);
         mortargoAbilityKey.SetActive(false);
-        barra.SetActive(false);
-        TEXTDamage.SetActive(false);
+       // barra.SetActive(false);
+      //  TEXTDamage.SetActive(false);
         cooldownM.SetActive(false);
     }
 
