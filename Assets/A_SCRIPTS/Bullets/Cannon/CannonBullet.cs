@@ -127,7 +127,7 @@ public class CannonBullet : BulletsBase
         if (distance < 0.1f)
             return Vector3.up * v;
 
-        float angle = Mathf.Clamp(distance * 1f, 15f, 75f) * Mathf.Deg2Rad;
+        float angle = Mathf.Clamp(distance * 1.5f, 30f, 65f) * Mathf.Deg2Rad;
         float cosAngle = Mathf.Cos(angle);
         float sinAngle = Mathf.Sin(angle);
 

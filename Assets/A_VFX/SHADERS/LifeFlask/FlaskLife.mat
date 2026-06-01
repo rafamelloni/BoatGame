@@ -56,12 +56,12 @@ Material:
     m_Ints: []
     m_Floats:
     - _Amplitude: 0.025
-    - _FillLevel: 1.9
+    - _FillLevel: 1.5453333
     - _Frequency: 26.61
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Speed: 12
-    - _Tilt: 0.00000680665
+    - _Tilt: 0.7566424
     m_Colors:
     - White: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0.6886792, g: 0, b: 0, a: 1}

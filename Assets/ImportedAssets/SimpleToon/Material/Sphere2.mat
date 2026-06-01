@@ -24,7 +24,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 19e690e6b30ba5246834e29a5edf291d, type: 3}
+        m_Texture: {fileID: 2800000, guid: f2367696ac7fb4649aa5c6389d86838f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -33,11 +33,11 @@ Material:
     - _Gloss: 10
     - _OutlineWidth: 1
     - _RimPower: 2.2
-    - _RimStep: 0.028
+    - _RimStep: 0.578
     - _RimStepSmooth: 1
-    - _ShadowStep: 0.102
-    - _ShadowStepSmooth: 0
-    - _SpecularStep: 0.17
+    - _ShadowStep: 0.608
+    - _ShadowStepSmooth: 0.07
+    - _SpecularStep: 0.632
     - _SpecularStepSmooth: 0
     - _Step: 0.432
     - _Step1: 0.537
@@ -48,7 +48,7 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _HighColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
-    - _RimColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+    - _RimColor: {r: 0.4716981, g: 0.15797438, b: 0.15797438, a: 1}
+    - _SpecularColor: {r: 0.7490192, g: 0.6677577, b: 0.6677577, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
