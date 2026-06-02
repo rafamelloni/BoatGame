@@ -311,6 +311,7 @@ public class EnemySpawner : MonoBehaviour
 
     public void ResumeSpawning()
     {
+        if (!gameObject.activeSelf) return;
         if (_phases == null || _phases.Length == 0)
         {
             Debug.LogWarning("EnemySpawner: no hay fases configuradas.");
@@ -326,6 +327,7 @@ public class EnemySpawner : MonoBehaviour
         _isRunning = true;
 
         ApplyCurrentPhase();
+
 
         StartCoroutine(GroupSpawnLoop());
         _shipHandler.StartLoop();

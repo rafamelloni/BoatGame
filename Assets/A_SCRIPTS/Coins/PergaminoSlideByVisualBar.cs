@@ -9,7 +9,7 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
     [Header("Objeto padre de la UI")]
     [SerializeField] private GameObject pergaminoPadre;
     [Header("Movimiento")]
-    [SerializeField] private float targetX = 0f;
+    [SerializeField] private float targetY = 0f;
     [SerializeField] private float duration = 0.35f;
     [SerializeField] private float overshootAmount = 20f;
     public float closeDuration = 0.25f;
@@ -17,14 +17,14 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
     private RectTransform rectTransform;
     private Coroutine routine;
     private bool _isOpen = false;
-    private float _startX;
+    private float _startY;
 
     private void Awake()
     {
         if (pergaminoPadre == null)
             pergaminoPadre = gameObject;
         rectTransform = pergaminoPadre.GetComponent<RectTransform>();
-        _startX = rectTransform.anchoredPosition.x;
+        _startY = rectTransform.anchoredPosition.y;
     }
 
     private void Update()
@@ -54,27 +54,24 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
     private IEnumerator OpenRoutine()
     {
         Vector2 startPos = rectTransform.anchoredPosition;
-        Vector2 overshootPos = new Vector2(targetX + overshootAmount, startPos.y);
-        Vector2 finalPos = new Vector2(targetX, startPos.y);
+        Vector2 overshootPos = new Vector2(startPos.x, targetY + overshootAmount);
+        Vector2 finalPos = new Vector2(startPos.x, targetY);
 
         yield return MoveTo(startPos, overshootPos, duration);
         yield return MoveTo(overshootPos, finalPos, 0.12f);
-
         routine = null;
     }
 
     private IEnumerator CloseRoutine(System.Action onComplete)
     {
         Vector2 startPos = rectTransform.anchoredPosition;
-        Vector2 finalPos = new Vector2(_startX, startPos.y);
+        Vector2 finalPos = new Vector2(startPos.x, _startY);
 
         yield return MoveTo(startPos, finalPos, closeDuration);
-
         _isOpen = false;
         fillBar.fillAmount = 0f;
         Time.timeScale = 1f;
         routine = null;
-
         onComplete?.Invoke();
     }
 
