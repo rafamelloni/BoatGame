@@ -9,7 +9,9 @@ public class BladeOrbitBehaviour : MonoBehaviour
     private float _damageCooldown;
     private Dictionary<GameObject, float> _hitTimers = new();
     private LayerMask _enemyLayers;
-
+    [SerializeField] GameObject woodparticles;
+    [SerializeField] GameObject ColissionBlades;
+  
     [SerializeField] private float rotationSpeed = 720f;
 
     private void Update()
@@ -26,6 +28,8 @@ public class BladeOrbitBehaviour : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Vector3 explosionPoint = other.ClosestPoint(transform.position);
+
         if ((_enemyLayers.value & (1 << other.gameObject.layer)) == 0) return;
 
         if (_hitTimers.TryGetValue(other.gameObject, out float lastHit))
@@ -34,6 +38,8 @@ public class BladeOrbitBehaviour : MonoBehaviour
         var health = other.GetComponentInParent<EnemyHealth>();
         if (health == null) return;
 
+        ParticlePool.Instance.GetParticle(woodparticles, explosionPoint);
+        ParticlePool.Instance.GetParticle(ColissionBlades, explosionPoint);
         health.TakeDamage(_damage);
         _hitTimers[other.gameObject] = Time.time;
     }
