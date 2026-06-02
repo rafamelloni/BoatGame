@@ -9,13 +9,19 @@ public class LastStand : MonoBehaviour
     [SerializeField] private LayerMask enemyLayer;
 
     [Header("VFX (opcional)")]
-    [SerializeField] private ParticleSystem activationVFX;
+    [SerializeField] private GameObject explosionPrefab;
 
     private bool _isUnlocked = false;
     private bool _onCooldown = false;
     private RT_PlayerHealth _playerHealth;
     private RT_PlayerStats _stats;
-
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            Activate();
+        }
+    }
     private void Awake()
     {
         _playerHealth = GetComponent<RT_PlayerHealth>();
@@ -49,6 +55,7 @@ public class LastStand : MonoBehaviour
 
     private void Activate()
     {
+
         Collider[] enemies = Physics.OverlapSphere(transform.position, 999f, enemyLayer);
         foreach (var e in enemies)
         {
@@ -57,8 +64,9 @@ public class LastStand : MonoBehaviour
                 health.TakeDamage(999f);
         }
 
-        //activationVFX?.Play();
-        StartCoroutine(CooldownRoutine());
+        Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+ 
+         StartCoroutine(CooldownRoutine());
     }
 
     private IEnumerator CooldownRoutine()
