@@ -50,7 +50,7 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5436890611856693226}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -105,10 +105,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LastStandExplosionVFX
   sphereRenderer: {fileID: 3324872241112998622}
   startScale: 0.2
-  endScale: 35
-  expandDuration: 3
-  fadeDuration: 0.25
-  startAlpha: 1.1
-  startInnerAlpha: 38.73
-  startEmission: 60
-  startInnerStrength: 0.46
+  endScale: 80
+  expandDuration: 1.2
+  fadeDuration: 0.35
+  startAlpha: 1.6
+  startInnerAlpha: 25.19
+  startEmission: 8.1
+  startInnerStrength: 4.13

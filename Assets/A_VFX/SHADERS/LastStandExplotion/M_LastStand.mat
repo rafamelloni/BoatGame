@@ -38,12 +38,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _EmissionStrenght: 60
-    - _InnerAlpha: 38.73
-    - _InnerStrength: 0.46
+    - _EmissionStrenght: 8.1
+    - _InnerAlpha: 25.19
+    - _InnerStrength: 4.13
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _alpha: 1.1
+    - _alpha: 1.6
+    - _edge: 0.11
+    - _edge2: 1.59
+    - _scaleNoise1: -0.42
+    - _scaleNoise2: -0.02
     - _time_1: 0
     m_Colors:
     - _Color: {r: 1, g: 0.1305468, b: 0, a: 1}
