@@ -20,6 +20,8 @@ public class BossRandomPattern : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private KeyCode _debugKey = KeyCode.Space;
+    [SerializeField] private BossBarrelAttack _barrelAttack;
+
 
     private void Update()
     {
@@ -91,8 +93,14 @@ public class BossRandomPattern : MonoBehaviour
     {
         var orb = WarningOrbPool.Instance.Get();
         orb.transform.position = pos;
-        orb.Trigger(_orbGrowDuration, () => WarningOrbPool.Instance.Return(orb));
+        _barrelAttack.QueueVisual();
+        orb.Trigger(_orbGrowDuration, () =>
+        {
+            WarningOrbPool.Instance.Return(orb);
+            _barrelAttack.SpawnBarrel(pos);
+        });
     }
+
 
     private void OnDrawGizmosSelected()
     {

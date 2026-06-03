@@ -16,11 +16,12 @@ public class BossCrossPattern : MonoBehaviour
     [Header("Altura")]
     [SerializeField] private float _spawnHeight = 0f;
 
+    [Header("Referencias")]
+    [SerializeField] private BossBarrelAttack _barrelAttack;
+    [SerializeField] private Transform _player;
+
     [Header("Debug")]
     [SerializeField] private KeyCode _debugKey = KeyCode.Z;
-
-    [Header("Player")]
-    [SerializeField] private Transform _player;
 
     private List<WarningOrb> _activeOrbs = new List<WarningOrb>();
 
@@ -35,7 +36,6 @@ public class BossCrossPattern : MonoBehaviour
         ForceReturnAll();
 
         Vector3 forward = Vector3.forward;
-
         if (_player != null)
         {
             Vector3 dir = _player.position - transform.position;
@@ -92,10 +92,12 @@ public class BossCrossPattern : MonoBehaviour
         var orb = WarningOrbPool.Instance.Get();
         orb.transform.position = pos;
         _activeOrbs.Add(orb);
+        _barrelAttack.QueueVisual();
         orb.Trigger(_orbGrowDuration, () =>
         {
             _activeOrbs.Remove(orb);
             WarningOrbPool.Instance.Return(orb);
+            _barrelAttack.SpawnBarrel(pos);
         });
     }
 
