@@ -1,19 +1,22 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class TimerBoss : MonoBehaviour
 {
     [Header("Tiempo")]
-    [SerializeField] private float tiempoInicial = 180f; // 3 minutos
+    [SerializeField] private float tiempoInicial = 180f;
 
     [Header("UI")]
     [SerializeField] private TMP_Text textoTimer;
-    [SerializeField] private Image barraTimer;
+
+    [Tooltip("RectTransform de la barra naranja (Image Type = Sliced)")]
+    [SerializeField] private RectTransform barraTimer;
+
+    [SerializeField] private float anchoMaximo = 1000f;
 
     [Header("Objeto a activar al llegar a 0")]
     [SerializeField] private GameObject objetoAlTerminar;
-    [SerializeField] private EnemySpawner _enemySpawner;
+    [SerializeField] private EnemySpawner enemySpawner;
 
     private float tiempoActual;
     private bool timerActivo = true;
@@ -25,12 +28,13 @@ public class TimerBoss : MonoBehaviour
         if (objetoAlTerminar != null)
             objetoAlTerminar.SetActive(false);
 
-        ActualizarTexto();
+        ActualizarUI();
     }
 
     private void Update()
     {
-        if (!timerActivo) return;
+        if (!timerActivo)
+            return;
 
         tiempoActual -= Time.deltaTime;
 
@@ -39,38 +43,43 @@ public class TimerBoss : MonoBehaviour
             tiempoActual = 0f;
             timerActivo = false;
 
-            ActualizarTexto();
-
             if (objetoAlTerminar != null)
-            {
                 objetoAlTerminar.SetActive(true);
-                _enemySpawner.DespawnAll();
-            }
-               
 
-
-            return;
+            if (enemySpawner != null)
+                enemySpawner.DespawnAll();
         }
 
-        ActualizarTexto();
+        ActualizarUI();
     }
 
-    private void ActualizarTexto()
+    private void ActualizarUI()
     {
+        float porcentaje = tiempoActual / tiempoInicial;
+
         int minutos = Mathf.FloorToInt(tiempoActual / 60f);
         int segundos = Mathf.FloorToInt(tiempoActual % 60f);
-        textoTimer.text = minutos.ToString("00") + ":" + segundos.ToString("00");
+
+        if (textoTimer != null)
+            textoTimer.text = $"{minutos:00}:{segundos:00}";
 
         if (barraTimer != null)
-            barraTimer.fillAmount = tiempoActual / tiempoInicial;
+        {
+            barraTimer.sizeDelta = new Vector2(
+                anchoMaximo * porcentaje,
+                barraTimer.sizeDelta.y
+            );
+        }
     }
 
     public void ResetTimer()
-    
     {
         tiempoActual = tiempoInicial;
+        timerActivo = true;
 
+        if (objetoAlTerminar != null)
+            objetoAlTerminar.SetActive(false);
 
+        ActualizarUI();
     }
-
 }

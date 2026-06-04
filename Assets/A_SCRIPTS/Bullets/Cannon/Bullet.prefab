@@ -201,8 +201,8 @@ MonoBehaviour:
   _spreadAngle: 30
   _splitDamageMultiplier: 0.5
   _maxRicochetBounces: 7
-  debugRicochet: 1
-  debugSplit: 1
+  debugRicochet: 0
+  debugSplit: 0
 --- !u!114 &8522850598336236742
 MonoBehaviour:
   m_ObjectHideFlags: 0

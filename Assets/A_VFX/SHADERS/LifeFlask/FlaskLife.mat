@@ -61,7 +61,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Speed: 12
-    - _Tilt: 1.0402564
+    - _Tilt: 0
     m_Colors:
     - White: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 0.6886792, g: 0, b: 0, a: 1}
