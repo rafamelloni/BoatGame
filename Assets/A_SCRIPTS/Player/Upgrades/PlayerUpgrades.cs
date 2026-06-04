@@ -2,20 +2,31 @@ using UnityEngine;
 
 public class PlayerUpgrades : MonoBehaviour
 {
-    RT_PlayerStats _rtData;
+    private RT_PlayerStats _rtData;
+    private RT_CannonData _cannonData;
+    private RT_BladesData _bladesData;
+    private RT_MolotovData _molotovData;
+
+    [SerializeField] private AbilityController _abilityController;
+
     public void Setup(RT_PlayerStats statsPlayer)
     {
         _rtData = statsPlayer;
+        _cannonData = _abilityController.CannonAbility.RuntimeData;
+        _bladesData = _abilityController.BladesAbility._rtData;
+        _molotovData = _abilityController.MolotovAbility._rtData;
     }
 
-    public void MaxHP()
+    public void DamageUpgrade()
     {
-        _rtData.maxHealth = 300;
+
     }
 
-    public void Speed()
+    public void ResetAll()
     {
-        _rtData.moveSpeed += 3;
+        _abilityController.CannonAbility.ResetUpgrades();
+        _abilityController.BladesAbility.ResetUpgrades();
+        _abilityController.MolotovAbility.ResetUpgrades();
     }
 
 }

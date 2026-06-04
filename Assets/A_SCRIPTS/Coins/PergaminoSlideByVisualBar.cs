@@ -6,6 +6,9 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
 {
     [Header("Barra visual")]
     [SerializeField] private Image fillBar;
+    [Header("Corsshjair Desactivarl")]
+    [SerializeField] private GameObject _crosshair;
+
     [Header("Objeto padre de la UI")]
     [SerializeField] private GameObject pergaminoPadre;
     [Header("Movimiento")]
@@ -34,7 +37,9 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
         if (fillBar.fillAmount >= 0.99f)
         {
             _isOpen = true;
+            _crosshair.SetActive(false);
             OpenPergamino();
+
         }
     }
 
@@ -73,6 +78,7 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
         Time.timeScale = 1f;
         routine = null;
         onComplete?.Invoke();
+        _crosshair.SetActive(true   );
     }
 
     private IEnumerator MoveTo(Vector2 from, Vector2 to, float moveDuration)

@@ -66,9 +66,7 @@ public class RT_PlayerHealth : MonoBehaviour
     [SerializeField] private float _vidaParaActivarFuego = 30f;
 
     [Header("UI")]
-    [SerializeField] private TextMeshProUGUI _healthText;
-    [SerializeField] private Material _healthBarMaterial;
-    [SerializeField] private float _fillMax = 1.9f;
+    [SerializeField] private Image _healthBar;
 
     [Header("Regeneración")]
     [SerializeField] private float _regenRate = 0f;
@@ -342,15 +340,8 @@ public class RT_PlayerHealth : MonoBehaviour
     private void UpdateHealthUI()
     {
         if (_stats == null || _stats.maxHealth <= 0f) return;
-
-        if (_healthText != null)
-            _healthText.text = $"{Mathf.CeilToInt(_stats.currentHealth)}/{Mathf.CeilToInt(_stats.maxHealth)}";
-
-        if (_healthBarMaterial != null)
-        {
-            float fillValue = (_stats.currentHealth / _stats.maxHealth) * _fillMax;
-            _healthBarMaterial.SetFloat("_FillLevel", fillValue);
-        }
+        if (_healthBar != null)
+            _healthBar.fillAmount = _stats.currentHealth / _stats.maxHealth;
     }
 
     private void ResetVisuals()

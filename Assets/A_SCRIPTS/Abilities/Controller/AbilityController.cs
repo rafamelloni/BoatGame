@@ -28,7 +28,6 @@ public class AbilityController : MonoBehaviour
 
     [Header("Cannon UI")]
     public GameObject cannonMesh;
-    public GameObject cannonUI;
     public GameObject cannonTecla;
     public GameObject cooldownC;
     public bool _wasUCannon = false;
@@ -75,7 +74,7 @@ public class AbilityController : MonoBehaviour
         if (runner == null) runner = gameObject.AddComponent<CoroutineRunner>();
 
         SetupCannon(hardpoints, runner);
-        SetupMortar(runner);
+        //SetupMortar(runner);
         SetupMolotov(runner);
         SetupBlades(runner);
     }
@@ -87,13 +86,13 @@ public class AbilityController : MonoBehaviour
         _abilityE.OnCooldownStarted += _cannonCooldownUI.PlayCooldown;
     }
 
-    private void SetupMortar(CoroutineRunner runner)
-    {
-        _abilityQ = new MorterStrategy(_morterData, _mortarShootPointReal, _mortarShootPoint,
-            runner, _barrelFactory, _mortarE);
-        _mortarChargeUI.Init(_morterData.cooldown, () => _abilityQ.RestoreCharge());
-        _abilityQ.OnChargeConsumed += _ => _mortarChargeUI.OnShot();
-    }
+    //private void SetupMortar(CoroutineRunner runner)
+    //{
+    //    _abilityQ = new MorterStrategy(_morterData, _mortarShootPointReal, _mortarShootPoint,
+    //        runner, _barrelFactory, _mortarE);
+    //    _mortarChargeUI.Init(_morterData.cooldown, () => _abilityQ.RestoreCharge());
+    //    _abilityQ.OnChargeConsumed += _ => _mortarChargeUI.OnShot();
+    //}
 
     private void SetupMolotov(CoroutineRunner runner)
     {
@@ -128,7 +127,6 @@ public class AbilityController : MonoBehaviour
     {
         _wasUCannon = true;
         cannonMesh.SetActive(true);
-        cannonUI.SetActive(true);
         cooldownC.SetActive(true);
         _abilityE.SetUnlocked(true);
     }
@@ -161,7 +159,6 @@ public class AbilityController : MonoBehaviour
         _abilityBlades.ResetUpgrades();
 
         cannonMesh.SetActive(false);
-        cannonUI.SetActive(false);
      //   cannonTecla.SetActive(false);
         cooldownC.SetActive(false);
 

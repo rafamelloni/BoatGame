@@ -6,7 +6,6 @@ using System.Collections.Generic;
 public class CooldownRadialUI : MonoBehaviour
 {
     [SerializeField] private Image radialImage;
-    [SerializeField] private RectTransform _rotatingObject;
     [SerializeField] private float _maxRotationAngle = 45f;
 
     private Coroutine currentRoutine;
@@ -36,7 +35,6 @@ public class CooldownRadialUI : MonoBehaviour
 
         radialImage.fillAmount = 0f;
         radialImage.enabled = false;
-        _rotatingObject.localRotation = Quaternion.identity;
         currentRoutine = null;
     }
 
@@ -64,12 +62,10 @@ public class CooldownRadialUI : MonoBehaviour
                 zRotation = Mathf.Lerp(_maxRotationAngle, 0f, t);
             }
 
-            _rotatingObject.localRotation = Quaternion.Euler(0f, 0f, zRotation);
             yield return null;
         }
 
         radialImage.fillAmount = 0f;
-        _rotatingObject.localRotation = Quaternion.identity;
         currentRoutine = null;
     }
 
@@ -104,12 +100,10 @@ public class CooldownRadialUI : MonoBehaviour
                 zRotation = Mathf.Lerp(_maxRotationAngle, 0f, t);
             }
 
-            _rotatingObject.localRotation = Quaternion.Euler(0f, 0f, zRotation);
             yield return null;
         }
 
         radialImage.fillAmount = 0f;
-        _rotatingObject.localRotation = Quaternion.identity;
         currentRoutine = null;
         // sin radialImage.enabled = false
     }

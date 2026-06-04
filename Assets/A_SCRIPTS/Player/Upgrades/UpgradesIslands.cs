@@ -42,32 +42,31 @@ public class UpgradesIslands : MonoBehaviour
         OnRouglikeExit();
     }
 
-    //MORTAR
-    public void MortarAbilityOnClick()
+    //Damage
+    public void DamageAllOnClick()
     {
-        ability.MortarAveilable();
-        //ability.LetMortarBeUpgraded();
+        
         canvas.SetActive(false);
         OnRouglikeExit();
     }
 
-    //SHIP
-    public void HPPlayerOnClick()
+    //Crit
+    public void CritChanceOnClick()
     {
-        _playerUpgrades.MaxHP();
+        
         canvas.SetActive(false);
         OnRouglikeExit();
     }
-    public void SpeedPlayerOnClick()
+    public void CritMultiplierOnClick()
     {
-        _playerUpgrades.Speed();
+        
         canvas.SetActive(false);
         OnRouglikeExit();
     }
 
 
     //??
-    public void OnButtonClick5()
+    public void PickUpRangeOnClick()
     {
         //bnner.SetActive(true);
         canvas.SetActive(false);

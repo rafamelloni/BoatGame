@@ -16,7 +16,8 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private GameObject _MESH;
     [SerializeField] private GameObject _cameraPreSeleccion;
     [SerializeField] private GameObject _canvasPreSeleccion;
-    [SerializeField] private UpgradeSystem _upgradeSystem;
+    [SerializeField] private UpgradeSystem _upgradeSystemRougelike;
+    [SerializeField] private PlayerUpgrades _upgradeSystemIslands;
     [SerializeField] private RT_PlayerUpgrades _playerUpgrades;
     [SerializeField] private CoinSpawner _coinSpawner;
 
@@ -95,7 +96,8 @@ public class SceneResetter : MonoBehaviour
 
         // Abilities
         _abilityController.ResetAbilities();
-        _upgradeSystem.ResetAll();         // resetea RT_PlayerUpgrades + AbilityController
+        _upgradeSystemRougelike.ResetAll();         // resetea RT_PlayerUpgrades + AbilityController
+        _upgradeSystemIslands.ResetAll();         // resetea RT_PlayerUpgrades + AbilityController
 
         // UI
         _abilityUpgradeSystem.ResetAllUpgradesStats();

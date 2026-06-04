@@ -16,5 +16,5 @@ MonoBehaviour:
   description: +9 Cannon Damage
   icon: {fileID: 0}
   statType: 1
-  statValue: 20
+  statValue: 9
   specialAbility: 0
