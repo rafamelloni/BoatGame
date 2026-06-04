@@ -1,8 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 
-public class UIToggleAnimator : MonoBehaviour
+public class BarraAnimacion : MonoBehaviour
 {
-    [Header("Objetos")]
+    [Header("Barra de vida original")]
+    [SerializeField] private Image barraVidaReferencia;
+
+    [Header("Sprites animados")]
     [SerializeField] private GameObject spriteA;
     [SerializeField] private GameObject spriteB;
 
@@ -13,22 +17,40 @@ public class UIToggleAnimator : MonoBehaviour
     [Header("Inicio")]
     [SerializeField] private bool startWithA = true;
 
+    private Image imageA;
+    private Image imageB;
+
     private float timer;
     private float nextSwitchTime;
     private bool showingA;
+
+    private void Awake()
+    {
+        if (spriteA != null)
+            imageA = spriteA.GetComponent<Image>();
+
+        if (spriteB != null)
+            imageB = spriteB.GetComponent<Image>();
+    }
 
     private void Start()
     {
         showingA = startWithA;
 
-        spriteA.SetActive(showingA);
-        spriteB.SetActive(!showingA);
+        if (spriteA != null)
+            spriteA.SetActive(showingA);
+
+        if (spriteB != null)
+            spriteB.SetActive(!showingA);
 
         SetNextTime();
+        ActualizarFillAmount();
     }
 
     private void Update()
     {
+        ActualizarFillAmount();
+
         timer += Time.deltaTime;
 
         if (timer >= nextSwitchTime)
@@ -37,11 +59,28 @@ public class UIToggleAnimator : MonoBehaviour
 
             showingA = !showingA;
 
-            spriteA.SetActive(showingA);
-            spriteB.SetActive(!showingA);
+            if (spriteA != null)
+                spriteA.SetActive(showingA);
+
+            if (spriteB != null)
+                spriteB.SetActive(!showingA);
 
             SetNextTime();
         }
+    }
+
+    private void ActualizarFillAmount()
+    {
+        if (barraVidaReferencia == null)
+            return;
+
+        float fill = barraVidaReferencia.fillAmount;
+
+        if (imageA != null)
+            imageA.fillAmount = fill;
+
+        if (imageB != null)
+            imageB.fillAmount = fill;
     }
 
     private void SetNextTime()
