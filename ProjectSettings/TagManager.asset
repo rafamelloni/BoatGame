@@ -11,6 +11,7 @@ TagManager:
   - ShipEnemy
   - Islas
   - DashBoss
+  - MortarBoss
   layers:
   - Default
   - TransparentFX
