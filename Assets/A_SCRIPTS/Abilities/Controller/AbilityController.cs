@@ -32,16 +32,7 @@ public class AbilityController : MonoBehaviour
     public GameObject cooldownC;
     public bool _wasUCannon = false;
 
-    [Header("Mortar UI")]
-    public GameObject mortarGo;
-    public GameObject mortargoAbilityUI;
-    public GameObject mortargoAbilityNumber;
-    public GameObject mortargoAbilityStats;
-    public GameObject mortargoAbilityKey;
-    public GameObject barra;
-    public GameObject TEXTDamage;
-    public GameObject cooldownM;
-    public bool _wasUMortar = false;
+ 
 
     [Header("Ship Upgrade Positions")]
     [SerializeField] private GameObject _cannonR;
@@ -110,9 +101,6 @@ public class AbilityController : MonoBehaviour
         if (Input.GetMouseButtonDown(1) && _wasUCannon)
             _abilityE.TryExecute();
 
-        if (Input.GetKeyDown(KeyCode.Q) && _wasUMortar)
-            _abilityQ.TryExecute();
-
         _abilityBlades?.Tick();
     }
 
@@ -131,45 +119,20 @@ public class AbilityController : MonoBehaviour
         _abilityE.SetUnlocked(true);
     }
 
-    public void MortarAveilable()
-    {
-        _wasUMortar = true;
-        mortarGo.SetActive(true);
-        mortargoAbilityUI.SetActive(true);
-        mortargoAbilityNumber.SetActive(true);
-        mortargoAbilityStats.SetActive(true);
-        mortargoAbilityKey.SetActive(true);
-        cooldownM.SetActive(true);
-        barra.SetActive(true);
-        TEXTDamage.SetActive(true);
-        _abilityQ.SetUnlocked(true);
-    }
 
     public void ResetAbilities()
     {
         _wasUCannon = false;
-        _wasUMortar = false;
 
         _cannonCooldownUI.TurnOff();
-        _mortarChargeUI.TurnOff();
 
         _abilityE.ResetUpgrades();
-        _abilityQ.ResetUpgrades();
 
         _abilityBlades.ResetUpgrades();
 
         cannonMesh.SetActive(false);
-     //   cannonTecla.SetActive(false);
+     
         cooldownC.SetActive(false);
-
-        mortarGo.SetActive(false);
-        mortargoAbilityUI.SetActive(false);
-        mortargoAbilityNumber.SetActive(false);
-       // mortargoAbilityStats.SetActive(false);
-        mortargoAbilityKey.SetActive(false);
-       // barra.SetActive(false);
-      //  TEXTDamage.SetActive(false);
-        cooldownM.SetActive(false);
     }
 
     public void ShipUpgraded()

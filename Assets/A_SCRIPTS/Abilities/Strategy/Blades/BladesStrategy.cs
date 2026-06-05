@@ -139,6 +139,12 @@ public class BladesStrategy : IAbilityStrategy
     public void ResetUpgrades()
     {
         SetUnlocked(false);
+
+        foreach (var b in _blades)
+            Object.Destroy(b);
+        _blades.Clear();
+        _noiseOffsets.Clear();
+
         _rtData.damage = _data.damage;
         _rtData.bladeCount = _data.bladeCount;
         _rtData.orbitRadius = _data.orbitRadius;

@@ -38,9 +38,7 @@ public class ShipButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             case SelectedAbility.Cannon:
                 abilityController.CannonAveilable();
                 break;
-            case SelectedAbility.Mortar:
-                abilityController.MortarAveilable();
-                break;
+            
         }
     }
 

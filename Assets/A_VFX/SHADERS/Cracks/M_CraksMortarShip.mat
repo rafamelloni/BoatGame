@@ -57,7 +57,7 @@ Material:
     - _NormalStrenght: 0
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Smoothness: 0.73
+    - _Smoothness: 1
     - _grietaStrenght: 0
     m_Colors:
     - _Color: {r: 27.53272, g: 2.738857, b: 0, a: 1}
