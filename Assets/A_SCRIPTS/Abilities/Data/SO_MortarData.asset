@@ -21,7 +21,7 @@ MonoBehaviour:
   backDistance: 8
   height: 15
   randomRadius: 2
-  damage: 35
+  damage: 30
   fallingSpeed: 500
   explosionVFX: {fileID: 3978846613861188047, guid: 86305f990f28ddc44ac12ebfeaf4b20d, type: 3}
   waterSplashVFX: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}

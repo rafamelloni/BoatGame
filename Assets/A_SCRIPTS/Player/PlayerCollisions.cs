@@ -28,7 +28,7 @@ public class PlayerCollisions : MonoBehaviour
     {
 
 
-        if (collision.gameObject.CompareTag(enemyShipTag))
+        if (collision.gameObject.CompareTag(enemyShipTag) || collision.gameObject.CompareTag("MortarBoss"))
         {
            
             Vector3 knockbackDir = transform.position - collision.transform.position;

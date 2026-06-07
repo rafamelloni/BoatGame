@@ -60,25 +60,21 @@ public class BarrelExplosion : BulletsBase
     {
         Vector3 explosionPoint = other.ClosestPoint(transform.position);
 
-        if (other.CompareTag("Enemy") || other.CompareTag("ShipEnemy"))
+        if (other.CompareTag("Player"))
         {
             Explode(explosionPoint);
             ParticlePool.Instance.GetParticle(_rtData.explosionVFX, explosionPoint);
-            _hasSpawned = false;
         }
 
-        if (other.gameObject.CompareTag("Floor"))
+        if (other.CompareTag("Floor"))
         {
-            Vector3 explosionPoint0 = other.ClosestPoint(transform.position);
-            ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint0);
-            _hasSpawned = false;
+            ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint);
         }
 
         if (_indicator != null)
             _indicator.ResetIndicator();
 
         Pool.Return(this);
-        _hasSpawned = false;
     }
 
     private void Explode(Vector3 center)
@@ -86,9 +82,12 @@ public class BarrelExplosion : BulletsBase
         Collider[] hits = Physics.OverlapSphere(center, _explosionRadius, _damageLayers);
         for (int i = 0; i < hits.Length; i++)
         {
-            IDamageable damageable = hits[i].GetComponentInParent<IDamageable>();
-            if (damageable != null)
-                damageable.TakeDamage(_rtData.damage);
+            if (hits[i].CompareTag("Player"))
+            {
+                RT_PlayerHealth health = hits[i].GetComponentInParent<RT_PlayerHealth>();
+                if (health != null)
+                    health.TakeDamage(_rtData.damage);
+            }
         }
     }
 }

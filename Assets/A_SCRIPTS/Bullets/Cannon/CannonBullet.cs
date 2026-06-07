@@ -174,7 +174,7 @@ public class CannonBullet : BulletsBase
 
         Vector3 explosionPoint = other.ClosestPoint(transform.position);
 
-        if (other.CompareTag("Enemy") || other.CompareTag("ShipEnemy") || other.CompareTag("DashBoss"))
+        if (other.CompareTag("Enemy") || other.CompareTag("ShipEnemy") || other.CompareTag("DashBoss") || other.CompareTag("MortarBoss"))
         {
             bool hasRicochet = debugRicochet || (_playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.Ricochet));
 

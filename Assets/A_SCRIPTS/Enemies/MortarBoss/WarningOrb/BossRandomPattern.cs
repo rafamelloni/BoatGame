@@ -22,52 +22,57 @@ public class BossRandomPattern : MonoBehaviour
     [SerializeField] private KeyCode _debugKey = KeyCode.Space;
     [SerializeField] private BossBarrelAttack _barrelAttack;
 
-
     private void Update()
     {
         if (Input.GetKeyDown(_debugKey))
             FireRandom();
     }
 
+    // llamado desde el loop normal del controller
     [ContextMenu("Fire Random")]
     public void FireRandom()
     {
-        if (_sequential)
-            StartCoroutine(FireSequential());
-        else
-            FireSimultaneous();
+        FireRandom(transform.position);
     }
 
-    private void FireSimultaneous()
+    // llamado desde el charge con posición exacta del momento del disparo
+    public void FireRandom(Vector3 origin)
     {
-        foreach (var pos in GetRandomPositions())
+        if (_sequential)
+            StartCoroutine(FireSequential(origin));
+        else
+            FireSimultaneous(origin);
+    }
+
+    private void FireSimultaneous(Vector3 origin)
+    {
+        foreach (var pos in GetRandomPositions(origin))
             SpawnOrb(pos);
     }
 
-    private IEnumerator FireSequential()
+    private IEnumerator FireSequential(Vector3 origin)
     {
-        foreach (var pos in GetRandomPositions())
+        foreach (var pos in GetRandomPositions(origin))
         {
             SpawnOrb(pos);
             yield return new WaitForSeconds(_sequentialDelay);
         }
     }
 
-    private List<Vector3> GetRandomPositions()
+    private List<Vector3> GetRandomPositions(Vector3 origin)
     {
         var positions = new List<Vector3>();
-        Vector3 origin = new Vector3(transform.position.x, _spawnHeight, transform.position.z);
+        Vector3 o = new Vector3(origin.x, _spawnHeight, origin.z);
         int maxAttempts = 100;
 
         for (int i = 0; i < _orbCount; i++)
         {
             int attempts = 0;
             Vector3 candidate;
-
             do
             {
                 Vector2 random = Random.insideUnitCircle.normalized * Random.Range(_minRadius, _maxRadius);
-                candidate = origin + new Vector3(random.x, 0f, random.y);
+                candidate = o + new Vector3(random.x, 0f, random.y);
                 attempts++;
             }
             while (!IsValidPosition(candidate, positions) && attempts < maxAttempts);
@@ -100,7 +105,6 @@ public class BossRandomPattern : MonoBehaviour
             _barrelAttack.SpawnBarrel(pos);
         });
     }
-
 
     private void OnDrawGizmosSelected()
     {

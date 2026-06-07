@@ -6,7 +6,6 @@ using UnityEngine;
 public class UpgradesIslands : MonoBehaviour
 {
     public AbilityController ability;
-    [SerializeField] CannonUpgrades _cannonUpgrades;
     [SerializeField] PlayerUpgrades _playerUpgrades;
 
     public GameObject bnner;
@@ -26,18 +25,25 @@ public class UpgradesIslands : MonoBehaviour
     {
         IslandManager.OnAnyIslandDefeated -= OnRouglikeSelection;
     }
-    
+    //TEST AP[AGAR
+    public void FakeUpgrade()
+    {
+        // _cannonUpgrades.AddCharge();
+        canvas.SetActive(false);
+        OnRouglikeExit();
+
+    }
     //CANNON
     public void CannonChargeOnClick()
     {
-        _cannonUpgrades.AddCharge();
+       // _cannonUpgrades.AddCharge();
         canvas.SetActive(false);
         OnRouglikeExit();
 
     }
     public void CannonBulletSizeOnClick()
     {
-        _cannonUpgrades.IncreaseBulletSize();
+       // _cannonUpgrades.IncreaseBulletSize();
         canvas.SetActive(false);
         OnRouglikeExit();
     }
@@ -65,7 +71,7 @@ public class UpgradesIslands : MonoBehaviour
     }
 
 
-    //??
+    //PickUpRange
     public void PickUpRangeOnClick()
     {
         //bnner.SetActive(true);

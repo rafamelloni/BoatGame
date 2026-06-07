@@ -15,7 +15,7 @@ MonoBehaviour:
   bulletPrefab: {fileID: 8034590942499124795, guid: 03d3d9e452ce62340962d353c7a01990, type: 3}
   bulletSpeed: 20
   verticalArc: 3
-  damage: 50
+  damage: 250
   dropDelay: 0.25
   shotsPerBurst: 1
   timeBetweenShots: 0.5
