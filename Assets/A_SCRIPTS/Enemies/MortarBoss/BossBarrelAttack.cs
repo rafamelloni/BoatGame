@@ -11,6 +11,9 @@ public class BossBarrelAttack : MonoBehaviour
     [Header("Visual Shoot")]
     [SerializeField] private float _visualDelay = 0.1f;
 
+    [Header("Visual Shoot")]
+    [SerializeField] private ParticleSystem _shootParticle;
+
     private RT_MortarData _rtMortarData;
     private int _pendingVisuals = 0;
     private Coroutine _visualRoutine;
@@ -55,6 +58,13 @@ public class BossBarrelAttack : MonoBehaviour
     {
         if (_mortarData.visualProjectilePrefab == null || _shootPoint == null) return;
         GameObject proj = Instantiate(_mortarData.visualProjectilePrefab, _shootPoint.position, Quaternion.identity);
+
+        if (_shootParticle != null)
+        {
+            _shootParticle.gameObject.SetActive(true);
+            _shootParticle.Emit(1); // cantidad de partículas por disparo
+        }
+
         Rigidbody rb = proj.GetComponent<Rigidbody>();
         if (rb != null)
             rb.linearVelocity = Vector3.up * _rtMortarData.visualShootForce;
