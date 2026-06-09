@@ -98,7 +98,7 @@ public class AbilityController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(1) && _wasUCannon)
+        if (Input.GetMouseButton(1) && _wasUCannon)
             _abilityE.TryExecute();
 
         _abilityBlades?.Tick();

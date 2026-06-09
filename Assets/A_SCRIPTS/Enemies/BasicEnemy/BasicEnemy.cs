@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEngine.ParticleSystem;
 
 public class BasicEnemy : Enemy
 {
@@ -22,6 +21,13 @@ public class BasicEnemy : Enemy
 
     private Vector3 formationOffset;
     private bool _stopped;
+    private FakeWaveMovement _wave;
+
+    private void Awake()
+    {
+        base.Awake();
+        _wave = GetComponent<FakeWaveMovement>();
+    }
 
     public void SetPlayer(Transform player)
     {
@@ -35,10 +41,18 @@ public class BasicEnemy : Enemy
         _stopped = stopped;
     }
 
+    private void ApplyYaw(Quaternion targetRot)
+    {
+        Quaternion smoothed = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+        if (_wave != null)
+            _wave.SetYaw(smoothed.eulerAngles.y);
+        else
+            transform.rotation = smoothed;
+    }
+
     private void Update()
     {
         if (player == null) return;
-
         if (leader != null && !leader.gameObject.activeInHierarchy)
             leader = null;
 
@@ -48,12 +62,12 @@ public class BasicEnemy : Enemy
 
         Vector3 dir = targetPos - transform.position;
         dir.y = 0f;
-        if(_trailP != null)
+
+        if (_trailP != null)
             _trailP.Play();
 
         if (!_stopped && dir.sqrMagnitude > 0.01f)
         {
-            // Avoidance islas
             Vector3 avoidance = Vector3.zero;
             Collider[] obstacles = Physics.OverlapSphere(transform.position, obstacleRadius, obstacleLayer);
             foreach (var col in obstacles)
@@ -65,7 +79,6 @@ public class BasicEnemy : Enemy
                     avoidance += away.normalized / dist;
             }
 
-            // Separacion entre enemies
             Vector3 separation = Vector3.zero;
             Collider[] neighbors = Physics.OverlapSphere(transform.position, separationRadius, enemyLayer);
             foreach (var col in neighbors)
@@ -83,26 +96,23 @@ public class BasicEnemy : Enemy
 
             transform.position += move.normalized * speed * Time.deltaTime;
 
-            // Rotacion sigue la direccion real de movimiento
             if (move.sqrMagnitude > 0.01f)
             {
-                Quaternion targetRot = Quaternion.LookRotation(move.normalized);
-                targetRot *= Quaternion.Euler(0f, -90f, 0f);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+                Quaternion targetRot = Quaternion.LookRotation(move.normalized) * Quaternion.Euler(0f, -90f, 0f);
+                ApplyYaw(targetRot);
             }
         }
         else if (_stopped)
         {
-            if(_trailP !=null)
+            if (_trailP != null)
                 _trailP.Stop();
-            // Parado, rota hacia el player
+
             Vector3 rotDir = player.position - transform.position;
             rotDir.y = 0f;
             if (rotDir.sqrMagnitude > 0.01f)
             {
-                Quaternion targetRot = Quaternion.LookRotation(rotDir);
-                targetRot *= Quaternion.Euler(0f, -90f, 0f);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+                Quaternion targetRot = Quaternion.LookRotation(rotDir) * Quaternion.Euler(0f, -90f, 0f);
+                ApplyYaw(targetRot);
             }
         }
     }

@@ -6,17 +6,16 @@ public class CoinManager : MonoBehaviour
 {
     public static CoinManager Instance { get; private set; }
 
-    [SerializeField] private int _coinsToFill = 20; // cuántas monedas llenan la barra
+    [SerializeField] private int _coinsToFill = 20;
 
     private int _coins;
+    private int _level;
 
-    public event Action<float> OnCoinChanged; // 0-1 normalizado
+    public event Action<float> OnCoinChanged;
+    public event Action<int> OnLevelChanged;
     public event Action OnBarFilled;
 
-    private void Awake()
-    {
-        Instance = this;
-    }
+    private void Awake() => Instance = this;
 
     public void AddCoin()
     {
@@ -26,7 +25,9 @@ public class CoinManager : MonoBehaviour
 
         if (_coins >= _coinsToFill)
         {
+            _level++;
             _coins = 0;
+            OnLevelChanged?.Invoke(_level);
             OnBarFilled?.Invoke();
         }
     }

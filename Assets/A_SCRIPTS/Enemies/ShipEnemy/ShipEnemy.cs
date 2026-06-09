@@ -53,7 +53,6 @@ public class ShipEnemy : Enemy
         base.Awake();
         _rb = GetComponent<Rigidbody>();
         _rtCannonDataEnemy = new RT_CannonData(so_island);
-        _bullets = GameObject.FindWithTag("IslandBulletFactory").GetComponent<BulletFactory>();
         _enemyHealth.OnDeath += () => OnDead?.Invoke(this);
     }
 
@@ -62,13 +61,20 @@ public class ShipEnemy : Enemy
         _player = player;
         playerAimPoint = aimPoint;
         _state = State.Approach;
+        
+    }
+
+    private void OnEnable()
+    {
+        _bullets = GameObject.FindWithTag("IslandBulletFactory").GetComponent<BulletFactory>();
         _enemyHealth.Revive();
+
+        
     }
 
     private void Update()
     {
-        if (_player == null) return;
-
+        if (_player == null) { Debug.Log("NO PLAYER"); return; }
         Vector3 toPlayer = _player.position - transform.position;
         toPlayer.y = 0f;
         float dist = toPlayer.magnitude;
@@ -159,7 +165,9 @@ public class ShipEnemy : Enemy
 
     private void Shoot()
     {
+        Debug.Log("SHOOT");
         var b = _bullets.Create();
+        Debug.Log($"bullet: {b}");
         b.GetComponent<CannonBulletIsland>().Setup(_SP, _rtCannonDataEnemy, -1);
         particle.Play();
         var a = _bullets.Create();

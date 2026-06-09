@@ -20,6 +20,7 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private PlayerUpgrades _upgradeSystemIslands;
     [SerializeField] private RT_PlayerUpgrades _playerUpgrades;
     [SerializeField] private CoinSpawner _coinSpawner;
+    [SerializeField] private CoinBarUI _coinBarUI;
 
     [Header("Player")]
     [SerializeField] private Transform _playerTransform;
@@ -102,6 +103,7 @@ public class SceneResetter : MonoBehaviour
         // UI
         _abilityUpgradeSystem.ResetAllUpgradesStats();
         _upgradeStatsUI.ResetStats();
+        _coinBarUI.ResetBar();
 
         // World
         _islandSpawnManager.ResetIslands();
