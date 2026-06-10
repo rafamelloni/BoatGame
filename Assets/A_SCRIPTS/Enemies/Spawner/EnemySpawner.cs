@@ -1,58 +1,15 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [System.Serializable]
-    public struct SpawnPhase
-    {
-        public string name;
-        public float startAtSecond;
-
-        [Header("Groups")]
-        public float groupSpawnInterval;
-        public int maxActiveGroups;
-        public float groupHealth; // 0 = usar valor del prefab
-
-        [Header("Ships")]
-        public float shipSpawnInterval;
-        public int maxActiveShips;
-        public float shipHealth; // 0 = usar valor del prefab
-
-        [Header("Rafas")]
-        public float rafaSpawnInterval;
-        public int maxActiveRafas;
-        public float rafaHealth; // 0 = usar valor del prefab
-
-        [Header("Coins")]
-        public int coinsToFill; // 0 = no modificar
-    }
-
-    [Header("Phases")]
-    [SerializeField] private SpawnPhase[] _phases;
-
     [Header("References")]
+    [SerializeField] private EnemyFactory _factory;
+    [SerializeField] private PhaseManager _phaseManager;
     [SerializeField] private Transform _player;
-    [SerializeField] private Transform _playerAimPo;
     [SerializeField] private Camera _camera;
-    [SerializeField] private BulletFactory enemyBullet;
-
-    [Header("Group Prefabs")]
-    [SerializeField] private GameObject[] _enemyGroupPrefabs;
-    [SerializeField] private int _initialGroupStockPerType = 3;
-    [SerializeField] private float _minDistanceBetweenGroups = 30f;
-
-    [Header("Ship Enemy")]
-    [SerializeField] private GameObject _shipEnemyPrefab;
-    [SerializeField] private int _initialShipStock = 3;
-    [SerializeField] private float _minDistanceBetweenShips = 20f;
-
-    [Header("Rafa Enemy")]
-    [SerializeField] private GameObject _rafaEnemyPrefab;
-    [SerializeField] private int _initialRafaStock = 3;
-    [SerializeField] private float _minDistanceBetweenRafas = 15f;
 
     [Header("Spawn Area")]
     [SerializeField] private Transform _spawnCenter;
@@ -60,6 +17,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float _spawnHeight = 0f;
     [SerializeField] private float _spawnYOffset = 5.3f;
     [SerializeField] private float _spawnRangeAroundPlayer = 40f;
+    [SerializeField] private float _spawnCenterOffset = 1f;
 
     [Header("Placement")]
     [SerializeField] private int _maxSpawnAttempts = 30;
@@ -67,272 +25,430 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float _minDistanceFromPlayer = 25f;
     [SerializeField] private LayerMask _overlapCheckMask;
 
-    // Handlers
-    private EnemySpawnHandler<ShipEnemy> _shipHandler;
-    private EnemySpawnHandler<RafaEnemy> _rafaHandler;
+    [Header("Min distances")]
+    [SerializeField] private float _minDistanceBetweenGroups = 30f;
+    [SerializeField] private float _minDistanceBetweenShips = 20f;
+    [SerializeField] private float _minDistanceBetweenRafas = 15f;
 
-    // Groups
-    private ObjectPool<EnemyGroup>[] _groupPools;
-    private int _activeGroupCount = 0;
+    [Header("Tumulto")]
+    [SerializeField] private float _tumultoRadius = 20f;
+    [SerializeField] private int _tumultoMinGroups = 3;
 
-    // FIX: diccionario en vez de lista para que Remove siempre funcione aunque el grupo se haya movido
+    [Header("Rafa")]
+    [SerializeField] private float _rafaLifetime = 10f;
+
+    // Posiciones activas
     private readonly Dictionary<EnemyGroup, Vector3> _activeGroupPositions = new();
     private readonly List<Vector3> _activeShipPositions = new();
     private readonly List<Vector3> _activeRafaPositions = new();
 
-    // Fase actual
-    private int _currentPhaseIndex = 0;
-    private float _sessionTime = 0f;
-    private bool _isRunning = false;
+    private int _activeGroupCount = 0;
 
-    private SpawnPhase CurrentPhase => _phases[_currentPhaseIndex];
+    // ParÃ¡metros de fase actuales
+    private float _groupInterval;
+    private int _maxGroups;
+    private float _shipInterval;
+    private int _maxShips;
+    private float _rafaInterval;
+    private int _maxRafas;
+    private int _tumultoMinGroupsPhase;
+    private float _tumultoCheckCooldown;
+    private float _tumultoActiveDuration;
+    private float _tumultoSpawnInterval;
+    private TumultoSpawnType _tumultoSpawnType;
+
+    private bool _isRunning = false;
+    private Coroutine _groupLoop;
+    private Coroutine _shipLoop;
+    private Coroutine _rafaLoop;
+
+    private float _lastTumultoCheck;
+    private float _lastTumultoSpawn;
+    private float _tumultoActiveUntil;
+    private bool _tumultoActive;
 
     private void Awake()
     {
-        InitGroupPools();
-
-        _shipHandler = new EnemySpawnHandler<ShipEnemy>(
-            prefab: _shipEnemyPrefab,
-            initialStock: _initialShipStock,
-            minDistance: _minDistanceBetweenShips,
-            activePositions: _activeShipPositions,
-            onSpawn: ship =>
-            {
-                ship.SetPlayer(_player, _playerAimPo);
-                ship.OnDead += _shipHandler.Return;
-            },
-            onReturn: ship =>
-            {
-                ship.OnDead -= _shipHandler.Return;
-            },
-            owner: this
-        );
-
-        _rafaHandler = new EnemySpawnHandler<RafaEnemy>(
-            prefab: _rafaEnemyPrefab,
-            initialStock: _initialRafaStock,
-            minDistance: _minDistanceBetweenRafas,
-            activePositions: _activeRafaPositions,
-            onSpawn: rafa =>
-            {
-                rafa.SetPlayer(_player);
-                rafa.OnDead += _rafaHandler.Return;
-            },
-            onReturn: rafa =>
-            {
-                rafa.OnDead -= _rafaHandler.Return;
-            },
-            owner: this
-        );
+        _phaseManager.OnPhaseChanged += OnPhaseChanged;
     }
 
-    private void Start()
+    private void OnDestroy()
     {
-        // intencional: ResumeSpawning() se llama desde afuera
+        _phaseManager.OnPhaseChanged -= OnPhaseChanged;
     }
 
     private void Update()
     {
         if (!_isRunning) return;
-        if (_phases == null || _phases.Length == 0) return;
 
-        _sessionTime += Time.deltaTime;
-
-        int nextPhase = _currentPhaseIndex + 1;
-        if (nextPhase < _phases.Length && _sessionTime >= _phases[nextPhase].startAtSecond)
+        if (_tumultoActive)
         {
-            _currentPhaseIndex = nextPhase;
-            ApplyCurrentPhase();
-            Debug.Log($"[EnemySpawner] Fase {_currentPhaseIndex}: {CurrentPhase.name}");
+            // Evento activo: spawnea cada intervalo hasta que expire la duraciÃ³n
+            if (Time.time >= _tumultoActiveUntil)
+            {
+                // DuraciÃ³n terminÃ³, entra en cooldown
+                _tumultoActive = false;
+                _lastTumultoCheck = Time.time;
+            }
+            else if (Time.time >= _lastTumultoSpawn + _tumultoSpawnInterval)
+            {
+                SpawnTumulto();
+                _lastTumultoSpawn = Time.time;
+            }
+        }
+        else
+        {
+            // En cooldown: chequea si hay tumulto al vencer el cooldown
+            if (Time.time >= _lastTumultoCheck + _tumultoCheckCooldown)
+            {
+                if (IsTumulto(out _))
+                {
+                    _tumultoActive = true;
+                    _tumultoActiveUntil = Time.time + _tumultoActiveDuration;
+                    _lastTumultoSpawn = 0f; // spawnea inmediatamente al detectar
+                }
+                else
+                {
+                    _lastTumultoCheck = Time.time; // no hay tumulto, sigue esperando
+                }
+            }
         }
     }
 
-    private void ApplyCurrentPhase()
+    // â€”â€”â€” Control externo â€”â€”â€”
+
+    public void StartSpawning()
     {
-        var phase = CurrentPhase;
-        _shipHandler.UpdateParams(phase.shipSpawnInterval, phase.maxActiveShips);
-        _rafaHandler.UpdateParams(phase.rafaSpawnInterval, phase.maxActiveRafas);
+        if (!gameObject.activeSelf) return;
+        StopAllLoops();
+        _isRunning = true;
+        _phaseManager.StartSession();
+    }
+
+    public void StopSpawning()
+    {
+        _isRunning = false;
+        _phaseManager.StopSession();
+        StopAllLoops();
+    }
+
+    public void ResumeSpawning()
+    {
+        if (!gameObject.activeSelf) return;
+        if (_isRunning) return;
+        _isRunning = true;
+        _phaseManager.StartSession();
+    }
+
+    public void DespawnAll()
+    {
+        StopSpawning();
+        DespawnGroups();
+        _factory.DespawnAll<ShipEnemy>();
+        _factory.DespawnAll<RafaEnemy>();
+        _activeShipPositions.Clear();
+        _activeRafaPositions.Clear();
+    }
+
+    public void DespawnAllAndRestart()
+    {
+        DespawnAll();
+        StartSpawning();
+    }
+
+    // â€”â€”â€” Fase â€”â€”â€”
+
+    private void OnPhaseChanged(SpawnPhase phase)
+    {
+        _factory.ApplyPhase(phase);
+
+        _groupInterval = phase.groupSpawnInterval;
+        _maxGroups = phase.maxActiveGroups;
+        _shipInterval = phase.shipSpawnInterval;
+        _maxShips = phase.maxActiveShips;
+        _rafaInterval = phase.rafaSpawnInterval;
+        _maxRafas = phase.maxActiveRafas;
+        _tumultoMinGroupsPhase = phase.tumultoMinGroups > 0 ? phase.tumultoMinGroups : _tumultoMinGroups;
+        _tumultoCheckCooldown = phase.tumultoCheckCooldown;
+        _tumultoActiveDuration = phase.tumultoActiveDuration;
+        _tumultoSpawnInterval = phase.tumultoSpawnInterval;
+        _tumultoSpawnType = phase.tumultoSpawnType;
+
+        // Resetea timers al cambiar de fase
+        _lastTumultoCheck = Time.time;
+        _lastTumultoSpawn = Time.time;
+        _tumultoActive = false;
+
         if (phase.coinsToFill > 0)
             CoinManager.Instance.SetCoinsRequired(phase.coinsToFill);
+
+        if (_isRunning)
+            RestartLoops();
     }
 
-    // — GROUPS —
+    // â€”â€”â€” Tumulto spawn â€”â€”â€”
 
-    private void InitGroupPools()
+    private void SpawnTumulto()
     {
-        _groupPools = new ObjectPool<EnemyGroup>[_enemyGroupPrefabs.Length];
-        for (int i = 0; i < _enemyGroupPrefabs.Length; i++)
+        Vector3 spawnDir = IsTumulto(out Vector3 oppositeDir) ? oppositeDir : Vector3.zero;
+
+        switch (_tumultoSpawnType)
         {
-            var prefab = _enemyGroupPrefabs[i];
-            _groupPools[i] = new ObjectPool<EnemyGroup>(
-                () => { var go = Instantiate(prefab); go.SetActive(false); return go.GetComponent<EnemyGroup>(); },
-                g => g.gameObject.SetActive(true),
-                g => { g.Cleanup(); g.gameObject.SetActive(false); },
-                _initialGroupStockPerType
-            );
+            case TumultoSpawnType.Group:
+                SpawnGroupAroundPlayer(spawnDir);
+                break;
+            case TumultoSpawnType.Ship:
+                SpawnShipAroundPlayer(spawnDir);
+                break;
+            case TumultoSpawnType.Rafa:
+                SpawnRafaAroundPlayer(spawnDir);
+                break;
         }
     }
 
-    private IEnumerator GroupSpawnLoop()
+    private void SpawnGroupAroundPlayer(Vector3 directionBias)
+    {
+        var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
+        if (pos == null) return;
+        RegisterGroup(_factory.GetGroup(pos.Value, _spawnYOffset));
+    }
+
+    private void SpawnShipAroundPlayer(Vector3 directionBias)
+    {
+        var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
+        if (pos == null) return;
+        var ship = _factory.Get<ShipEnemy>(pos.Value, _spawnYOffset);
+        _activeShipPositions.Add(ship.transform.position);
+        ship.OnDead += OnShipReturned;
+    }
+
+    private void SpawnRafaAroundPlayer(Vector3 directionBias)
+    {
+        var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
+        if (pos == null) return;
+        RegisterRafa(_factory.Get<RafaEnemy>(pos.Value, _spawnYOffset));
+    }
+
+    // â€”â€”â€” Loops de spawn â€”â€”â€”
+
+    private void RestartLoops()
+    {
+        StopAllLoops();
+        _groupLoop = StartCoroutine(SpawnLoop(_groupInterval, () => _activeGroupCount < _maxGroups, SpawnGroup));
+        _shipLoop = StartCoroutine(SpawnLoop(_shipInterval, () => _activeShipPositions.Count < _maxShips, SpawnShip));
+        _rafaLoop = StartCoroutine(SpawnLoop(_rafaInterval, () => _activeRafaPositions.Count < _maxRafas, SpawnRafa));
+    }
+
+    private void StopAllLoops()
+    {
+        if (_groupLoop != null) { StopCoroutine(_groupLoop); _groupLoop = null; }
+        if (_shipLoop != null) { StopCoroutine(_shipLoop); _shipLoop = null; }
+        if (_rafaLoop != null) { StopCoroutine(_rafaLoop); _rafaLoop = null; }
+    }
+
+    private IEnumerator SpawnLoop(float interval, Func<bool> canSpawn, Action spawnAction)
     {
         while (true)
         {
-            yield return new WaitForSeconds(CurrentPhase.groupSpawnInterval);
-            if (_activeGroupCount >= CurrentPhase.maxActiveGroups) continue;
-            Vector3? pos = TryGetValidPosition(IsTooCloseToActiveGroup);
-            if (pos == null) continue;
-            SpawnGroup(pos.Value);
+            yield return new WaitForSeconds(interval);
+            if (!canSpawn()) continue;
+            spawnAction();
         }
     }
 
-    private void SpawnGroup(Vector3 position)
+    // â€”â€”â€” Spawn regular â€”â€”â€”
+
+    private void SpawnGroup()
     {
-        int randomIndex = UnityEngine.Random.Range(0, _groupPools.Length);
-        var group = _groupPools[randomIndex].Get();
-        Vector3 finalPos = position + new Vector3(0f, _spawnYOffset, 0f);
-        group.transform.position = finalPos;
-        Debug.Log($"[Spawn] distancia al player: {Vector3.Distance(finalPos, _player.position):F1}");
+        var pos = TryGetValidPosition(IsTooCloseToGroup);
+        if (pos == null) return;
+        RegisterGroup(_factory.GetGroup(pos.Value, _spawnYOffset));
+    }
 
-
-        if (CurrentPhase.groupHealth > 0)
-        {
-            var members = group.GetComponentsInChildren<EnemyHealth>(true);
-            foreach (var member in members)
-                member.SetMaxHealth(CurrentPhase.groupHealth);
-        }
-
-        group.OnGroupDead += ReturnGroupToPool;
-        group.Init(_player, enemyBullet);
-        _activeGroupPositions[group] = finalPos; // FIX: diccionario keyed por referencia
+    private void RegisterGroup(EnemyGroup group)
+    {
+        group.OnGroupDead += ReturnGroup;
+        group.OnGroupAlmostDead += ReleaseGroupSlot;
+        _activeGroupPositions[group] = group.transform.position;
         _activeGroupCount++;
     }
 
-    private void ReturnGroupToPool(EnemyGroup group)
+    private void ReleaseGroupSlot(EnemyGroup group)
     {
-        group.OnGroupDead -= ReturnGroupToPool;
-        if (!_activeGroupPositions.ContainsKey(group)) return;
-        _activeGroupPositions.Remove(group); // FIX: Remove por referencia, siempre funciona
-        for (int i = 0; i < _enemyGroupPrefabs.Length; i++)
-        {
-            if (group.gameObject.name.Contains(_enemyGroupPrefabs[i].name))
-            {
-                _groupPools[i].Return(group);
-                break;
-            }
-        }
+        group.OnGroupAlmostDead -= ReleaseGroupSlot;
+        _activeGroupPositions.Remove(group);
         _activeGroupCount--;
     }
 
-    private bool IsTooCloseToActiveGroup(Vector3 candidate)
+    private void ReturnGroup(EnemyGroup group)
     {
-        foreach (var pos in _activeGroupPositions.Values) // FIX: iterar Values del diccionario
-            if (Vector3.Distance(candidate, pos) < _minDistanceBetweenGroups) return true;
-        return false;
+        group.OnGroupDead -= ReturnGroup;
+        _activeGroupPositions.Remove(group);
+        _factory.ReturnGroup(group);
     }
 
-    // — COMPARTIDO —
+    private void SpawnShip()
+    {
+        var pos = TryGetValidPosition(IsTooCloseToShip);
+        if (pos == null) return;
+        var ship = _factory.Get<ShipEnemy>(pos.Value, _spawnYOffset);
+        _activeShipPositions.Add(ship.transform.position);
+        ship.OnDead += OnShipReturned;
+    }
 
-    private Vector3? TryGetValidPosition(Func<Vector3, bool> isTooClose)
+    private void OnShipReturned(ShipEnemy ship)
+    {
+        ship.OnDead -= OnShipReturned;
+        _activeShipPositions.Remove(ship.transform.position);
+    }
+
+    private void SpawnRafa()
+    {
+        var pos = TryGetValidPosition(IsTooCloseToRafa);
+        if (pos == null) return;
+        RegisterRafa(_factory.Get<RafaEnemy>(pos.Value, _spawnYOffset));
+    }
+
+    private void RegisterRafa(RafaEnemy rafa)
+    {
+        _activeRafaPositions.Add(rafa.transform.position);
+        rafa.OnDead += OnRafaReturned;
+        StartCoroutine(RafaLifetimeCoroutine(rafa));
+    }
+
+    private void OnRafaReturned(RafaEnemy rafa)
+    {
+        rafa.OnDead -= OnRafaReturned;
+        _activeRafaPositions.Remove(rafa.transform.position);
+    }
+
+    private IEnumerator RafaLifetimeCoroutine(RafaEnemy rafa)
+    {
+        yield return new WaitForSeconds(_rafaLifetime);
+        if (rafa != null && rafa.gameObject.activeInHierarchy)
+            rafa.GetComponent<EnemyHealth>().TakeDamage(999f);
+    }
+
+    // â€”â€”â€” Despawn de grupos â€”â€”â€”
+
+    private void DespawnGroups()
+    {
+        foreach (var group in _activeGroupPositions.Keys)
+        {
+            group.OnGroupDead -= ReturnGroup;
+            group.OnGroupAlmostDead -= ReleaseGroupSlot;
+            _factory.ReturnGroup(group);
+        }
+        _activeGroupPositions.Clear();
+        _activeGroupCount = 0;
+    }
+
+    // â€”â€”â€” Tumulto â€”â€”â€”
+
+    private bool IsTumulto(out Vector3 oppositeDirection)
+    {
+        oppositeDirection = Vector3.zero;
+
+        var positions = new List<Vector3>(_activeGroupPositions.Values);
+        int minGroups = _tumultoMinGroupsPhase > 0 ? _tumultoMinGroupsPhase : _tumultoMinGroups;
+        if (positions.Count < minGroups) return false;
+
+        int grouped = 0;
+        Vector3 massCenter = Vector3.zero;
+
+        foreach (var pos in positions)
+        {
+            foreach (var other in positions)
+            {
+                if (pos == other) continue;
+                if (Vector3.Distance(pos, other) < _tumultoRadius)
+                {
+                    grouped++;
+                    massCenter += pos;
+                    break;
+                }
+            }
+        }
+
+        if (grouped < minGroups) return false;
+
+        massCenter /= grouped;
+        Vector3 dir = _player.position - massCenter;
+        dir.y = 0f;
+        oppositeDirection = dir.normalized;
+        return true;
+    }
+
+    // â€”â€”â€” Posicionamiento â€”â€”â€”
+
+    private Vector3? TryGetValidPosition(Func<Vector3, bool> isTooClose) =>
+        TryGetValidPositionWithOffset(isTooClose, Vector3.zero);
+
+    private Vector3? TryGetValidPositionWithOffset(Func<Vector3, bool> isTooClose, Vector3 directionBias)
     {
         for (int i = 0; i < _maxSpawnAttempts; i++)
         {
-            Vector3 candidate = GetRandomPosition();
+            Vector3 candidate = GetRandomPosition(directionBias);
             if (IsOverlappingSomething(candidate)) continue;
             if (IsVisibleByCamera(candidate)) continue;
             if (isTooClose(candidate)) continue;
             if (Vector3.Distance(candidate, _player.position) < _minDistanceFromPlayer) continue;
             return candidate;
         }
-        Debug.LogWarning("EnemySpawner: no se encontró posición válida.");
+        Debug.LogWarning("[EnemySpawner] No se encontrÃ³ posiciÃ³n vÃ¡lida.");
         return null;
     }
 
-    private Vector3 GetRandomPosition()
+    private Vector3 GetRandomPosition(Vector3 directionBias = default)
     {
         float halfX = _spawnAreaSize.x * 0.5f;
         float halfZ = _spawnAreaSize.y * 0.5f;
-        Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * _spawnRangeAroundPlayer;
-        float x = Mathf.Clamp(_player.position.x + randomCircle.x,
-            _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
-        float z = Mathf.Clamp(_player.position.z + randomCircle.y,
-            _spawnCenter.position.z - halfZ, _spawnCenter.position.z + halfZ);
+
+        Vector3 camForwardXZ = _camera.transform.forward;
+        camForwardXZ.y = 0f;
+        camForwardXZ.Normalize();
+
+        Vector3 offsetDir = directionBias != Vector3.zero ? directionBias : camForwardXZ;
+        Vector3 center = _player.position + offsetDir * _spawnRangeAroundPlayer * _spawnCenterOffset;
+
+        Vector2 circle = UnityEngine.Random.insideUnitCircle * _spawnRangeAroundPlayer;
+        float x = Mathf.Clamp(center.x + circle.x, _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
+        float z = Mathf.Clamp(center.z + circle.y, _spawnCenter.position.z - halfZ, _spawnCenter.position.z + halfZ);
         return new Vector3(x, _spawnHeight, z);
     }
 
-    private bool IsOverlappingSomething(Vector3 candidate) =>
-        Physics.CheckSphere(candidate, _overlapCheckRadius, _overlapCheckMask);
+    private bool IsOverlappingSomething(Vector3 pos) =>
+        Physics.CheckSphere(pos, _overlapCheckRadius, _overlapCheckMask);
 
-    private bool IsVisibleByCamera(Vector3 candidate)
+    private bool IsVisibleByCamera(Vector3 pos)
     {
-        Vector3 vp = _camera.WorldToViewportPoint(candidate);
-        float margin = 0.15f;
-        return vp.x >= -margin && vp.x <= 1f + margin
-            && vp.y >= -margin && vp.y <= 1f + margin
-            && vp.z > 0f;
+        Vector3 vp = _camera.WorldToViewportPoint(pos);
+        const float m = 0.15f;
+        return vp.x >= -m && vp.x <= 1f + m && vp.y >= -m && vp.y <= 1f + m && vp.z > 0f;
     }
 
-    // — DESPAWN / RESUME —
-
-    public void DespawnAllAndReset()
+    private bool IsTooCloseToGroup(Vector3 c)
     {
-        DespawnAll();
-        ResumeSpawning();
+        foreach (var pos in _activeGroupPositions.Values)
+            if (Vector3.Distance(c, pos) < _minDistanceBetweenGroups) return true;
+        return false;
     }
 
-    public void DespawnAll()
+    private bool IsTooCloseToShip(Vector3 c)
     {
-        _isRunning = false;
-        StopAllCoroutines();
-        _shipHandler.StopLoop();
-        _rafaHandler.StopLoop();
-        DespawnGroups();
-        _shipHandler.DespawnAll();
-        _rafaHandler.DespawnAll();
+        foreach (var pos in _activeShipPositions)
+            if (Vector3.Distance(c, pos) < _minDistanceBetweenShips) return true;
+        return false;
     }
 
-    private void DespawnGroups()
+    private bool IsTooCloseToRafa(Vector3 c)
     {
-        var groups = FindObjectsByType<EnemyGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        foreach (var group in groups)
-        {
-            group.OnGroupDead -= ReturnGroupToPool;
-            for (int i = 0; i < _enemyGroupPrefabs.Length; i++)
-            {
-                if (group.gameObject.name.Contains(_enemyGroupPrefabs[i].name))
-                {
-                    _groupPools[i].Return(group);
-                    break;
-                }
-            }
-        }
-        _activeGroupPositions.Clear();
-        _activeGroupCount = 0;
+        foreach (var pos in _activeRafaPositions)
+            if (Vector3.Distance(c, pos) < _minDistanceBetweenRafas) return true;
+        return false;
     }
 
-    public void ResumeSpawning()
-    {
-        if (!gameObject.activeSelf) return;
-        if (_phases == null || _phases.Length == 0)
-        {
-            Debug.LogWarning("EnemySpawner: no hay fases configuradas.");
-            return;
-        }
-
-        StopAllCoroutines();
-        _shipHandler.StopLoop();
-        _rafaHandler.StopLoop();
-
-        _currentPhaseIndex = 0;
-        _sessionTime = 0f;
-        _isRunning = true;
-
-        ApplyCurrentPhase();
-
-
-        StartCoroutine(GroupSpawnLoop());
-        _shipHandler.StartLoop();
-        _rafaHandler.StartLoop();
-    }
+    // â€”â€”â€” Gizmos â€”â€”â€”
 
     private void OnDrawGizmos()
     {
@@ -344,133 +460,16 @@ public class EnemySpawner : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(_player.position, _minDistanceFromPlayer);
         }
-    }
 
-    // ————————————————————————————————————————————
-    // HANDLER GENERICO
-    // ————————————————————————————————————————————
+        Gizmos.color = Color.cyan;
+        foreach (var pos in _activeGroupPositions.Values)
+            Gizmos.DrawWireSphere(pos, _tumultoRadius * 0.5f);
 
-    private class EnemySpawnHandler<T> where T : MonoBehaviour
-    {
-        private readonly ObjectPool<T> _pool;
-        private float _spawnInterval;
-        private int _maxActive;
-        private readonly float _minDistance;
-        private readonly Action<T> _onSpawn;
-        private readonly Action<T> _onReturn;
-        private readonly EnemySpawner _owner;
-        private readonly List<Vector3> _activePositions;
-        private int _activeCount;
-        private Coroutine _loop;
-
-        public EnemySpawnHandler(
-            GameObject prefab,
-            int initialStock,
-            float minDistance,
-            List<Vector3> activePositions,
-            Action<T> onSpawn,
-            Action<T> onReturn,
-            EnemySpawner owner)
+        if (Application.isPlaying && IsTumulto(out Vector3 dir))
         {
-            _minDistance = minDistance;
-            _activePositions = activePositions;
-            _onSpawn = onSpawn;
-            _onReturn = onReturn;
-            _owner = owner;
-
-            _pool = new ObjectPool<T>(
-                () => { var go = UnityEngine.Object.Instantiate(prefab); go.SetActive(false); return go.GetComponent<T>(); },
-                t => { },
-                t => t.gameObject.SetActive(false),
-                initialStock
-            );
-        }
-
-        public void UpdateParams(float spawnInterval, int maxActive)
-        {
-            _spawnInterval = spawnInterval;
-            _maxActive = maxActive;
-            if (_loop != null)
-            {
-                _owner.StopCoroutine(_loop);
-                _loop = _owner.StartCoroutine(SpawnLoop());
-            }
-        }
-
-        public void StartLoop()
-        {
-            _loop = _owner.StartCoroutine(SpawnLoop());
-        }
-
-        public void StopLoop()
-        {
-            if (_loop != null)
-            {
-                _owner.StopCoroutine(_loop);
-                _loop = null;
-            }
-        }
-
-        public void Return(T instance)
-        {
-            _activePositions.Remove(instance.transform.position);
-            _onReturn(instance);
-            _pool.Return(instance);
-            _activeCount--;
-        }
-
-        public void DespawnAll()
-        {
-            StopLoop();
-            var active = UnityEngine.Object.FindObjectsByType<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            foreach (var instance in active)
-            {
-                _onReturn(instance);
-                _pool.Return(instance);
-            }
-            _activePositions.Clear();
-            _activeCount = 0;
-        }
-
-        private IEnumerator SpawnLoop()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(_spawnInterval);
-                if (_activeCount >= _maxActive) continue;
-                Vector3? pos = _owner.TryGetValidPosition(IsTooClose);
-                if (pos == null) continue;
-                Spawn(pos.Value);
-            }
-        }
-
-        private void Spawn(Vector3 position)
-        {
-            var instance = _pool.Get();
-            Vector3 finalPos = position + new Vector3(0f, _owner._spawnYOffset, 0f);
-            instance.transform.position = finalPos;
-            instance.gameObject.SetActive(true);
-
-            var health = instance.GetComponent<EnemyHealth>();
-            if (health != null)
-            {
-                float phaseHealth = typeof(T) == typeof(ShipEnemy)
-                    ? _owner.CurrentPhase.shipHealth
-                    : _owner.CurrentPhase.rafaHealth;
-                if (phaseHealth > 0)
-                    health.SetMaxHealth(phaseHealth);
-            }
-
-            _activePositions.Add(finalPos);
-            _onSpawn(instance);
-            _activeCount++;
-        }
-
-        private bool IsTooClose(Vector3 candidate)
-        {
-            foreach (var pos in _activePositions)
-                if (Vector3.Distance(candidate, pos) < _minDistance) return true;
-            return false;
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(_player.position, _player.position + dir * 20f);
+            Gizmos.DrawWireSphere(_player.position + dir * 20f, 2f);
         }
     }
 }

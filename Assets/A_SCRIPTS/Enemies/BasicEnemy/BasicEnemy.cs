@@ -33,7 +33,7 @@ public class BasicEnemy : Enemy
     {
         this.player = player;
         if (leader != null)
-            formationOffset = transform.position - leader.position;
+            formationOffset = transform.localPosition;
     }
 
     public void SetStopped(bool stopped)
@@ -57,8 +57,8 @@ public class BasicEnemy : Enemy
             leader = null;
 
         Vector3 targetPos = leader != null
-            ? leader.position + formationOffset
-            : player.position;
+              ? leader.position + formationOffset
+              : player.position;
 
         Vector3 dir = targetPos - transform.position;
         dir.y = 0f;

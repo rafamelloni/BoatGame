@@ -65,8 +65,8 @@ public class BasicEnemyShoot : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, viewDistance);
+       // Gizmos.color = Color.yellow;
+       // Gizmos.DrawWireSphere(transform.position, viewDistance);
         if (target == null) return;
         Vector3 forward = transform.right;
         float halfAngle = viewAngle * 0.5f;

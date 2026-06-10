@@ -9,9 +9,10 @@ public class CoinSpawner : MonoBehaviour
     [SerializeField] private Transform _player;
 
     [Header("Drop config")]
-    [SerializeField] private int _coinsPerKill = 3;
+    [SerializeField] private int _coinsPerKill = 1;
     [SerializeField] private float _spawnRadius = 1.5f;
     [SerializeField] private float _spawnHeight = 0.5f;   // altura fija de flotación
+    [SerializeField] private PhaseManager _phaseManager;
 
     private ObjectPool<Coin> _pool;
 
@@ -32,8 +33,23 @@ public class CoinSpawner : MonoBehaviour
         );
     }
 
-    private void OnEnable() => EnemyHealth.OnAnyEnemyDied += SpawnCoins;
-    private void OnDisable() => EnemyHealth.OnAnyEnemyDied -= SpawnCoins;
+    private void OnEnable()
+    {
+        EnemyHealth.OnAnyEnemyDied += SpawnCoins;
+        _phaseManager.OnPhaseChanged += OnPhaseChanged;
+    }
+
+    private void OnDisable()
+    {
+        EnemyHealth.OnAnyEnemyDied -= SpawnCoins;
+        _phaseManager.OnPhaseChanged -= OnPhaseChanged;
+    }
+
+    private void OnPhaseChanged(SpawnPhase phase)
+    {
+        if (phase.coinsPerKill > 0)
+            _coinsPerKill = phase.coinsPerKill;
+    }
 
     private void SpawnCoins(Vector3 deathPos)
     {

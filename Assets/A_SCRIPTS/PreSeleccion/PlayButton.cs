@@ -45,7 +45,7 @@ public class PlayButton : MonoBehaviour
     {
         _movement.SetMovementEnabled(true);
         _islandSpawner.StartSpawning();
-        _enemySpawner.ResumeSpawning();
+        _enemySpawner.StartSpawning();
         canvas.SetActive(false);
         cameraPreSeleciion.SetActive(false);
         camaramMain.SetActive(true);
