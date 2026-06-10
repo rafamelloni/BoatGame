@@ -1,90 +1,36 @@
 using UnityEngine;
-using UnityEngine.UI;
 
-public class BarraAnimacion : MonoBehaviour
+public class UIFloatingIdle : MonoBehaviour
 {
-    [Header("Barra de vida original")]
-    [SerializeField] private Image barraVidaReferencia;
+    [Header("Objeto a flotar")]
+    [SerializeField] private RectTransform target;
 
-    [Header("Sprites animados")]
-    [SerializeField] private GameObject spriteA;
-    [SerializeField] private GameObject spriteB;
+    [Header("Movimiento")]
+    [SerializeField] private float moveAmountY = 3f;
+    [SerializeField] private float moveSpeed = 1.5f;
 
-    [Header("Tiempo")]
-    [SerializeField] private float minSwitchTime = 0.15f;
-    [SerializeField] private float maxSwitchTime = 0.4f;
+    [Header("Rotación")]
+    [SerializeField] private float rotationAmount = 1.2f;
+    [SerializeField] private float rotationSpeed = 1f;
 
-    [Header("Inicio")]
-    [SerializeField] private bool startWithA = true;
-
-    private Image imageA;
-    private Image imageB;
-
-    private float timer;
-    private float nextSwitchTime;
-    private bool showingA;
+    private Vector2 startPos;
+    private Quaternion startRot;
 
     private void Awake()
     {
-        if (spriteA != null)
-            imageA = spriteA.GetComponent<Image>();
+        if (target == null)
+            target = GetComponent<RectTransform>();
 
-        if (spriteB != null)
-            imageB = spriteB.GetComponent<Image>();
-    }
-
-    private void Start()
-    {
-        showingA = startWithA;
-
-        if (spriteA != null)
-            spriteA.SetActive(showingA);
-
-        if (spriteB != null)
-            spriteB.SetActive(!showingA);
-
-        SetNextTime();
-        ActualizarFillAmount();
+        startPos = target.anchoredPosition;
+        startRot = target.localRotation;
     }
 
     private void Update()
     {
-        ActualizarFillAmount();
+        float y = Mathf.Sin(Time.time * moveSpeed) * moveAmountY;
+        float rot = Mathf.Sin(Time.time * rotationSpeed) * rotationAmount;
 
-        timer += Time.deltaTime;
-
-        if (timer >= nextSwitchTime)
-        {
-            timer = 0f;
-
-            showingA = !showingA;
-
-            if (spriteA != null)
-                spriteA.SetActive(showingA);
-
-            if (spriteB != null)
-                spriteB.SetActive(!showingA);
-
-            SetNextTime();
-        }
-    }
-
-    private void ActualizarFillAmount()
-    {
-        if (barraVidaReferencia == null)
-            return;
-
-        float fill = barraVidaReferencia.fillAmount;
-
-        if (imageA != null)
-            imageA.fillAmount = fill;
-
-        if (imageB != null)
-            imageB.fillAmount = fill;
-    }
-
-    private void SetNextTime()
-    {
-        nextSwitchTime = Random.Range(minSwitchTime, maxSwitchTime);
+        target.anchoredPosition = startPos + new Vector2(0f, y);
+        target.localRotation = startRot * Quaternion.Euler(0f, 0f, rot);
     }
 }
