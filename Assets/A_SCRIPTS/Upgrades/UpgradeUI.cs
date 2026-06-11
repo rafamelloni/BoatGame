@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using System.Collections.Generic;
 
@@ -9,17 +10,23 @@ public class UpgradeUI : MonoBehaviour
     [SerializeField] private UpgradeOfferSystem offerSystem;
     [SerializeField] private UpgradeSystem upgradeSystem;
     [SerializeField] private RT_PlayerUpgrades playerUpgrades;
+
     [Header("Mapa")]
     [SerializeField] private UpgradePathMap pathMap;
+
     [Header("Botones de paths")]
     [SerializeField] private Button[] pathButtons;
+
     [Header("Info del path seleccionado")]
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI descriptionText;
+
     [Header("Confirmar")]
     [SerializeField] private Button confirmButton;
+
     [Header("Rebordes seleccionados")]
     [SerializeField] private GameObject[] selectedRebordes;
+
     [Header("Pergamino")]
     [SerializeField] private PergaminoSlideByVisualBar pergamino;
 
@@ -29,11 +36,23 @@ public class UpgradeUI : MonoBehaviour
     private void Awake()
     {
         confirmButton.onClick.AddListener(OnConfirm);
+
         for (int i = 0; i < pathButtons.Length; i++)
         {
             int index = i;
             pathButtons[i].onClick.AddListener(() => OnPathSelected(index));
+
+            var trigger = pathButtons[i].gameObject.AddComponent<EventTrigger>();
+
+            var enterEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
+            enterEntry.callback.AddListener(_ => selectedRebordes[index].SetActive(true));
+            trigger.triggers.Add(enterEntry);
+
+            var exitEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
+            exitEntry.callback.AddListener(_ => selectedRebordes[index].SetActive(_selectedPath == _currentOffer[index]));
+            trigger.triggers.Add(exitEntry);
         }
+
         confirmButton.interactable = false;
     }
 
@@ -79,11 +98,10 @@ public class UpgradeUI : MonoBehaviour
         pathButtons[index].GetComponent<Image>().sprite = _currentOffer[index].pathIconSelected;
 
         for (int i = 0; i < selectedRebordes.Length; i++)
-            selectedRebordes[i].SetActive(false);
-
-        selectedRebordes[index].SetActive(true);
+            selectedRebordes[i].SetActive(i == index);
 
         _selectedPath = _currentOffer[index];
+
         SO_UpgradeStep nextStep = playerUpgrades.GetNextStep(_selectedPath);
         if (nextStep != null)
         {
