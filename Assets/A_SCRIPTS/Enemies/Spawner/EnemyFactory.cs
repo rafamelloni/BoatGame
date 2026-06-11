@@ -65,9 +65,12 @@ public class EnemyFactory : MonoBehaviour
     }
 
     /// Obtiene un EnemyGroup aleatorio del pool.
-    public EnemyGroup GetGroup(Vector3 position, float yOffset)
+    public EnemyGroup GetGroup(Vector3 position, float yOffset, int prefabIndex = -1)
     {
-        int idx = UnityEngine.Random.Range(0, _groupPools.Length);
+        int idx = prefabIndex >= 0 && prefabIndex < _groupPools.Length
+            ? prefabIndex
+            : UnityEngine.Random.Range(0, _groupPools.Length);
+
         var group = _groupPools[idx].Get();
         group.transform.position = position + new Vector3(0f, yOffset, 0f);
         group.gameObject.SetActive(true);

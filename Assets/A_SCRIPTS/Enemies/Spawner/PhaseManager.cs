@@ -6,39 +6,72 @@ public enum TumultoSpawnType { Group, Ship, Rafa }
 [Serializable]
 public struct SpawnPhase
 {
+    [Tooltip("Nombre descriptivo de la fase, solo para identificarla en el inspector.")]
     public string name;
+
+    [Tooltip("Segundo de sesión en el que arranca esta fase.")]
     public float startAtSecond;
 
-    [Header("Groups")]
+    [Space(6)]
+    [Header("——— Grupos ———")]
+    [Tooltip("Cada cuántos segundos intenta spawnear un nuevo grupo.")]
     public float groupSpawnInterval;
+
+    [Tooltip("Índice del prefab de grupo a spawnear. -1 = aleatorio.")]
+    public int groupPrefabIndex;
+
+    [Tooltip("Máximo de grupos activos en pantalla al mismo tiempo.")]
     public int maxActiveGroups;
+
+    [Tooltip("Health de cada miembro del grupo. 0 = usar valor del prefab.")]
     public float groupHealth;
 
-    [Header("Ships")]
+    [Space(6)]
+    [Header("——— Ships ———")]
+    [Tooltip("Cada cuántos segundos intenta spawnear un nuevo ship.")]
     public float shipSpawnInterval;
+
+    [Tooltip("Máximo de ships activos en pantalla al mismo tiempo.")]
     public int maxActiveShips;
+
+    [Tooltip("Health del ship. 0 = usar valor del prefab.")]
     public float shipHealth;
 
-    [Header("Rafas")]
+    [Space(6)]
+    [Header("——— Rafas ———")]
+    [Tooltip("Cada cuántos segundos intenta spawnear un nuevo Rafa.")]
     public float rafaSpawnInterval;
+
+    [Tooltip("Máximo de Rafas activos en pantalla al mismo tiempo.")]
     public int maxActiveRafas;
+
+    [Tooltip("Health del Rafa. 0 = usar valor del prefab.")]
     public float rafaHealth;
 
-    [Header("Tumulto")]
-    [Tooltip("Cuántos grupos tienen que estar juntos para considerarse tumulto.")]
+    [Space(6)]
+    [Header("——— Tumulto ———")]
+    [Tooltip("Mínimo de grupos juntos para considerar que hay tumulto. 0 = usar valor del EnemySpawner.")]
     public int tumultoMinGroups;
-    [Tooltip("Cuánto espera antes de volver a chequear si hay tumulto.")]
+
+    [Tooltip("Segundos que espera antes de volver a chequear si hay tumulto, después de que terminó un evento.")]
     public float tumultoCheckCooldown;
-    [Tooltip("Cuántos segundos dura spawneando cuando detecta tumulto.")]
+
+    [Tooltip("Cuántos segundos dura el evento de tumulto spawneando enemigos.")]
     public float tumultoActiveDuration;
+
     [Tooltip("Cada cuántos segundos spawnea un enemigo durante el evento de tumulto.")]
     public float tumultoSpawnInterval;
-    [Tooltip("Qué tipo de enemigo spawnea durante el tumulto.")]
+
+    [Tooltip("Tipo de enemigo que spawnea durante el tumulto.")]
     public TumultoSpawnType tumultoSpawnType;
 
-    [Header("Coins")]
+    [Space(6)]
+    [Header("——— Monedas ———")]
+    [Tooltip("Cuántas monedas necesita el jugador para llenar la barra en esta fase. 0 = no modificar.")]
     public int coinsToFill;
-    public int coinsPerKill; 
+
+    [Tooltip("Cuántas monedas dropea cada enemigo al morir. 0 = usar valor del inspector.")]
+    public int coinsPerKill;
 }
 
 public class PhaseManager : MonoBehaviour

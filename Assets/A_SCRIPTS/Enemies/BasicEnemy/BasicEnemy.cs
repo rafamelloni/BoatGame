@@ -33,7 +33,7 @@ public class BasicEnemy : Enemy
     {
         this.player = player;
         if (leader != null)
-            formationOffset = transform.localPosition;
+            formationOffset = transform.position - leader.position;
     }
 
     public void SetStopped(bool stopped)
@@ -53,21 +53,19 @@ public class BasicEnemy : Enemy
     private void Update()
     {
         if (player == null) return;
-        if (leader != null && !leader.gameObject.activeInHierarchy)
-            leader = null;
 
-        Vector3 targetPos = leader != null
-              ? leader.position + formationOffset
-              : player.position;
+        Vector3 targetPos = (leader != null && leader.gameObject.activeInHierarchy)
+            ? leader.position + formationOffset
+            : player.position;
 
         Vector3 dir = targetPos - transform.position;
         dir.y = 0f;
 
-        if (_trailP != null)
-            _trailP.Play();
-
         if (!_stopped && dir.sqrMagnitude > 0.01f)
         {
+            if (_trailP != null)
+                _trailP.Play();
+
             Vector3 avoidance = Vector3.zero;
             Collider[] obstacles = Physics.OverlapSphere(transform.position, obstacleRadius, obstacleLayer);
             foreach (var col in obstacles)
@@ -93,12 +91,14 @@ public class BasicEnemy : Enemy
 
             Vector3 move = dir.normalized + avoidance * obstacleForce + separation * separationForce;
             move.y = 0f;
-
             transform.position += move.normalized * speed * Time.deltaTime;
 
-            if (move.sqrMagnitude > 0.01f)
+            // Rota siempre hacia el player, no hacia el vector move
+            Vector3 rotDir = player.position - transform.position;
+            rotDir.y = 0f;
+            if (rotDir.sqrMagnitude > 0.01f)
             {
-                Quaternion targetRot = Quaternion.LookRotation(move.normalized) * Quaternion.Euler(0f, -90f, 0f);
+                Quaternion targetRot = Quaternion.LookRotation(rotDir) * Quaternion.Euler(0f, -90f, 0f);
                 ApplyYaw(targetRot);
             }
         }
