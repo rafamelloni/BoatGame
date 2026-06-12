@@ -10,20 +10,38 @@ public class BossBarrelAttack : MonoBehaviour
 
     [Header("Visual Shoot")]
     [SerializeField] private float _visualDelay = 0.1f;
-
-    [Header("Visual Shoot")]
     [SerializeField] private ParticleSystem _shootParticle;
+    [SerializeField] private int _visualProjectilePoolSize = 10;
 
     private RT_MortarData _rtMortarData;
     private int _pendingVisuals = 0;
     private Coroutine _visualRoutine;
-
+    private ObjectPool<Rigidbody> _visualPool;
 
     private void Start()
     {
         _rtMortarData = new RT_MortarData(_mortarData);
-    }
 
+        if (_mortarData.visualProjectilePrefab != null)
+        {
+            _visualPool = new ObjectPool<Rigidbody>(
+                () =>
+                {
+                    var go = Instantiate(_mortarData.visualProjectilePrefab);
+                    go.SetActive(false);
+                    return go.GetComponent<Rigidbody>();
+                },
+                rb => rb.gameObject.SetActive(true),
+                rb =>
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                    rb.gameObject.SetActive(false);
+                },
+                _visualProjectilePoolSize
+            );
+        }
+    }
 
     public void QueueVisual()
     {
@@ -34,7 +52,7 @@ public class BossBarrelAttack : MonoBehaviour
 
     private IEnumerator FireVisualsSequential()
     {
-        yield return null; // espera un frame para que lleguen todas las llamadas
+        yield return null;
         while (_pendingVisuals > 0)
         {
             VisualShoot();
@@ -43,8 +61,6 @@ public class BossBarrelAttack : MonoBehaviour
         }
         _visualRoutine = null;
     }
-
-   
 
     public void SpawnBarrel(Vector3 targetPosition)
     {
@@ -56,25 +72,27 @@ public class BossBarrelAttack : MonoBehaviour
 
     private void VisualShoot()
     {
-        if (_mortarData.visualProjectilePrefab == null || _shootPoint == null) return;
-        GameObject proj = Instantiate(_mortarData.visualProjectilePrefab, _shootPoint.position, Quaternion.identity);
+        if (_visualPool == null || _shootPoint == null) return;
+
+        var rb = _visualPool.Get();
+        rb.transform.position = _shootPoint.position;
+        rb.transform.rotation = Quaternion.identity;
+        rb.linearVelocity = Vector3.up * _rtMortarData.visualShootForce;
 
         if (_shootParticle != null)
         {
             _shootParticle.gameObject.SetActive(true);
-            _shootParticle.Emit(1); // cantidad de partículas por disparo
+            _shootParticle.Emit(1);
         }
 
-        Rigidbody rb = proj.GetComponent<Rigidbody>();
-        if (rb != null)
-            rb.linearVelocity = Vector3.up * _rtMortarData.visualShootForce;
-        StartCoroutine(DisableAfterSeconds(proj, _rtMortarData.visualLifetime));
+        StartCoroutine(ReturnVisualAfterSeconds(rb, _rtMortarData.visualLifetime));
     }
 
-    private IEnumerator DisableAfterSeconds(GameObject go, float seconds)
+    private IEnumerator ReturnVisualAfterSeconds(Rigidbody rb, float seconds)
     {
         yield return new WaitForSeconds(seconds);
-        if (go != null) go.SetActive(false);
+        if (rb != null && rb.gameObject.activeSelf)
+            _visualPool.Return(rb);
     }
 
     private Transform CreateSpawnTransform(Vector3 pos)
