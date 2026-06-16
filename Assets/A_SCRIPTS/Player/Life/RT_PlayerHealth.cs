@@ -103,11 +103,13 @@ public class RT_PlayerHealth : MonoBehaviour
     {
         if (_isDead) return;
 
+        if (UnityEngine.Random.value < _stats.blockChance)
+            return; // bloqueado, no hace nada
+
         _stats.currentHealth -= amount;
         _stats.currentHealth = Mathf.Max(_stats.currentHealth, 0f);
 
         OnDamage?.Invoke();
-
         UpdateVisuals();
         PlayDamageVignettePulse();
 

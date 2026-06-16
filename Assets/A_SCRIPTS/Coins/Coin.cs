@@ -8,7 +8,7 @@ public class Coin : MonoBehaviour
     [SerializeField] private float _rotationSpeed = 90f;
 
     [Header("Pickup")]
-    [SerializeField] private float _magnetRadius = 6f;
+    [SerializeField] private float _magnetRadius;
     [SerializeField] private float _orbitRadius = 1.2f;
     [SerializeField] private float _magnetSpeed = 8f;
 
@@ -28,12 +28,13 @@ public class Coin : MonoBehaviour
         if (_trail != null)
             _trail.Clear();
     }
-    public void Init(Transform player, Vector3 spawnPos)
+    public void Init(Transform player, Vector3 spawnPos, float pickupRange)
     {
         _player = player;
         transform.position = spawnPos;
         _baseY = spawnPos.y;
         _state = State.Float;
+        _magnetRadius = pickupRange;
     }
 
     private void Update()

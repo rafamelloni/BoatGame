@@ -14,6 +14,15 @@ public class RT_PlayerStats : MonoBehaviour
     public float sprintMultiplier;
     public float maxHealth;
     public float currentHealth;
+    public float critChance;
+    public float critMultiplier;
+    public float knockbackForce;
+    public float knockbackDuration;
+    public float damageWhenBumpingEnemies;
+    public float damageWhenBumpingBoss;
+    public float pickUpRange;
+    public float blockChance;
+
 
     private void Awake()
     {
@@ -47,5 +56,16 @@ public class RT_PlayerStats : MonoBehaviour
         sprintMultiplier = stats.sprintMultiplier;
         maxHealth = stats.maxHealth;
         currentHealth = stats.maxHealth;
+        critMultiplier = stats.critMultiplier;
+        critChance = stats.critChance;
+
+        knockbackForce = stats.knockbackForce;
+        knockbackDuration = stats.knockbackDuration;
+        damageWhenBumpingEnemies = stats.damageWhenBumpingEnemies;
+        damageWhenBumpingBoss = stats.damageWhenBumpingBoss;
+
+        pickUpRange = stats.pickUpRange;
+
+        blockChance = stats.blockChance;
     }
 }

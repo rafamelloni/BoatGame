@@ -9,19 +9,18 @@ public class PlayerCollisions : MonoBehaviour
     public string bossShipTag = "DashBoss";
     [SerializeField] ParticleSystem SmokeParticles;
 
-    [SerializeField] private float knockbackForce = 10f;
-    [SerializeField] private float knockbackDuration = 0.2f;
-    [SerializeField] private float damageWhenBumpingEnemies = 15f;
-    [SerializeField] private float damageWhenBumpingBoss = 25f;
+   
     [SerializeField] private Movement _movement;
 
     RT_PlayerHealth _health;
+    public RT_PlayerStats stats;
     Rigidbody _rb;
 
     private void Awake()
     {
         _health = GetComponent<RT_PlayerHealth>();
         _rb = GetComponent<Rigidbody>();
+
     }
 
     void OnCollisionEnter(Collision collision)
@@ -34,8 +33,8 @@ public class PlayerCollisions : MonoBehaviour
             Vector3 knockbackDir = transform.position - collision.transform.position;
             knockbackDir.y = 0f;
             knockbackDir.Normalize();
-            _movement.ApplyKnockback(knockbackDir, knockbackForce, knockbackDuration);
-            _health.TakeDamage(damageWhenBumpingEnemies);
+            _movement.ApplyKnockback(knockbackDir, stats.knockbackForce, stats.knockbackDuration);
+            _health.TakeDamage(stats.damageWhenBumpingEnemies);
         }
 
         if (collision.gameObject.CompareTag(IslandTag))
@@ -54,14 +53,14 @@ public class PlayerCollisions : MonoBehaviour
             Vector3 knockbackDir = transform.position - collision.transform.position;
             knockbackDir.y = 0f;
             knockbackDir.Normalize();
-            _movement.ApplyKnockback(knockbackDir, knockbackForce, knockbackDuration);
+            _movement.ApplyKnockback(knockbackDir, stats.knockbackForce, stats.knockbackDuration);
         }
 
         if (collision.gameObject.CompareTag(bossShipTag))
         {
 
             //collision.gameObject.GetComponent<EnemyHealth>()?.TakeDamage(9999);
-            _health.TakeDamage(damageWhenBumpingBoss);
+            _health.TakeDamage(stats.damageWhenBumpingBoss);
 
 
         }
@@ -72,7 +71,7 @@ public class PlayerCollisions : MonoBehaviour
         if (other.gameObject.CompareTag(enemyTag))
         {
             other.gameObject.GetComponent<EnemyHealth>()?.TakeDamage(9999);
-            _health.TakeDamage(damageWhenBumpingEnemies);
+            _health.TakeDamage(stats.damageWhenBumpingEnemies);
         }
     }
 }

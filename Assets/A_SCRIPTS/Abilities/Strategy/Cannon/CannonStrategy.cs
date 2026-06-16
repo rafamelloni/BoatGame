@@ -14,6 +14,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
     CannonRecoil _recoilLeft;
     CannonRecoil _recoilRight;
     private RT_PlayerUpgrades _playerUpgrades;
+    private PlayerUpgrades _islandUpgrades;
 
     public event Action<float> OnCooldownStarted;
     public float CooldownDuration => _rtData.cooldown;
@@ -24,7 +25,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
     public RT_CannonData RuntimeData => _rtData;
 
     public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner,
-        BulletFactory cannonBullet, followPlayer camera, CannonRecoil recoilR, CannonRecoil recoilL, RT_PlayerUpgrades playerUpgrades)
+        BulletFactory cannonBullet, followPlayer camera, CannonRecoil recoilR, CannonRecoil recoilL, RT_PlayerUpgrades playerUpgrades, PlayerUpgrades islandUpgrades)
     {
         _playerUpgrades = playerUpgrades;
         _baseData = data;
@@ -35,6 +36,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         _camera = camera;
         _recoilLeft = recoilL;
         _recoilRight = recoilR;
+        _islandUpgrades = islandUpgrades;
     }
 
     public void TryExecute()
@@ -94,7 +96,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         {
             cb.OnSplit -= SpawnSplitBullet;
             cb.OnSplit += SpawnSplitBullet;
-            cb.Setup(point, _rtData, side, _playerUpgrades, targetPoint);
+            cb.Setup(point, _rtData, side, _playerUpgrades, _islandUpgrades, targetPoint);
         }
     }
 

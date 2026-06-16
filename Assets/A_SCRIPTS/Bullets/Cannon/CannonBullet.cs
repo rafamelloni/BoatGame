@@ -32,6 +32,7 @@ public class CannonBullet : BulletsBase
 
     private bool _isSplitBullet = false;
     private RT_PlayerUpgrades _playerUpgrades;
+    private PlayerUpgrades _islandUpgrades;
     private Collider _ignoredCollider;
 
     public event Action<Vector3, Vector3, float> OnSplit;
@@ -63,12 +64,13 @@ public class CannonBullet : BulletsBase
         gameObject.SetActive(false);
     }
 
-    public void Setup(Transform point, RT_CannonData rtData, float side, RT_PlayerUpgrades playerUpgrades, Vector3 targetPoint)
+    public void Setup(Transform point, RT_CannonData rtData, float side, RT_PlayerUpgrades playerUpgrades, PlayerUpgrades islandUpgrades, Vector3 targetPoint)
     {
         _pointShoot = point;
         _rtData = rtData;
         _side = side;
         _playerUpgrades = playerUpgrades;
+        _islandUpgrades = islandUpgrades;
         _isSplitBullet = false;
         _targetPoint = targetPoint;
         Launch();
@@ -235,12 +237,16 @@ public class CannonBullet : BulletsBase
 
     private void Explode(Vector3 center)
     {
+        float baseDamage = _rtData.damage;
+        bool isCrit = _islandUpgrades != null && UnityEngine.Random.value < _islandUpgrades.Stats.critChance;
+        float damage = isCrit ? baseDamage * _islandUpgrades.Stats.critMultiplier : baseDamage;
+
         Collider[] hits = Physics.OverlapSphere(center, _explosionRadius, _damageLayers);
         for (int i = 0; i < hits.Length; i++)
         {
             IDamageable damageable = hits[i].GetComponentInParent<IDamageable>();
             if (damageable != null)
-                damageable.TakeDamage(_rtData.damage);
+                damageable.TakeDamage(damage); // <-- damage, no _rtData.damage
         }
     }
 

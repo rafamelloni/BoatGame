@@ -33,10 +33,49 @@ public class UpgradesIslands : MonoBehaviour
         OnRouglikeExit();
 
     }
+
+    //BLADES SPEED
+    public void BladesSpeed()
+    {
+        _playerUpgrades.BladesSpeed();
+        canvas.SetActive(false);
+        OnRouglikeExit();
+    }
+    public void BlockChanceUpgrade()
+    {
+        _playerUpgrades.BlockChanceUpgrade();
+        canvas.SetActive(false);
+        OnRouglikeExit();
+    }
+    //COOLDOWN 
+    public void CooldownAll()
+    {
+        _playerUpgrades.CooldownAll();
+        canvas.SetActive(false);
+        OnRouglikeExit();
+
+    }
+
+    public void SummonCooldown()
+    {
+        _playerUpgrades.SummonCooldown();
+        canvas.SetActive(false);
+        OnRouglikeExit();
+    }
+
+    //RAMMING
+    public void RammingUpgrade()
+    {
+        _playerUpgrades.RammingDamage();
+        canvas.SetActive(false);
+        OnRouglikeExit();
+
+    }
+
     //CANNON
     public void CannonChargeOnClick()
     {
-       // _cannonUpgrades.AddCharge();
+       //_cannonUpgrades.AddCharge();
         canvas.SetActive(false);
         OnRouglikeExit();
 
@@ -51,7 +90,14 @@ public class UpgradesIslands : MonoBehaviour
     //Damage
     public void DamageAllOnClick()
     {
-        
+        _playerUpgrades.DamageUpgrade();
+        canvas.SetActive(false);
+        OnRouglikeExit();
+    }
+
+    public void SummonDamage()
+    {
+        _playerUpgrades.SummonDamage();
         canvas.SetActive(false);
         OnRouglikeExit();
     }
@@ -59,13 +105,13 @@ public class UpgradesIslands : MonoBehaviour
     //Crit
     public void CritChanceOnClick()
     {
-        
+        _playerUpgrades.CritChanceUpgrade();
         canvas.SetActive(false);
         OnRouglikeExit();
     }
     public void CritMultiplierOnClick()
     {
-        
+        _playerUpgrades.CritMultiplierUpgrade();
         canvas.SetActive(false);
         OnRouglikeExit();
     }
@@ -74,7 +120,7 @@ public class UpgradesIslands : MonoBehaviour
     //PickUpRange
     public void PickUpRangeOnClick()
     {
-        //bnner.SetActive(true);
+        _playerUpgrades.PickUpRange();
         canvas.SetActive(false);
         OnRouglikeExit();
     }

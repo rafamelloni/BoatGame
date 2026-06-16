@@ -27,8 +27,8 @@ public class SO_BladesData : ScriptableObject
     public int burstCount = 10;
     public float burstSpeed = 12f;
     public float burstMaxDistance = 15f;
-    public float burstDamage = 30f;
-    public float burstInterval = 5f;
+    public float burstDamage = 20f;
+    public float burstInterval = 8f;
 
     [Header("Detection")]
     public LayerMask enemyLayers;

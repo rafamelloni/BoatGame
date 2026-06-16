@@ -55,6 +55,7 @@ public class AbilityController : MonoBehaviour
     private BladesStrategy _abilityBlades;
 
     public RT_PlayerUpgrades _playerUpgrades;
+    public PlayerUpgrades _islandUpgrades;
 
     public CannonStrategy CannonAbility => _abilityE;
 
@@ -73,7 +74,7 @@ public class AbilityController : MonoBehaviour
     private void SetupCannon(ShipHardpoints hardpoints, CoroutineRunner runner)
     {
         _abilityE = new CannonStrategy(_cannonsData, hardpoints, runner, _bulletFactory,
-            _camera, _recoilCannonR, _recoilCannonL, _playerUpgrades);
+            _camera, _recoilCannonR, _recoilCannonL, _playerUpgrades, _islandUpgrades);
         _abilityE.OnCooldownStarted += _cannonCooldownUI.PlayCooldown;
     }
 
