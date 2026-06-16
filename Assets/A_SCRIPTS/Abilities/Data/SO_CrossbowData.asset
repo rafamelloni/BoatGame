@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 874d5afe7cd2c8f4fa159bf1972493f3, type: 3}
+  m_Name: SO_CrossbowData
+  m_EditorClassIdentifier: Assembly-CSharp::SO_CrossbowData
+  arrowPrefab: {fileID: 7475671789681468970, guid: 9c89262f7d4982b4ab78d8805676177c, type: 3}
+  damage: 30
+  cooldown: 1.2
+  arrowSpeed: 18
+  detectionRadius: 20
+  burstArrowCount: 3
+  burstSpreadAngle: 20
+  enemyLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  rotationSpeed: 5
+  explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
+  waterVfx: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}

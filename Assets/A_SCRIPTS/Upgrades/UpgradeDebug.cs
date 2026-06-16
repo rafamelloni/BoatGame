@@ -20,6 +20,8 @@ public class UpgradeDebug : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha4)) MaxPath(3);
         if (Input.GetKeyDown(KeyCode.Alpha5)) MaxPath(4);
         if (Input.GetKeyDown(KeyCode.Alpha6)) MaxPath(5);
+        if (Input.GetKeyDown(KeyCode.Alpha8)) MaxPath(6);
+
 
         if (Input.GetKeyDown(KeyCode.Alpha7)) _bossMortar.SetActive(true);
 

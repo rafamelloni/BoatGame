@@ -11,5 +11,7 @@ public enum StatType
     BladeSpeed,
     BladeCount,
     OrbitRadius,
-    HealthRegen
+    HealthRegen,
+    CrossbowDamage,
+    CrossbowCooldown,
 }

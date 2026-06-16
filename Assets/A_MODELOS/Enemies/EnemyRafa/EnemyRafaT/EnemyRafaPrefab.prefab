@@ -189,6 +189,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1355161601838012629}
+  - component: {fileID: 1210701460017655688}
+  - component: {fileID: 7434119572250749109}
   m_Layer: 0
   m_Name: EnemyRafaPrefab
   m_TagString: Untagged
@@ -213,3 +215,37 @@ Transform:
   - {fileID: 1810668678926476957}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1210701460017655688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7667534967315389716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cd538a141eb0b14faccb11825d59ff4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RafaEnemy
+  baseData: {fileID: 11400000, guid: ae551f0897a028f4784e87b4d8423ad4, type: 2}
+  _enemyHealth: {fileID: 7434119572250749109}
+  speed: 6
+  rotationSpeed: 5
+  steerSpeed: 3
+  chargeRange: 25
+  chargeSpeed: 18
+  chargeOvershoot: 5
+  chargeCooldown: 1.5
+  aimDuration: 0.8
+--- !u!114 &7434119572250749109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7667534967315389716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca3b1e91467c3be42a7f014922e65120, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 public class UpgradeSystem : MonoBehaviour
 {
@@ -19,10 +18,11 @@ public class UpgradeSystem : MonoBehaviour
     [SerializeField] private Sprite spriteTripleMolotov;
     [SerializeField] private Sprite spriteUnlockBlades;
     [SerializeField] private Sprite spriteBladesBurst;
+    [SerializeField] private Sprite spriteUnlockCrossbow;
+    [SerializeField] private Sprite spriteCrossbowBurst;
 
     [SerializeField] private DashMovement dashMovement;
     [SerializeField] private LastStand lastStand;
-
 
     public void ApplyUpgrade(SO_UpgradePath path)
     {
@@ -31,8 +31,10 @@ public class UpgradeSystem : MonoBehaviour
             Debug.LogWarning($"Path {path.pathName} ya esta completo.");
             return;
         }
+
         SO_UpgradeStep step = playerUpgrades.GetNextStep(path);
         if (step == null) return;
+
         ApplyStat(step);
         ApplySpecialAbility(step);
         playerUpgrades.AdvancePath(path);
@@ -66,6 +68,12 @@ public class UpgradeSystem : MonoBehaviour
                 break;
             case StatType.MolotovArea:
                 abilityController.MolotovAbility._rtData.explosionRadius *= 1f + step.statValue / 100f;
+                break;
+            case StatType.CrossbowDamage:
+                abilityController.CrossbowAbility._rtData.damage *= 1f + step.statValue / 100f;
+                break;
+            case StatType.CrossbowCooldown:
+                abilityController.CrossbowAbility._rtData.cooldown *= 1f - step.statValue / 100f;
                 break;
             case StatType.BladeDamage:
                 abilityController.BladesAbility._rtData.damage += step.statValue;
@@ -105,7 +113,14 @@ public class UpgradeSystem : MonoBehaviour
                 abilityHUD.UnlockNext(spriteUnlockMolotov);
                 break;
             case SpecialAbilityType.TripleMolotov:
-               // abilityHUD.UnlockNext(spriteTripleMolotov);
+                // abilityHUD.UnlockNext(spriteTripleMolotov);
+                break;
+            case SpecialAbilityType.UnlockCrossbow:
+                abilityController.CrossbowAvailable();
+                abilityHUD.UnlockNext(spriteUnlockCrossbow);
+                break;
+            case SpecialAbilityType.CrossbowBurst:
+                abilityHUD.UnlockNext(spriteCrossbowBurst);
                 break;
             case SpecialAbilityType.UnlockBlades:
                 abilityController.BladesAvailable();
@@ -113,7 +128,6 @@ public class UpgradeSystem : MonoBehaviour
                 break;
             case SpecialAbilityType.BladesBurst:
                 Debug.Log("[UpgradeSystem] BladesBurst desbloqueado");
-                //abilityHUD.UnlockNext(spriteBladesBurst);
                 break;
         }
     }

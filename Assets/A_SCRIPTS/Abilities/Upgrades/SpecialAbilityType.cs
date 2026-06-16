@@ -8,5 +8,7 @@ public enum SpecialAbilityType
     UnlockMolotov,
     TripleMolotov,
     UnlockBlades,
-    BladesBurst
+    BladesBurst,
+    UnlockCrossbow,
+    CrossbowBurst
 }

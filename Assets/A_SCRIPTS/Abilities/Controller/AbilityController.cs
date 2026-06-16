@@ -10,17 +10,18 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private CannonRecoil _recoilCannonR;
     [SerializeField] private CannonRecoil _recoilCannonL;
 
-    [Header("Mortar")]
-    [SerializeField] private SO_MorterData _morterData;
-    [SerializeField] private Transform _mortarShootPoint;
-    [SerializeField] private Transform _mortarShootPointReal;
-    [SerializeField] private MortarChargeUI _mortarChargeUI;
-
     [Header("Molotov")]
     [SerializeField] private SO_MolotovData _molotovData;
     [SerializeField] private Transform _molotovLaunchPoint;
     [SerializeField] private LayerMask _molotovEnemyLayers;
     public MolotovStrategy MolotovAbility => _molotovStrategy;
+
+    [Header("Crossbow")]
+    [SerializeField] private SO_CrossbowData _crossbowData;
+    [SerializeField] private Transform _crossbowLaunchPoint;
+    [SerializeField] private LayerMask _crossbowEnemyLayers;
+    [SerializeField] private GameObject _crossbowGO;
+    public CrossbowStrategy CrossbowAbility => _crossbowStrategy;
 
     [Header("Blades")]
     [SerializeField] private SO_BladesData _bladesData;
@@ -31,8 +32,6 @@ public class AbilityController : MonoBehaviour
     public GameObject cannonTecla;
     public GameObject cooldownC;
     public bool _wasUCannon = false;
-
- 
 
     [Header("Ship Upgrade Positions")]
     [SerializeField] private GameObject _cannonR;
@@ -50,13 +49,12 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private BulletFactory _barrelFactory;
 
     private CannonStrategy _abilityE;
-    private MorterStrategy _abilityQ;
     private MolotovStrategy _molotovStrategy;
+    private CrossbowStrategy _crossbowStrategy;
     private BladesStrategy _abilityBlades;
 
     public RT_PlayerUpgrades _playerUpgrades;
     public PlayerUpgrades _islandUpgrades;
-
     public CannonStrategy CannonAbility => _abilityE;
 
     private void Awake()
@@ -66,8 +64,8 @@ public class AbilityController : MonoBehaviour
         if (runner == null) runner = gameObject.AddComponent<CoroutineRunner>();
 
         SetupCannon(hardpoints, runner);
-        //SetupMortar(runner);
         SetupMolotov(runner);
+        SetupCrossbow(runner);
         SetupBlades(runner);
     }
 
@@ -78,18 +76,16 @@ public class AbilityController : MonoBehaviour
         _abilityE.OnCooldownStarted += _cannonCooldownUI.PlayCooldown;
     }
 
-    //private void SetupMortar(CoroutineRunner runner)
-    //{
-    //    _abilityQ = new MorterStrategy(_morterData, _mortarShootPointReal, _mortarShootPoint,
-    //        runner, _barrelFactory, _mortarE);
-    //    _mortarChargeUI.Init(_morterData.cooldown, () => _abilityQ.RestoreCharge());
-    //    _abilityQ.OnChargeConsumed += _ => _mortarChargeUI.OnShot();
-    //}
-
     private void SetupMolotov(CoroutineRunner runner)
     {
         _molotovStrategy = new MolotovStrategy(_molotovData, _molotovLaunchPoint, runner,
             _molotovEnemyLayers, _playerUpgrades, GetComponent<Collider>());
+    }
+
+    private void SetupCrossbow(CoroutineRunner runner)
+    {
+        _crossbowStrategy = new CrossbowStrategy(_crossbowData, _crossbowLaunchPoint,
+            runner, _crossbowEnemyLayers, _playerUpgrades, _crossbowGO);
     }
 
     private void SetupBlades(CoroutineRunner runner)
@@ -108,8 +104,12 @@ public class AbilityController : MonoBehaviour
     public void BladesAvailable()
     {
         _abilityBlades.SetUnlocked(true);
-
         _abilityBlades.EnableBlades();
+    }
+
+    public void CrossbowAvailable()
+    {
+        _crossbowStrategy.SetUnlocked(true);
     }
 
     public void CannonAveilable()
@@ -120,19 +120,15 @@ public class AbilityController : MonoBehaviour
         _abilityE.SetUnlocked(true);
     }
 
-
     public void ResetAbilities()
     {
         _wasUCannon = false;
-
         _cannonCooldownUI.TurnOff();
-
         _abilityE.ResetUpgrades();
-
+        _molotovStrategy.ResetUpgrades();
+        _crossbowStrategy.ResetUpgrades();
         _abilityBlades.ResetUpgrades();
-
         cannonMesh.SetActive(false);
-     
         cooldownC.SetActive(false);
     }
 
@@ -141,7 +137,6 @@ public class AbilityController : MonoBehaviour
         _cannonR.transform.position = _newCannonPosR.position;
         _cannonL.transform.position = _newCannonPosL.position;
         _mortar.transform.position = _newMortarPos.position;
-
         _recoilCannonR.UpdateLocalOrgin();
         _recoilCannonL.UpdateLocalOrgin();
     }
