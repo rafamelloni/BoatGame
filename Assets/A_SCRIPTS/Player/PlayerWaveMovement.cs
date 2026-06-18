@@ -15,9 +15,8 @@ public class PlayerWaveMovement : MonoBehaviour
     public float tiltSmoothSpeed = 10f;
     public float tiltReturnSpeed = 3f;
 
-
-
     private Rigidbody _rb;
+    private Movement _movement;
     private float _baseHeight;
     private float _phaseOffset;
     private float _currentExtraTiltX = 0f;
@@ -27,6 +26,7 @@ public class PlayerWaveMovement : MonoBehaviour
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
+        _movement = GetComponent<Movement>();
         _baseHeight = _rb.position.y;
         _phaseOffset = Random.Range(0f, Mathf.PI * 2f);
     }
@@ -47,13 +47,24 @@ public class PlayerWaveMovement : MonoBehaviour
         _currentExtraTiltX = Mathf.Lerp(_currentExtraTiltX, _targetExtraTiltX, Time.deltaTime * smooth);
     }
 
-    // Lo llama Movement.FixedUpdate — devuelve Y de la ola
+    void FixedUpdate()
+    {
+        // Si Movement está activo, él maneja el rigidbody
+        if (_movement != null && _movement.enabled) return;
+
+        Vector3 pos = _rb.position;
+        pos.y = GetWaveY();
+        _rb.MovePosition(pos);
+
+        float currentYaw = _rb.rotation.eulerAngles.y;
+        _rb.MoveRotation(GetWaveTilt(currentYaw));
+    }
+
     public float GetWaveY()
     {
         return _baseHeight + Mathf.Sin((Time.fixedTime + _phaseOffset) * frequency) * amplitude;
     }
 
-    // Lo llama Movement.FixedUpdate — devuelve rotación final combinada
     public Quaternion GetWaveTilt(float currentYaw)
     {
         float t = Time.fixedTime + _phaseOffset;
@@ -71,6 +82,4 @@ public class PlayerWaveMovement : MonoBehaviour
     {
         _baseHeight = y;
     }
-
-
 }

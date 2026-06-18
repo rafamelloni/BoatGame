@@ -29,13 +29,7 @@ public class IslandSpawnManager : MonoBehaviour
         _player = GameObject.FindWithTag("Player").transform;
         _islandSpawner.OnIslandReturned += OnIslandRemoved;
     }
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.P)) 
-        {
-            ResetIslands();
-        }
-    }
+
 
     public void StartSpawning() 
     {

@@ -30,6 +30,7 @@ public class UIHealthBarDashBoss : MonoBehaviour
 
     [Header("Spawner")]
     [SerializeField] private EnemySpawner _enemySpawner;
+    [SerializeField] private IslandSpawnManager _islandSpawner;
 
     private Material _materialInstance;
     private bool[] _activatedParticles;
@@ -58,6 +59,8 @@ public class UIHealthBarDashBoss : MonoBehaviour
             if (_bossHealth.GetCurrenHealt() > 0f)
                 UpdateBar(_bossHealth.GetCurrenHealt());
         }
+        _islandSpawner.ResetIslands();
+
     }
 
     private void OnDisable()
@@ -67,7 +70,9 @@ public class UIHealthBarDashBoss : MonoBehaviour
             _bossHealth.OnDamage -= UpdateBar;
             _bossHealth.OnDeath += DieBoss;
         }
-            
+
+        _islandSpawner.StartSpawning();
+
     }
 
     private void UpdateBar(float currentHealth)

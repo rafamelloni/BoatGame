@@ -22,6 +22,10 @@ public class MortarBossHealth : MonoBehaviour, IDamageable, IBoss
     [SerializeField] private GameObject[] _damageParticleObjects;
     [SerializeField, Range(0f, 1f)] private float[] _healthThresholds;
 
+    [Header("Spawner")]
+    [SerializeField] private EnemySpawner _enemySpawner;
+    [SerializeField] private IslandSpawnManager _islandSpawner;
+
     private float _currentHealth;
     private Material _materialInstance;
     private Material _materialInstance2;
@@ -51,6 +55,19 @@ public class MortarBossHealth : MonoBehaviour, IDamageable, IBoss
         if (_damageParticleObjects != null)
             foreach (var p in _damageParticleObjects)
                 if (p != null) p.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        _enemySpawner.StopSpawning();
+        _islandSpawner.ResetIslands();
+    }
+
+    private void OnDisable()
+    {
+        _enemySpawner.StartSpawning();
+        _islandSpawner.StartSpawning();
+
     }
 
     public void TakeDamage(float amount)

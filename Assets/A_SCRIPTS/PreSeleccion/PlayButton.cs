@@ -14,6 +14,7 @@ public class PlayButton : MonoBehaviour
     [SerializeField] private IslandSpawnManager _islandSpawner;
     [SerializeField] private PlayerUpgrades _playerUpgrades;
     [SerializeField] private TimerBoss _timerBoss;
+    [SerializeField] private GameObject _pauseManager;
 
     private void Awake()
     {
@@ -52,5 +53,6 @@ public class PlayButton : MonoBehaviour
         cameraPreSeleciion.SetActive(false);
         camaramMain.SetActive(true);
         canvasMain.SetActive(true);
+        _pauseManager.SetActive(true);
     }
 }
