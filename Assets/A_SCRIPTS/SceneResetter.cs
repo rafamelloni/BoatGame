@@ -21,6 +21,7 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private RT_PlayerUpgrades _playerUpgrades;
     [SerializeField] private CoinSpawner _coinSpawner;
     [SerializeField] private CoinBarUI _coinBarUI;
+    [SerializeField] private BossSequenceManager _bossSequenceManager;
 
     [Header("Player")]
     [SerializeField] private Transform _playerTransform;
@@ -110,6 +111,7 @@ public class SceneResetter : MonoBehaviour
         _enemySpawner.DespawnAll();
         _timerBoss.ResetTimer();
         _coinSpawner.DespawnAll();
+        _bossSequenceManager.ResetAll();
 
         // Preselección
         PreselectionData.Reset();

@@ -47,6 +47,7 @@ public class EnemySpawner : MonoBehaviour
     // Parámetros de fase actuales
     private float _groupInterval;
     private int _maxGroups;
+    private int _currentGroupPrefabIndex;
     private float _shipInterval;
     private int _maxShips;
     private float _rafaInterval;
@@ -83,10 +84,8 @@ public class EnemySpawner : MonoBehaviour
 
         if (_tumultoActive)
         {
-            // Evento activo: spawnea cada intervalo hasta que expire la duración
             if (Time.time >= _tumultoActiveUntil)
             {
-                // Duración terminó, entra en cooldown
                 _tumultoActive = false;
                 _lastTumultoCheck = Time.time;
             }
@@ -98,18 +97,17 @@ public class EnemySpawner : MonoBehaviour
         }
         else
         {
-            // En cooldown: chequea si hay tumulto al vencer el cooldown
             if (Time.time >= _lastTumultoCheck + _tumultoCheckCooldown)
             {
                 if (IsTumulto(out _))
                 {
                     _tumultoActive = true;
                     _tumultoActiveUntil = Time.time + _tumultoActiveDuration;
-                    _lastTumultoSpawn = 0f; // spawnea inmediatamente al detectar
+                    _lastTumultoSpawn = 0f;
                 }
                 else
                 {
-                    _lastTumultoCheck = Time.time; // no hay tumulto, sigue esperando
+                    _lastTumultoCheck = Time.time;
                 }
             }
         }
@@ -164,6 +162,7 @@ public class EnemySpawner : MonoBehaviour
 
         _groupInterval = phase.groupSpawnInterval;
         _maxGroups = phase.maxActiveGroups;
+        _currentGroupPrefabIndex = phase.groupPrefabIndex;
         _shipInterval = phase.shipSpawnInterval;
         _maxShips = phase.maxActiveShips;
         _rafaInterval = phase.rafaSpawnInterval;
@@ -174,7 +173,6 @@ public class EnemySpawner : MonoBehaviour
         _tumultoSpawnInterval = phase.tumultoSpawnInterval;
         _tumultoSpawnType = phase.tumultoSpawnType;
 
-        // Resetea timers al cambiar de fase
         _lastTumultoCheck = Time.time;
         _lastTumultoSpawn = Time.time;
         _tumultoActive = false;
@@ -210,7 +208,7 @@ public class EnemySpawner : MonoBehaviour
     {
         var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
         if (pos == null) return;
-        RegisterGroup(_factory.GetGroup(pos.Value, _spawnYOffset));
+        RegisterGroup(_factory.GetGroup(pos.Value, _spawnYOffset, _currentGroupPrefabIndex));
     }
 
     private void SpawnShipAroundPlayer(Vector3 directionBias)
@@ -262,7 +260,7 @@ public class EnemySpawner : MonoBehaviour
     {
         var pos = TryGetValidPosition(IsTooCloseToGroup);
         if (pos == null) return;
-        RegisterGroup(_factory.GetGroup(pos.Value, _spawnYOffset));
+        RegisterGroup(_factory.GetGroup(pos.Value, _spawnYOffset, _currentGroupPrefabIndex));
     }
 
     private void RegisterGroup(EnemyGroup group)

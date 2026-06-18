@@ -13,6 +13,7 @@ public class PlayButton : MonoBehaviour
     [SerializeField] private EnemySpawner _enemySpawner;
     [SerializeField] private IslandSpawnManager _islandSpawner;
     [SerializeField] private PlayerUpgrades _playerUpgrades;
+    [SerializeField] private TimerBoss _timerBoss;
 
     private void Awake()
     {
@@ -36,7 +37,7 @@ public class PlayButton : MonoBehaviour
         playerStats.SetBaseStats(PreselectionData.SelectedShipStats);
         _playerUpgrades.Setup(playerStats);
 
-       
+
 
         StartGame();
     }
@@ -46,6 +47,7 @@ public class PlayButton : MonoBehaviour
         _movement.SetMovementEnabled(true);
         _islandSpawner.StartSpawning();
         _enemySpawner.StartSpawning();
+        _timerBoss.StartTimer();
         canvas.SetActive(false);
         cameraPreSeleciion.SetActive(false);
         camaramMain.SetActive(true);
