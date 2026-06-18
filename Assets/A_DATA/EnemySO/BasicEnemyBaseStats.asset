@@ -22,3 +22,6 @@ MonoBehaviour:
   explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
   waterSplash: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}
   trasilRederer: {fileID: 0}
+  tieredMaterials:
+  - {fileID: 2100000, guid: ffdebd8ef5c4d8045bdd44de4ac1a932, type: 2}
+  - {fileID: 2100000, guid: 5a2ab56299dfbc948a39969884093fde, type: 2}

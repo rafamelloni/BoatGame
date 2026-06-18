@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class BasicEnemy : Enemy
@@ -19,6 +20,12 @@ public class BasicEnemy : Enemy
     [SerializeField] private float separationForce = 2f;
     [SerializeField] private LayerMask enemyLayer;
 
+    [Header("Boss Upgrade")]
+    [SerializeField] private Renderer _meshRenderer;
+
+    public static event Action OnBossDefeated;
+    private static int _tier = 0;
+
     private Vector3 formationOffset;
     private bool _stopped;
     private FakeWaveMovement _wave;
@@ -27,6 +34,37 @@ public class BasicEnemy : Enemy
     {
         base.Awake();
         _wave = GetComponent<FakeWaveMovement>();
+    }
+
+    private void OnEnable()
+    {
+        OnBossDefeated += ApplyUpgradedMaterial;
+        if (_tier > 0)
+            ApplyUpgradedMaterial();
+    }
+
+    private void OnDisable()
+    {
+        OnBossDefeated -= ApplyUpgradedMaterial;
+    }
+
+    private void ApplyUpgradedMaterial()
+    {
+        if (_meshRenderer == null || baseData?.tieredMaterials == null) return;
+        int idx = _tier - 1;
+        if (idx >= 0 && idx < baseData.tieredMaterials.Length)
+            _meshRenderer.material = baseData.tieredMaterials[idx];
+    }
+
+    public static void TriggerBossDefeated()
+    {
+        _tier++;
+        OnBossDefeated?.Invoke();
+    }
+
+    public static void ResetTier()
+    {
+        _tier = 0;
     }
 
     public void SetPlayer(Transform player)
@@ -93,7 +131,6 @@ public class BasicEnemy : Enemy
             move.y = 0f;
             transform.position += move.normalized * speed * Time.deltaTime;
 
-            // Rota siempre hacia el player, no hacia el vector move
             Vector3 rotDir = player.position - transform.position;
             rotDir.y = 0f;
             if (rotDir.sqrMagnitude > 0.01f)

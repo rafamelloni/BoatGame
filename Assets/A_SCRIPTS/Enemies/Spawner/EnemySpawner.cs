@@ -246,6 +246,7 @@ public class EnemySpawner : MonoBehaviour
 
     private IEnumerator SpawnLoop(float interval, Func<bool> canSpawn, Action spawnAction)
     {
+        if (canSpawn()) spawnAction();
         while (true)
         {
             yield return new WaitForSeconds(interval);

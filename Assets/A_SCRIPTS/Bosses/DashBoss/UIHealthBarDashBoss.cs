@@ -28,6 +28,9 @@ public class UIHealthBarDashBoss : MonoBehaviour
     [Header("UI Ship Upgrade")]
     [SerializeField] GameObject _UIShipUpgrade;
 
+    [Header("Spawner")]
+    [SerializeField] private EnemySpawner _enemySpawner;
+
     private Material _materialInstance;
     private bool[] _activatedParticles;
 
@@ -120,5 +123,7 @@ public class UIHealthBarDashBoss : MonoBehaviour
     private void DieBoss()
     {
         _UIShipUpgrade.SetActive(true);
+       // _enemySpawner.ResumeSpawning();
+        BasicEnemy.TriggerBossDefeated();
     }
 }
