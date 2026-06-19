@@ -10,6 +10,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private PhaseManager _phaseManager;
     [SerializeField] private Transform _player;
     [SerializeField] private Rigidbody _playerRb;
+    [SerializeField] private Transform _playerBow;
     [SerializeField] private Camera _camera;
 
     [Header("Spawn Area")]
@@ -32,6 +33,8 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float _overlapCheckRadius = 5f;
     [SerializeField] private float _minDistanceFromPlayer = 15f;
     [SerializeField] private float _maxDistanceFromPlayer = 40f;
+    [Tooltip("Distancia del ray desde la proa para calcular el centro de spawn.")]
+    [SerializeField] private float _bowRayLength = 20f;
     [SerializeField] private LayerMask _overlapCheckMask;
 
     [Header("Min distances")]
@@ -512,13 +515,23 @@ public class EnemySpawner : MonoBehaviour
         return null;
     }
 
-    /// Genera una posición en la dirección dada, con algo de dispersión que aumenta con los intentos.
+    /// Genera una posición usando la proa del player como centro de spawn.
+    /// La dispersión aumenta con cada intento fallido.
     private Vector3 GetPositionInDirection(Vector3 direction, int attempt)
     {
         float halfX = _spawnAreaSize.x * 0.5f;
         float halfZ = _spawnAreaSize.y * 0.5f;
 
-        // Dispersión angular que aumenta con cada intento fallido
+        // Centro del spawn: punta de la proa + ray en dirección de movimiento
+        Vector3 bowForward = _playerBow != null ? _playerBow.forward : _player.forward;
+        bowForward.y = 0f;
+        bowForward.Normalize();
+        Vector3 spawnCenter = (_playerBow != null ? _playerBow.position : _player.position) + bowForward * _bowRayLength;
+        spawnCenter.y = _spawnHeight;
+        spawnCenter.x = Mathf.Clamp(spawnCenter.x, _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
+        spawnCenter.z = Mathf.Clamp(spawnCenter.z, _spawnCenter.position.z - halfZ, _spawnCenter.position.z + halfZ);
+
+        // Dispersión angular combinada con la dirección inteligente, aumenta con intentos fallidos
         float spreadAngle = Mathf.Min(attempt * 10f, 160f);
         float randomAngle = UnityEngine.Random.Range(-spreadAngle, spreadAngle) * Mathf.Deg2Rad;
 
@@ -531,7 +544,7 @@ public class EnemySpawner : MonoBehaviour
         ).normalized;
 
         float distance = UnityEngine.Random.Range(_minDistanceFromPlayer + 5f, _maxDistanceFromPlayer);
-        Vector3 candidate = _player.position + spreadDir * distance;
+        Vector3 candidate = spawnCenter + spreadDir * distance;
 
         candidate.x = Mathf.Clamp(candidate.x, _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
         candidate.z = Mathf.Clamp(candidate.z, _spawnCenter.position.z - halfZ, _spawnCenter.position.z + halfZ);
@@ -593,13 +606,25 @@ public class EnemySpawner : MonoBehaviour
             Gizmos.DrawWireSphere(_player.position + dir * 20f, 2f);
         }
 
+        // Ray desde la proa
+        if (_playerBow != null)
+        {
+            Vector3 bowForward = _playerBow.forward;
+            bowForward.y = 0f;
+            bowForward.Normalize();
+            Vector3 bowTip = _playerBow.position + bowForward * _bowRayLength;
+            Gizmos.color = Color.white;
+            Gizmos.DrawLine(_playerBow.position, bowTip);
+            Gizmos.DrawWireSphere(bowTip, 2f);
+        }
+
         // Dirección inteligente de spawn
         if (Application.isPlaying && _player != null)
         {
             Vector3 smartDir = GetSmartSpawnDirection();
-            Gizmos.color = Color.white;
-            Gizmos.DrawLine(_player.position, _player.position + smartDir * 25f);
-            Gizmos.DrawWireSphere(_player.position + smartDir * 25f, 1.5f);
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawLine(_player.position, _player.position + smartDir * 15f);
+            Gizmos.DrawWireSphere(_player.position + smartDir * 15f, 1.5f);
         }
     }
 }

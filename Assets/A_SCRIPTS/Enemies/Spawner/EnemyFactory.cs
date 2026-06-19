@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static EnemySpawner;
 
 public class EnemyFactory : MonoBehaviour
 {
@@ -28,14 +27,9 @@ public class EnemyFactory : MonoBehaviour
     [SerializeField] private Transform _playerAimPo;
     [SerializeField] private BulletFactory _enemyBullet;
 
-    // Pools por tipo
     private readonly Dictionary<Type, object> _pools = new();
-
-    // Grupos: múltiples pools, uno por prefab
     private ObjectPool<EnemyGroup>[] _groupPools;
     private GameObject[] _groupPrefabs;
-
-    // Fase actual cacheada para health overrides
     private SpawnPhase _currentPhase;
 
     private void Awake()
@@ -45,14 +39,11 @@ public class EnemyFactory : MonoBehaviour
         InitPool<RafaEnemy>(_rafaPrefab, _initialRafaStock);
     }
 
-    // ——— API pública ———
-
     public void ApplyPhase(SpawnPhase phase)
     {
         _currentPhase = phase;
     }
 
-    /// Obtiene un enemigo del pool y aplica su setup.
     public T Get<T>(Vector3 position, float yOffset) where T : MonoBehaviour
     {
         var pool = GetPool<T>();
@@ -65,7 +56,6 @@ public class EnemyFactory : MonoBehaviour
         return instance;
     }
 
-    /// Obtiene un EnemyGroup aleatorio del pool.
     public EnemyGroup GetGroup(Vector3 position, float yOffset, int prefabIndex = -1)
     {
         int idx = prefabIndex >= 0 && prefabIndex < _groupPools.Length
@@ -87,7 +77,6 @@ public class EnemyFactory : MonoBehaviour
         return group;
     }
 
-    /// Devuelve un enemigo al pool.
     public void Return<T>(T instance) where T : MonoBehaviour
     {
         RemoveSetup(instance);
@@ -95,9 +84,9 @@ public class EnemyFactory : MonoBehaviour
         pool.Return(instance);
     }
 
-    /// Devuelve un EnemyGroup al pool correcto.
     public void ReturnGroup(EnemyGroup group)
     {
+        group.GetComponent<EnemyEmerge>()?.Reset();
         group.Cleanup();
         for (int i = 0; i < _groupPrefabs.Length; i++)
         {
@@ -110,7 +99,6 @@ public class EnemyFactory : MonoBehaviour
         Debug.LogWarning($"[EnemyFactory] No se encontró pool para grupo '{group.name}'");
     }
 
-    /// Despawnea todos los enemigos de un tipo.
     public void DespawnAll<T>() where T : MonoBehaviour
     {
         var active = FindObjectsByType<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
@@ -124,8 +112,6 @@ public class EnemyFactory : MonoBehaviour
         foreach (var group in active)
             ReturnGroup(group);
     }
-
-    // ——— Setup por tipo ———
 
     private void ApplySetup<T>(T instance) where T : MonoBehaviour
     {
@@ -144,6 +130,7 @@ public class EnemyFactory : MonoBehaviour
 
     private void RemoveSetup<T>(T instance) where T : MonoBehaviour
     {
+        instance.GetComponent<EnemyEmerge>()?.Reset();
         switch (instance)
         {
             case ShipEnemy ship:
@@ -172,12 +159,8 @@ public class EnemyFactory : MonoBehaviour
             health.SetMaxHealth(phaseHealth);
     }
 
-    // ——— Callbacks de muerte ———
-
     private void OnShipDead(ShipEnemy ship) => Return(ship);
     private void OnRafaDead(RafaEnemy rafa) => Return(rafa);
-
-    // ——— Init ———
 
     private void InitGroupPools()
     {
@@ -190,7 +173,7 @@ public class EnemyFactory : MonoBehaviour
             _groupPools[i] = new ObjectPool<EnemyGroup>(
                 () => { var go = Instantiate(config.prefab); go.SetActive(false); return go.GetComponent<EnemyGroup>(); },
                 g => g.gameObject.SetActive(true),
-                g => {g.gameObject.SetActive(false); },
+                g => { g.gameObject.SetActive(false); },
                 config.initialStock
             );
         }

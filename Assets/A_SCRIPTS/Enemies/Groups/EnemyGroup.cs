@@ -34,6 +34,8 @@ public class EnemyGroup : MonoBehaviour
         _enemies = GetComponentsInChildren<BasicEnemy>();
         _shooters = GetComponentsInChildren<BasicEnemyShoot>();
 
+        Physics.SyncTransforms();
+
         foreach (var enemy in _enemies)
             enemy.SetPlayer(player);
         foreach (var shooter in _shooters)
@@ -86,6 +88,14 @@ public class EnemyGroup : MonoBehaviour
             if (member == null) continue;
             member.OnDeath -= OnMemberDied;
             member.Revive();
+
+            // Resetear posición y rotación local al estado original del prefab
+            var basicEnemy = member.GetComponent<BasicEnemy>();
+            if (basicEnemy != null)
+            {
+                member.transform.localPosition = basicEnemy.OriginalLocalPosition;
+                member.transform.localRotation = basicEnemy.OriginalLocalRotation;
+            }
         }
         _aliveCount = 0;
     }

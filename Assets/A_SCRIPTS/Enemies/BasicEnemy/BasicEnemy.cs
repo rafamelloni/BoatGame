@@ -26,6 +26,9 @@ public class BasicEnemy : Enemy
     public static event Action OnBossDefeated;
     private static int _tier = 0;
 
+    public Vector3 OriginalLocalPosition { get; private set; }
+    public Quaternion OriginalLocalRotation { get; private set; }
+
     private Vector3 formationOffset;
     private bool _stopped;
     private FakeWaveMovement _wave;
@@ -34,6 +37,8 @@ public class BasicEnemy : Enemy
     {
         base.Awake();
         _wave = GetComponent<FakeWaveMovement>();
+        OriginalLocalPosition = transform.localPosition;
+        OriginalLocalRotation = transform.localRotation;
     }
 
     private void OnEnable()

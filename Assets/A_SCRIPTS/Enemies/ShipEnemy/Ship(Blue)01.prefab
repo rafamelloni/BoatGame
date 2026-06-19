@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8154749399199304049}
   - component: {fileID: 4180368435906540631}
   - component: {fileID: -2750679881207628670}
+  - component: {fileID: 5557786333482562200}
   m_Layer: 6
   m_Name: Ship(Blue)01
   m_TagString: ShipEnemy
@@ -127,9 +128,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   obstacleRadius: 8
-  separationRadius: 4
   avoidanceWeight: 3
-  separationWeight: 1.5
   broadsideRayLength: 6
   broadsideFlipCooldown: 1.5
   fireRate: 1.2
@@ -199,6 +198,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 84
   m_CollisionDetection: 0
+--- !u!114 &5557786333482562200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1198856605732852742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee498420bbb62854584302bf6a46361c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyEmerge
+  _startDepth: -2
+  _targetHeight: 6.3
+  _emergeSpeed: 3
+  _moveSpeed: 2
+  _tiltAngle: 45
+  _tiltSmoothSpeed: 5
 --- !u!1 &6212077347874016881
 GameObject:
   m_ObjectHideFlags: 0

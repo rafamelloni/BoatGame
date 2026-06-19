@@ -68,7 +68,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee498420bbb62854584302bf6a46361c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyEmerge
-  _startDepth: -5
+  _startDepth: 0
   _targetHeight: 6.3
   _emergeSpeed: 2.2
   _moveSpeed: 2
