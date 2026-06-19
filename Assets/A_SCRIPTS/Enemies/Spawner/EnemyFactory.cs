@@ -61,6 +61,7 @@ public class EnemyFactory : MonoBehaviour
         instance.gameObject.SetActive(true);
         ApplySetup(instance);
         ApplyPhaseHealth(instance);
+        instance.GetComponent<EnemyEmerge>()?.Emerge(_player);
         return instance;
     }
 
@@ -82,6 +83,7 @@ public class EnemyFactory : MonoBehaviour
         }
 
         group.Init(_player, _enemyBullet);
+        group.GetComponent<EnemyEmerge>()?.Emerge(_player);
         return group;
     }
 

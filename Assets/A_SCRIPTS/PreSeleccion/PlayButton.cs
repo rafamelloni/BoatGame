@@ -15,6 +15,7 @@ public class PlayButton : MonoBehaviour
     [SerializeField] private PlayerUpgrades _playerUpgrades;
     [SerializeField] private TimerBoss _timerBoss;
     [SerializeField] private GameObject _pauseManager;
+    [SerializeField] private GameObject _xpCanvas;
 
     private void Awake()
     {
@@ -54,5 +55,6 @@ public class PlayButton : MonoBehaviour
         camaramMain.SetActive(true);
         canvasMain.SetActive(true);
         _pauseManager.SetActive(true);
+        _xpCanvas.SetActive(true);
     }
 }

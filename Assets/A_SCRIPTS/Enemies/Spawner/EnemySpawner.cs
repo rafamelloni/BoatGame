@@ -16,13 +16,13 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private Vector2 _spawnAreaSize = new Vector2(200f, 200f);
     [SerializeField] private float _spawnHeight = 0f;
     [SerializeField] private float _spawnYOffset = 5.3f;
-    [SerializeField] private float _spawnRangeAroundPlayer = 40f;
+    [SerializeField] private float _spawnRangeAroundPlayer = 30f;
     [SerializeField] private float _spawnCenterOffset = 1f;
 
     [Header("Placement")]
     [SerializeField] private int _maxSpawnAttempts = 30;
     [SerializeField] private float _overlapCheckRadius = 5f;
-    [SerializeField] private float _minDistanceFromPlayer = 25f;
+    [SerializeField] private float _minDistanceFromPlayer = 15f;
     [SerializeField] private LayerMask _overlapCheckMask;
 
     [Header("Min distances")]
@@ -36,6 +36,10 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Rafa")]
     [SerializeField] private float _rafaLifetime = 10f;
+
+    [Header("Distance Culling")]
+    [SerializeField] private float _maxGroupDistanceFromPlayer = 80f;
+    [SerializeField] private float _distanceCheckInterval = 5f;
 
     // Posiciones activas
     private readonly Dictionary<EnemyGroup, Vector3> _activeGroupPositions = new();
@@ -67,6 +71,7 @@ public class EnemySpawner : MonoBehaviour
     private float _lastTumultoSpawn;
     private float _tumultoActiveUntil;
     private bool _tumultoActive;
+    private float _lastDistanceCheck;
 
     private void Awake()
     {
@@ -82,6 +87,14 @@ public class EnemySpawner : MonoBehaviour
     {
         if (!_isRunning) return;
 
+        // ——— Distance culling ———
+        if (Time.time >= _lastDistanceCheck + _distanceCheckInterval)
+        {
+            _lastDistanceCheck = Time.time;
+            DespawnFarGroups();
+        }
+
+        // ——— Tumulto ———
         if (_tumultoActive)
         {
             if (Time.time >= _tumultoActiveUntil)
@@ -182,6 +195,27 @@ public class EnemySpawner : MonoBehaviour
 
         if (_isRunning)
             RestartLoops();
+    }
+
+    // ——— Distance culling ———
+
+    private void DespawnFarGroups()
+    {
+        var toRemove = new List<EnemyGroup>();
+        foreach (var kvp in _activeGroupPositions)
+        {
+            if (Vector3.Distance(kvp.Key.transform.position, _player.position) > _maxGroupDistanceFromPlayer)
+                toRemove.Add(kvp.Key);
+        }
+
+        foreach (var group in toRemove)
+        {
+            group.OnGroupDead -= ReturnGroup;
+            group.OnGroupAlmostDead -= ReleaseGroupSlot;
+            _activeGroupPositions.Remove(group);
+            _activeGroupCount--;
+            _factory.ReturnGroup(group);
+        }
     }
 
     // ——— Tumulto spawn ———
@@ -389,7 +423,6 @@ public class EnemySpawner : MonoBehaviour
         {
             Vector3 candidate = GetRandomPosition(directionBias);
             if (IsOverlappingSomething(candidate)) continue;
-            if (IsVisibleByCamera(candidate)) continue;
             if (isTooClose(candidate)) continue;
             if (Vector3.Distance(candidate, _player.position) < _minDistanceFromPlayer) continue;
             return candidate;
@@ -418,13 +451,6 @@ public class EnemySpawner : MonoBehaviour
 
     private bool IsOverlappingSomething(Vector3 pos) =>
         Physics.CheckSphere(pos, _overlapCheckRadius, _overlapCheckMask);
-
-    private bool IsVisibleByCamera(Vector3 pos)
-    {
-        Vector3 vp = _camera.WorldToViewportPoint(pos);
-        const float m = 0.15f;
-        return vp.x >= -m && vp.x <= 1f + m && vp.y >= -m && vp.y <= 1f + m && vp.z > 0f;
-    }
 
     private bool IsTooCloseToGroup(Vector3 c)
     {
@@ -458,6 +484,8 @@ public class EnemySpawner : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(_player.position, _minDistanceFromPlayer);
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(_player.position, _maxGroupDistanceFromPlayer);
         }
 
         Gizmos.color = Color.cyan;
