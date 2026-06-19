@@ -70,7 +70,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyEmerge
   _startDepth: -5
   _targetHeight: 6.3
-  _emergeSpeed: 1.5
+  _emergeSpeed: 2.2
   _moveSpeed: 2
   _tiltAngle: 0
   _tiltSmoothSpeed: 5

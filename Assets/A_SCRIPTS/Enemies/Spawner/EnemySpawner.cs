@@ -9,6 +9,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private EnemyFactory _factory;
     [SerializeField] private PhaseManager _phaseManager;
     [SerializeField] private Transform _player;
+    [SerializeField] private Rigidbody _playerRb;
     [SerializeField] private Camera _camera;
 
     [Header("Spawn Area")]
@@ -17,12 +18,20 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float _spawnHeight = 0f;
     [SerializeField] private float _spawnYOffset = 5.3f;
     [SerializeField] private float _spawnRangeAroundPlayer = 30f;
-    [SerializeField] private float _spawnCenterOffset = 1f;
+
+    [Header("Spawn Direction Weights")]
+    [Tooltip("Cuánto peso tiene la dirección de movimiento del player.")]
+    [SerializeField] private float _movementDirWeight = 1.5f;
+    [Tooltip("Cuánto peso tiene el sector con menos enemigos.")]
+    [SerializeField] private float _emptyDirWeight = 1f;
+    [Tooltip("Cantidad de sectores en los que se divide el espacio alrededor del player.")]
+    [SerializeField] private int _sectorCount = 8;
 
     [Header("Placement")]
     [SerializeField] private int _maxSpawnAttempts = 30;
     [SerializeField] private float _overlapCheckRadius = 5f;
     [SerializeField] private float _minDistanceFromPlayer = 15f;
+    [SerializeField] private float _maxDistanceFromPlayer = 40f;
     [SerializeField] private LayerMask _overlapCheckMask;
 
     [Header("Min distances")]
@@ -412,6 +421,75 @@ public class EnemySpawner : MonoBehaviour
         return true;
     }
 
+    // ——— Dirección inteligente de spawn ———
+
+    /// Calcula la mejor dirección para spawnear combinando:
+    /// 1. Dirección de movimiento del player (para cortarle el paso)
+    /// 2. Sector con menos enemigos activos (para cubrir flancos)
+    private Vector3 GetSmartSpawnDirection()
+    {
+        // Dirección de movimiento del player
+        Vector3 movementDir = Vector3.zero;
+        if (_playerRb != null)
+        {
+            movementDir = _playerRb.linearVelocity;
+            movementDir.y = 0f;
+            if (movementDir.sqrMagnitude > 0.1f)
+                movementDir.Normalize();
+            else
+                movementDir = Vector3.zero;
+        }
+
+        // Sector con menos enemigos
+        Vector3 emptySectorDir = GetLeastPopulatedSectorDirection();
+
+        // Combinar con pesos
+        Vector3 combined = movementDir * _movementDirWeight + emptySectorDir * _emptyDirWeight;
+        combined.y = 0f;
+
+        if (combined.sqrMagnitude < 0.01f)
+            combined = UnityEngine.Random.insideUnitCircle.magnitude > 0
+                ? new Vector3(UnityEngine.Random.insideUnitCircle.x, 0f, UnityEngine.Random.insideUnitCircle.y).normalized
+                : Vector3.forward;
+
+        return combined.normalized;
+    }
+
+    /// Divide el espacio alrededor del player en sectores y devuelve
+    /// la dirección del sector con menos enemigos activos.
+    private Vector3 GetLeastPopulatedSectorDirection()
+    {
+        int[] sectorCounts = new int[_sectorCount];
+        float sectorAngle = 360f / _sectorCount;
+
+        // Contar enemigos por sector (grupos + ships + rafas)
+        var allPositions = new List<Vector3>();
+        foreach (var pos in _activeGroupPositions.Values) allPositions.Add(pos);
+        allPositions.AddRange(_activeShipPositions);
+        allPositions.AddRange(_activeRafaPositions);
+
+        foreach (var pos in allPositions)
+        {
+            Vector3 dir = pos - _player.position;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.01f) continue;
+
+            float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
+            if (angle < 0f) angle += 360f;
+            int sector = Mathf.FloorToInt(angle / sectorAngle) % _sectorCount;
+            sectorCounts[sector]++;
+        }
+
+        // Encontrar sector con menos enemigos
+        int leastPopulated = 0;
+        for (int i = 1; i < _sectorCount; i++)
+            if (sectorCounts[i] < sectorCounts[leastPopulated])
+                leastPopulated = i;
+
+        float centerAngle = (leastPopulated + 0.5f) * sectorAngle * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Cos(centerAngle), 0f, Mathf.Sin(centerAngle));
+    }
+
     // ——— Posicionamiento ———
 
     private Vector3? TryGetValidPosition(Func<Vector3, bool> isTooClose) =>
@@ -419,9 +497,12 @@ public class EnemySpawner : MonoBehaviour
 
     private Vector3? TryGetValidPositionWithOffset(Func<Vector3, bool> isTooClose, Vector3 directionBias)
     {
+        // Si no hay bias externo (tumulto), usar dirección inteligente
+        Vector3 spawnDir = directionBias != Vector3.zero ? directionBias : GetSmartSpawnDirection();
+
         for (int i = 0; i < _maxSpawnAttempts; i++)
         {
-            Vector3 candidate = GetRandomPosition(directionBias);
+            Vector3 candidate = GetPositionInDirection(spawnDir, i);
             if (IsOverlappingSomething(candidate)) continue;
             if (isTooClose(candidate)) continue;
             if (Vector3.Distance(candidate, _player.position) < _minDistanceFromPlayer) continue;
@@ -431,22 +512,32 @@ public class EnemySpawner : MonoBehaviour
         return null;
     }
 
-    private Vector3 GetRandomPosition(Vector3 directionBias = default)
+    /// Genera una posición en la dirección dada, con algo de dispersión que aumenta con los intentos.
+    private Vector3 GetPositionInDirection(Vector3 direction, int attempt)
     {
         float halfX = _spawnAreaSize.x * 0.5f;
         float halfZ = _spawnAreaSize.y * 0.5f;
 
-        Vector3 camForwardXZ = _camera.transform.forward;
-        camForwardXZ.y = 0f;
-        camForwardXZ.Normalize();
+        // Dispersión angular que aumenta con cada intento fallido
+        float spreadAngle = Mathf.Min(attempt * 10f, 160f);
+        float randomAngle = UnityEngine.Random.Range(-spreadAngle, spreadAngle) * Mathf.Deg2Rad;
 
-        Vector3 offsetDir = directionBias != Vector3.zero ? directionBias : camForwardXZ;
-        Vector3 center = _player.position + offsetDir * _spawnRangeAroundPlayer * _spawnCenterOffset;
+        float cosA = Mathf.Cos(randomAngle);
+        float sinA = Mathf.Sin(randomAngle);
+        Vector3 spreadDir = new Vector3(
+            direction.x * cosA - direction.z * sinA,
+            0f,
+            direction.x * sinA + direction.z * cosA
+        ).normalized;
 
-        Vector2 circle = UnityEngine.Random.insideUnitCircle * _spawnRangeAroundPlayer;
-        float x = Mathf.Clamp(center.x + circle.x, _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
-        float z = Mathf.Clamp(center.z + circle.y, _spawnCenter.position.z - halfZ, _spawnCenter.position.z + halfZ);
-        return new Vector3(x, _spawnHeight, z);
+        float distance = UnityEngine.Random.Range(_minDistanceFromPlayer + 5f, _maxDistanceFromPlayer);
+        Vector3 candidate = _player.position + spreadDir * distance;
+
+        candidate.x = Mathf.Clamp(candidate.x, _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
+        candidate.z = Mathf.Clamp(candidate.z, _spawnCenter.position.z - halfZ, _spawnCenter.position.z + halfZ);
+        candidate.y = _spawnHeight;
+
+        return candidate;
     }
 
     private bool IsOverlappingSomething(Vector3 pos) =>
@@ -480,10 +571,13 @@ public class EnemySpawner : MonoBehaviour
         if (_spawnCenter == null) return;
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(_spawnCenter.position, new Vector3(_spawnAreaSize.x, 1f, _spawnAreaSize.y));
+
         if (_player != null)
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(_player.position, _minDistanceFromPlayer);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(_player.position, _maxDistanceFromPlayer);
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireSphere(_player.position, _maxGroupDistanceFromPlayer);
         }
@@ -497,6 +591,15 @@ public class EnemySpawner : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawLine(_player.position, _player.position + dir * 20f);
             Gizmos.DrawWireSphere(_player.position + dir * 20f, 2f);
+        }
+
+        // Dirección inteligente de spawn
+        if (Application.isPlaying && _player != null)
+        {
+            Vector3 smartDir = GetSmartSpawnDirection();
+            Gizmos.color = Color.white;
+            Gizmos.DrawLine(_player.position, _player.position + smartDir * 25f);
+            Gizmos.DrawWireSphere(_player.position + smartDir * 25f, 1.5f);
         }
     }
 }
