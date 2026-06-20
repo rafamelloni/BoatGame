@@ -38,11 +38,18 @@ public class MolotovStrategy : IAbilityStrategy
 
     private IEnumerator LaunchLoop()
     {
+        _launchTimer = 0f;
         while (IsUnlocked)
         {
-            TryLaunch();
-            yield return new WaitForSeconds(_rtData.launchInterval);
+            _launchTimer += Time.deltaTime;
+            if (_launchTimer >= _rtData.launchInterval)
+            {
+                _launchTimer = 0f;
+                TryLaunch();
+            }
+            yield return null;
         }
+        _launchTimer = 0f;
     }
 
     private IEnumerator BurstLoop()
@@ -55,7 +62,8 @@ public class MolotovStrategy : IAbilityStrategy
                 TryLaunchBurst();
         }
     }
-
+    private float _launchTimer = 0f;
+    public float LaunchProgress => _rtData.launchInterval > 0f ? Mathf.Clamp01(_launchTimer / _rtData.launchInterval) : 0f;
     private void TryLaunch()
     {
         Collider[] nearby = Physics.OverlapSphere(_launchPoint.position, _rtData.detectionRadius, _enemyLayers);
@@ -113,5 +121,6 @@ public class MolotovStrategy : IAbilityStrategy
         _rtData.fireDuration = _baseData.fireDuration;
         _rtData.burstInterval = _baseData.burstInterval;
         _rtData.burstCount = _baseData.burstCount;
+        _launchTimer = 0f;
     }
 }

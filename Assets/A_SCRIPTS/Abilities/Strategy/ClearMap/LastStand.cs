@@ -13,15 +13,18 @@ public class LastStand : MonoBehaviour
 
     private bool _isUnlocked = false;
     private bool _onCooldown = false;
+    private float _cooldownTimer = 0f;
     private RT_PlayerHealth _playerHealth;
     private RT_PlayerStats _stats;
+
+    public float CooldownProgress => _onCooldown ? Mathf.Clamp01(_cooldownTimer / cooldown) : 0f;
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
             Activate();
-        }
     }
+
     private void Awake()
     {
         _playerHealth = GetComponent<RT_PlayerHealth>();
@@ -41,13 +44,11 @@ public class LastStand : MonoBehaviour
     }
 
     public void Unlock() => _isUnlocked = true;
-
     public void DebugActivate() => Activate();
 
     private void CheckThreshold()
     {
         if (!_isUnlocked || _onCooldown) return;
-
         float ratio = _stats.currentHealth / _stats.maxHealth;
         if (ratio <= healthThreshold)
             Activate();
@@ -55,7 +56,6 @@ public class LastStand : MonoBehaviour
 
     private void Activate()
     {
-
         Collider[] enemies = Physics.OverlapSphere(transform.position, 999f, enemyLayer);
         foreach (var e in enemies)
         {
@@ -65,14 +65,19 @@ public class LastStand : MonoBehaviour
         }
 
         Instantiate(explosionPrefab, transform.position, Quaternion.identity);
- 
-         StartCoroutine(CooldownRoutine());
+        StartCoroutine(CooldownRoutine());
     }
 
     private IEnumerator CooldownRoutine()
     {
         _onCooldown = true;
-        yield return new WaitForSeconds(cooldown);
+        _cooldownTimer = 0f;
+        while (_cooldownTimer < cooldown)
+        {
+            _cooldownTimer += Time.deltaTime;
+            yield return null;
+        }
+        _cooldownTimer = 0f;
         _onCooldown = false;
     }
 }

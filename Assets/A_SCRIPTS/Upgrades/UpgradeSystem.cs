@@ -24,6 +24,9 @@ public class UpgradeSystem : MonoBehaviour
     [SerializeField] private DashMovement dashMovement;
     [SerializeField] private LastStand lastStand;
 
+    private int _molotovSlotIndex = -1;
+    private int _bladesSlotIndex = -1;
+
     public void ApplyUpgrade(SO_UpgradePath path)
     {
         if (!playerUpgrades.CanUpgrade(path))
@@ -106,14 +109,15 @@ public class UpgradeSystem : MonoBehaviour
                 break;
             case SpecialAbilityType.ClearScreen:
                 lastStand.Unlock();
-                abilityHUD.UnlockNext(spriteClearScreen);
+                abilityHUD.UnlockNext(spriteClearScreen, () => lastStand.CooldownProgress);
                 break;
             case SpecialAbilityType.UnlockMolotov:
                 abilityController.MolotovAbility.SetUnlocked(true);
                 abilityHUD.UnlockNext(spriteUnlockMolotov);
+                _molotovSlotIndex = abilityHUD.GetLastUnlockedIndex();
                 break;
             case SpecialAbilityType.TripleMolotov:
-                // abilityHUD.UnlockNext(spriteTripleMolotov);
+                abilityHUD.AddProgressToIndex(_molotovSlotIndex, () => abilityController.MolotovAbility.LaunchProgress);
                 break;
             case SpecialAbilityType.UnlockCrossbow:
                 abilityController.CrossbowAvailable();
@@ -125,8 +129,13 @@ public class UpgradeSystem : MonoBehaviour
             case SpecialAbilityType.UnlockBlades:
                 abilityController.BladesAvailable();
                 abilityHUD.UnlockNext(spriteUnlockBlades);
+                _bladesSlotIndex = abilityHUD.GetLastUnlockedIndex();
+                Debug.Log($"[UpgradeSystem] UnlockBlades slot index: {_bladesSlotIndex}");
                 break;
             case SpecialAbilityType.BladesBurst:
+                abilityHUD.AddProgressToIndex(_bladesSlotIndex, () => abilityController.BladesAbility.BurstProgress);
+                Debug.Log($"[UpgradeSystem] BladesBurst usando index: {_bladesSlotIndex}");
+
                 Debug.Log("[UpgradeSystem] BladesBurst desbloqueado");
                 break;
         }
@@ -134,6 +143,8 @@ public class UpgradeSystem : MonoBehaviour
 
     public void ResetAll()
     {
+        _molotovSlotIndex = -1;
+        _bladesSlotIndex = -1;
         playerUpgrades.ResetAll();
         abilityController.ResetAbilities();
         abilityHUD.ResetAll();

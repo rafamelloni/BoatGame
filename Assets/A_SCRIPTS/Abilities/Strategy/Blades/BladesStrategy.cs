@@ -45,15 +45,19 @@ public class BladesStrategy : IAbilityStrategy
 
     private IEnumerator BurstLoop()
     {
+        _burstTimer = 0f;
         while (IsUnlocked)
         {
-            yield return new WaitForSeconds(_rtData.burstInterval);
-            bool hasBurst = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.BladesBurst);
-            Debug.Log($"[BurstLoop] hasBurst={hasBurst} | IsUnlocked={IsUnlocked}");
-
-            if (hasBurst)
-                TriggerBurst();
+            _burstTimer += Time.deltaTime;
+            if (_burstTimer >= _rtData.burstInterval)
+            {
+                _burstTimer = 0f;
+                bool hasBurst = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.BladesBurst);
+                if (hasBurst) TriggerBurst();
+            }
+            yield return null;
         }
+        _burstTimer = 0f;
     }
 
     public void TriggerBurst()
@@ -77,7 +81,8 @@ public class BladesStrategy : IAbilityStrategy
             );
         }
     }
-
+    private float _burstTimer = 0f;
+    public float BurstProgress => _rtData.burstInterval > 0f ? Mathf.Clamp01(_burstTimer / _rtData.burstInterval) : 0f;
     public void Tick()
     {
         if (_blades.Count == 0) return;
