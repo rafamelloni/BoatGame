@@ -29,6 +29,7 @@ public class MortarBossController : MonoBehaviour
 
     private void Awake()
     {
+        
         _health = GetComponent<MortarBossHealth>();
     }
 

@@ -62,6 +62,9 @@ public class EnemyEmerge : MonoBehaviour
                     dir.Normalize();
                     pos.x += dir.x * _moveSpeed * Time.deltaTime;
                     pos.z += dir.z * _moveSpeed * Time.deltaTime;
+
+                    Quaternion targetRot = Quaternion.LookRotation(dir);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, _tiltSmoothSpeed * Time.deltaTime);
                 }
             }
 
@@ -99,6 +102,7 @@ public class EnemyEmerge : MonoBehaviour
                 list.Add(b);
             foreach (var b in GetComponentsInChildren<BasicEnemyShoot>())
                 list.Add(b);
+
         }
 
         var ship = GetComponent<ShipEnemy>();
@@ -106,6 +110,9 @@ public class EnemyEmerge : MonoBehaviour
 
         var rafa = GetComponent<RafaEnemy>();
         if (rafa != null) list.Add(rafa);
+
+        var dashBoss = GetComponent<DashBossEnemy>();
+        if (dashBoss != null) list.Add(dashBoss);
 
         return list.ToArray();
     }
