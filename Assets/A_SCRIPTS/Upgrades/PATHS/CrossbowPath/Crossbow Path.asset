@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Crossbow Path
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
   pathName: 
-  pathIconGrey: {fileID: 21300000, guid: 548c9279dffc70044800b0e01f7a3c17, type: 3}
-  pathIconSelected: {fileID: 21300000, guid: ecc70b587c1a56744aaf7cdbbfae217b, type: 3}
+  pathIconGrey: {fileID: 21300000, guid: 1aa9eb12d1bf4e642beb3095425d6be4, type: 3}
+  pathIconSelected: {fileID: 21300000, guid: e9a700cd9cfaa7b40aab0f8c197a1025, type: 3}
   pathDescription: 
   steps:
   - {fileID: 11400000, guid: ce8538e8a1b21ba43adf72bee6c501f9, type: 2}
