@@ -22,6 +22,7 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private CoinSpawner _coinSpawner;
     [SerializeField] private CoinBarUI _coinBarUI;
     [SerializeField] private BossSequenceManager _bossSequenceManager;
+    [SerializeField] private UpgradeShipBOSS _bossShip;
 
     [Header("Player")]
     [SerializeField] private Transform _playerTransform;
@@ -89,6 +90,7 @@ public class SceneResetter : MonoBehaviour
         rb.MoveRotation(_playerStartRotation);
         _playerTransform.GetComponent<RT_PlayerStats>().ResetToBase();
         _playerHealth.ResetHealth();
+        _bossShip.ResetShip();
 
         // Abilities
         _abilityController.ResetAbilities();

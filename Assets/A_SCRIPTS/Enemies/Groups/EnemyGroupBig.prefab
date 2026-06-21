@@ -81,7 +81,7 @@ MonoBehaviour:
   _tiltAngle: 0
   _tiltSmoothSpeed: 0
   _emergeParticlePrefab: {fileID: 6171254287114384594, guid: 4bbe30ef5660d3448a430c127f1978a0, type: 3}
-  _spawnParticleYOffset: 5
+  _spawnParticleYOffset: 6.3
 --- !u!1 &1300345625809637489
 GameObject:
   m_ObjectHideFlags: 0

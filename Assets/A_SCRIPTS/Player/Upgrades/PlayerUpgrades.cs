@@ -7,6 +7,8 @@ public class PlayerUpgrades : MonoBehaviour
     private RT_CannonData _cannonData;
     private RT_BladesData _bladesData;
     private RT_MolotovData _molotovData;
+    public AbilityController ability;
+
 
     [SerializeField] private AbilityController _abilityController;
     public RT_PlayerStats Stats => _rtData;
@@ -31,6 +33,14 @@ public class PlayerUpgrades : MonoBehaviour
         _bladesData = _abilityController.BladesAbility._rtData;
         _molotovData = _abilityController.MolotovAbility._rtData;
     }
+    //CANNON
+    public void CannonCharge() {
+
+        ability.CannonAbility._rtData.shotsPerBurst += 1;
+    }
+
+
+
     //BLADES
     public void BladesSpeed() 
     {

@@ -75,17 +75,17 @@ public class UpgradesIslands : MonoBehaviour
     //CANNON
     public void CannonChargeOnClick()
     {
-       //_cannonUpgrades.AddCharge();
+        _playerUpgrades.CannonCharge();
         canvas.SetActive(false);
         OnRouglikeExit();
 
     }
-    public void CannonBulletSizeOnClick()
-    {
-       // _cannonUpgrades.IncreaseBulletSize();
-        canvas.SetActive(false);
-        OnRouglikeExit();
-    }
+    //public void CannonBulletSizeOnClick()
+    //{
+    //   _cannonUpgrades.IncreaseBulletSize();
+    //    canvas.SetActive(false);
+    //    OnRouglikeExit();
+    //}
 
     //Damage
     public void DamageAllOnClick()

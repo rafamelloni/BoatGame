@@ -20,10 +20,13 @@ public class UpgradeShipBOSS : MonoBehaviour
     [SerializeField] GameObject _canvasShipUpgrades;
     [SerializeField] EnemySpawner _enemySpawner;
 
+    [SerializeField] RT_PlayerStats _playerHealth;
+
     public void Onclick()
     {
         AnimateShip();
         _canvasShipUpgrades.SetActive(false);
+        _playerHealth.currentHealth = _playerHealth.maxHealth;
         //_enemySpawner.ResumeSpawning();
 
     }
@@ -80,7 +83,7 @@ public class UpgradeShipBOSS : MonoBehaviour
         _movement.SetMovementEnabled(true);
     }
 
-    public void Reset()
+    public void ResetShip()
     {
         StopAllCoroutines();
         _movement.SetMovementEnabled(true);
