@@ -100,7 +100,7 @@ public class UpgradeSystem : MonoBehaviour
                 abilityHUD.UnlockNext(spriteRicochet);
                 break;
             case SpecialAbilityType.DoubleShot:
-                abilityController.CannonAbility._rtData.shotsPerBurst *= 2;
+                
                 abilityHUD.UnlockNext(spriteDoubleShot);
                 break;
             case SpecialAbilityType.Dashes:

@@ -19,6 +19,9 @@ public class MortarBossController : MonoBehaviour
     [Header("Duración del ataque (antes de cooldown)")]
     [SerializeField] private float _attackDuration = 1.5f;
 
+    [Header("UI")]
+    [SerializeField] private GameObject _UIShipUpgrade;
+
     private MortarBossHealth _health;
 
     private enum State { Idle, Attacking, Cooldown, Dead }
@@ -110,6 +113,8 @@ public class MortarBossController : MonoBehaviour
     {
         _state = State.Dead;
         StopAllCoroutines();
+        _UIShipUpgrade.SetActive(true);
+        BasicEnemy.TriggerBossDefeated();
         Debug.Log("[MortarBoss] Muerto.");
     }
 

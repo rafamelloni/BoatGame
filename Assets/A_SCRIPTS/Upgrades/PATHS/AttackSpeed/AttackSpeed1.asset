@@ -16,5 +16,5 @@ MonoBehaviour:
   description: Basic Attack Colldown -0.2s
   icon: {fileID: 0}
   statType: 2
-  statValue: 0.2
+  statValue: 20
   specialAbility: 0

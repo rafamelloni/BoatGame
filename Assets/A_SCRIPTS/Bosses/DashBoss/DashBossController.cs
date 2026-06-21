@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DashBossController : Enemy
@@ -25,7 +26,6 @@ public class DashBossController : Enemy
     [SerializeField] private float _betweenDashes;
 
     [Header("Dash Circle Indicator")]
-    // Prefab con DashCircleIndicator: tiene un círculo outer y un círculo inner (hijo) que se escala
     [SerializeField] private DashCircleIndicator _dashCirclePrefab;
 
     [Header("Particles")]
@@ -41,9 +41,12 @@ public class DashBossController : Enemy
     private float _nextCircleSpecialTime;
     private bool _isBusy;
 
+    private readonly List<DashCircleIndicator> _activeIndicators = new();
+
     private void Awake()
     {
         base.Awake();
+        _enemyHealth.OnDeath += OnDeath;
         SetPlayer(player);
     }
 
@@ -74,18 +77,34 @@ public class DashBossController : Enemy
             StartCoroutine(DoDash());
     }
 
+    private void OnDeath()
+    {
+        StopAllCoroutines();
+        foreach (var indicator in _activeIndicators)
+            if (indicator != null)
+                Destroy(indicator.gameObject);
+        _activeIndicators.Clear();
+    }
+
     // ─────────────────────────────────────────────
     //  Helpers para el indicador
     // ─────────────────────────────────────────────
 
-    /// Spawnea el prefab en <destination>, anima el círculo interno cerrándose,
-    /// y cuando llega a 0 invoca onComplete.
-    /// Devuelve la instancia para que puedas destruirla/desactivarla después.
     private DashCircleIndicator SpawnIndicator(Vector3 destination, float duration, System.Action onComplete = null)
     {
         DashCircleIndicator indicator = Instantiate(_dashCirclePrefab, destination, Quaternion.identity);
         indicator.Play(duration, onComplete);
+        _activeIndicators.Add(indicator);
         return indicator;
+    }
+
+    private void DestroyIndicator(DashCircleIndicator indicator)
+    {
+        if (indicator != null)
+        {
+            _activeIndicators.Remove(indicator);
+            Destroy(indicator.gameObject);
+        }
     }
 
     // ─────────────────────────────────────────────
@@ -106,13 +125,12 @@ public class DashBossController : Enemy
 
         yield return _movement.RotateToFace(destination);
 
-        // El círculo se cierra en _telegraphDuration y cuando termina dashea
         bool shouldDash = false;
         DashCircleIndicator indicator = SpawnIndicator(destination, _telegraphDuration, () => shouldDash = true);
 
         yield return new WaitUntil(() => shouldDash);
 
-        Destroy(indicator.gameObject);
+        DestroyIndicator(indicator);
         yield return _movement.ExecuteDash(destination);
 
         _movement.LockRotation(false);
@@ -122,8 +140,9 @@ public class DashBossController : Enemy
     }
 
     // ─────────────────────────────────────────────
-    //  Special attack (solo círculo en el último dash)
+    //  Special attack
     // ─────────────────────────────────────────────
+
     private IEnumerator DoSpecialAttack()
     {
         _isBusy = true;
@@ -139,7 +158,7 @@ public class DashBossController : Enemy
             bool shouldDash = false;
             DashCircleIndicator indicator = SpawnIndicator(destination, _telegraphDuration, () => shouldDash = true);
             yield return new WaitUntil(() => shouldDash);
-            Destroy(indicator.gameObject);
+            DestroyIndicator(indicator);
             yield return _movement.ExecuteDash(destination);
             _movement.LockRotation(false);
             yield return new WaitForSeconds(0.15f);
@@ -182,7 +201,6 @@ public class DashBossController : Enemy
             destinations[i].y = transform.position.y;
         }
 
-        // Spawneo los indicadores uno por uno (todos muestran el círculo cerrándose)
         float spawnInterval = _circleTelegraphSpawnDuration / count;
         DashCircleIndicator[] indicators = new DashCircleIndicator[count];
 
@@ -192,10 +210,8 @@ public class DashBossController : Enemy
             yield return new WaitForSeconds(spawnInterval);
         }
 
-        // Esperar que el primero termine de cerrarse
         yield return new WaitForSeconds(_telegraphDuration - _circleTelegraphSpawnDuration);
 
-        // Dashes en secuencia
         Vector3 prevPos = transform.position;
         for (int i = 0; i < count; i++)
         {
@@ -203,8 +219,7 @@ public class DashBossController : Enemy
             dir.y = 0f;
             transform.rotation = Quaternion.LookRotation(dir.normalized);
 
-            if (indicators[i] != null)
-                Destroy(indicators[i].gameObject);
+            DestroyIndicator(indicators[i]);
 
             yield return _movement.ExecuteDash(destinations[i], _circleDashDuration, revertTilt: false);
             SpawnDashFire(prevPos, destinations[i]);
@@ -238,6 +253,7 @@ public class DashBossController : Enemy
     private IEnumerator DespawnParticles(GameObject fireP)
     {
         yield return new WaitForSeconds(3f);
-        fireP.SetActive(false);
+        if (fireP != null)
+            Destroy(fireP.gameObject);
     }
 }

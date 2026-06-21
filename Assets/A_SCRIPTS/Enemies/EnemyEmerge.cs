@@ -11,6 +11,10 @@ public class EnemyEmerge : MonoBehaviour
     [SerializeField] private float _tiltAngle = 45f;
     [SerializeField] private float _tiltSmoothSpeed = 5f;
 
+    [Header("Partículas")]
+    [SerializeField] private GameObject _emergeParticlePrefab;
+    [SerializeField] private float _spawnParticleYOffset = 5f;
+
     private Transform _player;
     private Behaviour[] _behaviours;
     private bool _emerging = false;
@@ -19,16 +23,30 @@ public class EnemyEmerge : MonoBehaviour
     {
         if (_emerging) return;
         _player = player;
-
         Vector3 pos = transform.position;
         pos.y = _startDepth;
         transform.position = pos;
-
         _behaviours = CollectBehaviours();
         foreach (var b in _behaviours)
             b.enabled = false;
-
         _emerging = true;
+
+        if (_emergeParticlePrefab != null && ParticlePool.Instance != null)
+        {
+            Vector3 spawnPos = transform.position;
+            spawnPos.y += _spawnParticleYOffset;
+            GameObject particle = ParticlePool.Instance.GetParticle(_emergeParticlePrefab, spawnPos);
+            if (particle != null)
+            {
+                ParticleSystem ps = particle.GetComponent<ParticleSystem>();
+                if (ps != null)
+                {
+                    ps.Clear();
+                    ps.Play();
+                }
+            }
+        }
+
         StartCoroutine(EmergeRoutine());
     }
 
@@ -37,11 +55,9 @@ public class EnemyEmerge : MonoBehaviour
         StopAllCoroutines();
         _emerging = false;
         enabled = true;
-
         if (_behaviours != null)
             foreach (var b in _behaviours)
                 if (b != null) b.enabled = true;
-
         _behaviours = null;
     }
 
@@ -52,7 +68,6 @@ public class EnemyEmerge : MonoBehaviour
             Vector3 pos = transform.position;
             pos.y += _emergeSpeed * Time.deltaTime;
             pos.y = Mathf.Min(pos.y, _targetHeight);
-
             if (_player != null)
             {
                 Vector3 dir = _player.position - transform.position;
@@ -62,30 +77,23 @@ public class EnemyEmerge : MonoBehaviour
                     dir.Normalize();
                     pos.x += dir.x * _moveSpeed * Time.deltaTime;
                     pos.z += dir.z * _moveSpeed * Time.deltaTime;
-
                     Quaternion targetRot = Quaternion.LookRotation(dir);
                     transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, _tiltSmoothSpeed * Time.deltaTime);
                 }
             }
-
             transform.position = pos;
-
             float progress = Mathf.InverseLerp(_startDepth, _targetHeight, transform.position.y);
             float currentTilt = Mathf.Lerp(_tiltAngle, 0f, progress);
             Vector3 euler = transform.eulerAngles;
             euler.x = currentTilt;
             transform.eulerAngles = euler;
-
             yield return null;
         }
-
         Vector3 finalEuler = transform.eulerAngles;
         finalEuler.x = 0f;
         transform.eulerAngles = finalEuler;
-
         foreach (var b in _behaviours)
             b.enabled = true;
-
         _emerging = false;
         enabled = false;
     }
@@ -93,7 +101,6 @@ public class EnemyEmerge : MonoBehaviour
     private Behaviour[] CollectBehaviours()
     {
         var list = new System.Collections.Generic.List<Behaviour>();
-
         var group = GetComponent<EnemyGroup>();
         if (group != null)
         {
@@ -102,18 +109,13 @@ public class EnemyEmerge : MonoBehaviour
                 list.Add(b);
             foreach (var b in GetComponentsInChildren<BasicEnemyShoot>())
                 list.Add(b);
-
         }
-
         var ship = GetComponent<ShipEnemy>();
         if (ship != null) list.Add(ship);
-
         var rafa = GetComponent<RafaEnemy>();
         if (rafa != null) list.Add(rafa);
-
         var dashBoss = GetComponent<DashBossEnemy>();
         if (dashBoss != null) list.Add(dashBoss);
-
         return list.ToArray();
     }
 }

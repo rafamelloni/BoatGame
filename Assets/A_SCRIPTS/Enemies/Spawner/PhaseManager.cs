@@ -99,6 +99,11 @@ public class PhaseManager : MonoBehaviour
         _isRunning = false;
     }
 
+    public void ResumeSession()
+    {
+        _isRunning = true;
+    }
+
     private void Update()
     {
         if (!_isRunning) return;

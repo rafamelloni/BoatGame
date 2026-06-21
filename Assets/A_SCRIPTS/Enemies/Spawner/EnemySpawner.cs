@@ -160,7 +160,8 @@ public class EnemySpawner : MonoBehaviour
         if (!gameObject.activeSelf) return;
         if (_isRunning) return;
         _isRunning = true;
-        _phaseManager.StartSession();
+        _phaseManager.ResumeSession();
+        RestartLoops();
     }
 
     public void DespawnAll()

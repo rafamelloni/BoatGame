@@ -66,12 +66,6 @@ public class SceneResetter : MonoBehaviour
         _playerHealth.OnDeath -= HandlePlayerDeath;
     }
 
-    private void Update()
-    {
-
-        if (Input.GetKeyUp(KeyCode.B))
-            BOSS.SetActive(true);
-    }
 
     private void HandlePlayerDeath()
     {
@@ -112,6 +106,7 @@ public class SceneResetter : MonoBehaviour
         _timerBoss.ResetTimer();
         _coinSpawner.DespawnAll();
         _bossSequenceManager.ResetAll();
+        BasicEnemy.ResetTier();
 
         // Preselección
         PreselectionData.Reset();

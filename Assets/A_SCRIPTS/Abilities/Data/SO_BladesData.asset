@@ -19,13 +19,13 @@ MonoBehaviour:
   erraticAmount: 3.7
   radiusVariation: 2.86
   noiseSpeed: 1.6
-  damage: 50
-  damageCooldownPerEnemy: 0.8
+  damage: 10
+  damageCooldownPerEnemy: 1
   bladeCount: 1
   burstCount: 10
   burstSpeed: 22
   burstMaxDistance: 30
-  burstDamage: 9999
+  burstDamage: 15
   burstInterval: 5
   enemyLayers:
     serializedVersion: 2

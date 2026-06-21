@@ -19,8 +19,10 @@ public class AbilityController : MonoBehaviour
     [Header("Crossbow")]
     [SerializeField] private SO_CrossbowData _crossbowData;
     [SerializeField] private Transform _crossbowLaunchPoint;
+    [SerializeField] private Transform _crossbowLaunchPointNewShip;
     [SerializeField] private LayerMask _crossbowEnemyLayers;
     [SerializeField] private GameObject _crossbowGO;
+    [SerializeField] private GameObject _crossbowGOT2;
     public CrossbowStrategy CrossbowAbility => _crossbowStrategy;
 
     [Header("Blades")]
@@ -57,6 +59,13 @@ public class AbilityController : MonoBehaviour
     public PlayerUpgrades _islandUpgrades;
     public CannonStrategy CannonAbility => _abilityE;
 
+
+    private Vector3 _originalCannonRPos;
+    private Vector3 _originalCannonLPos;
+    private Vector3 _originalMortarPos;
+    private Vector3 _originalCrossbowLaunchPos;
+    private Vector3 _originalCrossbowGOPos;
+
     private void Awake()
     {
         var hardpoints = GetComponent<ShipHardpoints>();
@@ -67,6 +76,15 @@ public class AbilityController : MonoBehaviour
         SetupMolotov(runner);
         SetupCrossbow(runner);
         SetupBlades(runner);
+    }
+
+    private void Start()
+    {
+        _originalCannonRPos = _cannonR.transform.position;
+        _originalCannonLPos = _cannonL.transform.position;
+        _originalMortarPos = _mortar.transform.position;
+        _originalCrossbowLaunchPos = _crossbowLaunchPoint.position;
+        _originalCrossbowGOPos = _crossbowGO.transform.position;
     }
 
     private void SetupCannon(ShipHardpoints hardpoints, CoroutineRunner runner)
@@ -130,6 +148,15 @@ public class AbilityController : MonoBehaviour
         _abilityBlades.ResetUpgrades();
         cannonMesh.SetActive(false);
         cooldownC.SetActive(false);
+
+        //_cannonR.transform.position = _originalCannonRPos;
+        //_cannonL.transform.position = _originalCannonLPos;
+       
+        _crossbowLaunchPoint.position = _originalCrossbowLaunchPos;
+        _crossbowGO.transform.position = _originalCrossbowGOPos;
+
+        //_recoilCannonR.UpdateLocalOrgin();
+        //_recoilCannonL.UpdateLocalOrgin();
     }
 
     public void ShipUpgraded()
@@ -137,6 +164,9 @@ public class AbilityController : MonoBehaviour
         _cannonR.transform.position = _newCannonPosR.position;
         _cannonL.transform.position = _newCannonPosL.position;
         _mortar.transform.position = _newMortarPos.position;
+        _crossbowLaunchPoint.transform.position = _crossbowLaunchPointNewShip.transform.position;
+        _crossbowGO.transform.position = _crossbowGOT2.transform.position;
+
         _recoilCannonR.UpdateLocalOrgin();
         _recoilCannonL.UpdateLocalOrgin();
     }

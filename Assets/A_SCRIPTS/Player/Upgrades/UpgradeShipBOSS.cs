@@ -79,4 +79,14 @@ public class UpgradeShipBOSS : MonoBehaviour
         ship.rotation = originalRot;
         _movement.SetMovementEnabled(true);
     }
+
+    public void Reset()
+    {
+        StopAllCoroutines();
+        _movement.SetMovementEnabled(true);
+        _barcoViejoTest.SetActive(true);
+        _barcoNew.SetActive(false);
+        _particulasPuff.SetActive(false);
+        _canvasShipUpgrades.SetActive(false);
+    }
 }

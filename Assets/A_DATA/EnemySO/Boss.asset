@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90e00291d32278e4e8a219a2537c8b47, type: 3}
   m_Name: Boss
   m_EditorClassIdentifier: Assembly-CSharp::SO_EnemyData
-  maxHealth: 800
+  maxHealth: 1500
   fireRate: 0
   woodExplosionVFX: {fileID: 3707281584461059747, guid: bf734a92b8bf4e041a2ac01e5c9b65bd, type: 3}
   bulletSpeed: 15
@@ -22,3 +22,4 @@ MonoBehaviour:
   explosionVfx: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
   waterSplash: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}
   trasilRederer: {fileID: 0}
+  tieredMaterials: []
