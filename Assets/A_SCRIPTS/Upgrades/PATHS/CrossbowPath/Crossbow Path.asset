@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70ea4c955e87a8641b45a26ef02f3add, type: 3}
   m_Name: Crossbow Path
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradePath
-  pathName: 
+  pathName: CrossBow
   pathIconGrey: {fileID: 21300000, guid: 1aa9eb12d1bf4e642beb3095425d6be4, type: 3}
   pathIconSelected: {fileID: 21300000, guid: e9a700cd9cfaa7b40aab0f8c197a1025, type: 3}
-  pathDescription: 
+  pathDescription: CrossBow Path
   steps:
   - {fileID: 11400000, guid: ce8538e8a1b21ba43adf72bee6c501f9, type: 2}
   - {fileID: 11400000, guid: c71ae29ebc395ae42a56e1d7a94f455d, type: 2}

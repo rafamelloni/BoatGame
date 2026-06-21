@@ -64,7 +64,7 @@ public class UpgradeSystem : MonoBehaviour
                 playerH.RefreshUI();
                 break;
             case StatType.HealthRegen:
-                playerH.StartRegen(0.5f);
+                playerH.StartRegen(1f);
                 break;
             case StatType.MolotovDamage:
                 abilityController.MolotovAbility._rtData.damage *= 1f + step.statValue / 100f;

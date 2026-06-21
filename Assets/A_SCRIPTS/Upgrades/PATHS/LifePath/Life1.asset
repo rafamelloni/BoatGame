@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Life1
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: Health Regen
-  description: 0.5 health per second
+  description: 1 health regen per second
   icon: {fileID: 21300000, guid: d63f1d3079289d64fa06237562c8a5cb, type: 3}
   statType: 11
-  statValue: 0
+  statValue: 1
   specialAbility: 0
