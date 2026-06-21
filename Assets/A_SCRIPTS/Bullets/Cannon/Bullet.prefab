@@ -200,7 +200,7 @@ MonoBehaviour:
   _splitDelay: 0.15
   _spreadAngle: 30
   _splitDamageMultiplier: 0.5
-  _maxRicochetBounces: 7
+  _maxRicochetBounces: 6
   debugRicochet: 0
   debugSplit: 0
 --- !u!114 &8522850598336236742
