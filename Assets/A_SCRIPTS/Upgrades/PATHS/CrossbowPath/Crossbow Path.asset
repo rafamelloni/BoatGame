@@ -18,6 +18,6 @@ MonoBehaviour:
   pathDescription: CrossBow Path
   steps:
   - {fileID: 11400000, guid: ce8538e8a1b21ba43adf72bee6c501f9, type: 2}
-  - {fileID: 11400000, guid: c71ae29ebc395ae42a56e1d7a94f455d, type: 2}
+  - {fileID: 11400000, guid: 0554a2ffbf1fac84686c514ec711f15c, type: 2}
   - {fileID: 11400000, guid: a4366d2d144a7ee439dc371dc7039791, type: 2}
   - {fileID: 11400000, guid: 87e6f6771f5fdc0408346f46f01a2b1c, type: 2}

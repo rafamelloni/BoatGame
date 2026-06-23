@@ -14,6 +14,9 @@ public class EnemyFactory : MonoBehaviour
     [Header("Group")]
     [SerializeField] private GroupPoolConfig[] _groupConfigs;
 
+    [Header("Zombie Group")]
+    [SerializeField] private GroupPoolConfig[] _zombieGroupConfigs;
+
     [Header("Ship")]
     [SerializeField] private GameObject _shipPrefab;
     [SerializeField] private int _initialShipStock = 3;
@@ -30,11 +33,14 @@ public class EnemyFactory : MonoBehaviour
     private readonly Dictionary<Type, object> _pools = new();
     private ObjectPool<EnemyGroup>[] _groupPools;
     private GameObject[] _groupPrefabs;
+    private ObjectPool<ZombieGroup>[] _zombieGroupPools;
+    private GameObject[] _zombieGroupPrefabs;
     private SpawnPhase _currentPhase;
 
     private void Awake()
     {
         InitGroupPools();
+        InitZombieGroupPools();
         InitPool<ShipEnemy>(_shipPrefab, _initialShipStock);
         InitPool<RafaEnemy>(_rafaPrefab, _initialRafaStock);
     }
@@ -77,6 +83,27 @@ public class EnemyFactory : MonoBehaviour
         return group;
     }
 
+    public ZombieGroup GetZombieGroup(Vector3 position, float yOffset, int prefabIndex = -1)
+    {
+        int idx = prefabIndex >= 0 && prefabIndex < _zombieGroupPools.Length
+            ? prefabIndex
+            : UnityEngine.Random.Range(0, _zombieGroupPools.Length);
+
+        var group = _zombieGroupPools[idx].Get();
+        group.transform.position = position + new Vector3(0f, yOffset, 0f);
+        group.gameObject.SetActive(true);
+
+        if (_currentPhase.zombieHealth > 0)
+        {
+            foreach (var health in group.GetComponentsInChildren<EnemyHealth>(true))
+                health.SetMaxHealth(_currentPhase.zombieHealth);
+        }
+
+        group.Init(_player, _enemyBullet);
+        group.GetComponent<EnemyEmerge>()?.Emerge(_player);
+        return group;
+    }
+
     public void Return<T>(T instance) where T : MonoBehaviour
     {
         RemoveSetup(instance);
@@ -99,6 +126,21 @@ public class EnemyFactory : MonoBehaviour
         Debug.LogWarning($"[EnemyFactory] No se encontró pool para grupo '{group.name}'");
     }
 
+    public void ReturnZombieGroup(ZombieGroup group)
+    {
+        group.GetComponent<EnemyEmerge>()?.Reset();
+        group.Cleanup();
+        for (int i = 0; i < _zombieGroupPrefabs.Length; i++)
+        {
+            if (group.gameObject.name.Contains(_zombieGroupPrefabs[i].name))
+            {
+                _zombieGroupPools[i].Return(group);
+                return;
+            }
+        }
+        Debug.LogWarning($"[EnemyFactory] No se encontró pool para zombie group '{group.name}'");
+    }
+
     public void DespawnAll<T>() where T : MonoBehaviour
     {
         var active = FindObjectsByType<T>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
@@ -111,6 +153,13 @@ public class EnemyFactory : MonoBehaviour
         var active = FindObjectsByType<EnemyGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (var group in active)
             ReturnGroup(group);
+    }
+
+    public void DespawnAllZombieGroups()
+    {
+        var active = FindObjectsByType<ZombieGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var group in active)
+            ReturnZombieGroup(group);
     }
 
     private void ApplySetup<T>(T instance) where T : MonoBehaviour
@@ -174,6 +223,29 @@ public class EnemyFactory : MonoBehaviour
                 () => { var go = Instantiate(config.prefab); go.SetActive(false); return go.GetComponent<EnemyGroup>(); },
                 g => g.gameObject.SetActive(true),
                 g => { g.gameObject.SetActive(false); },
+                config.initialStock
+            );
+        }
+    }
+
+    private void InitZombieGroupPools()
+    {
+        _zombieGroupPools = new ObjectPool<ZombieGroup>[_zombieGroupConfigs.Length];
+        _zombieGroupPrefabs = new GameObject[_zombieGroupConfigs.Length];
+        for (int i = 0; i < _zombieGroupConfigs.Length; i++)
+        {
+            var config = _zombieGroupConfigs[i];
+            _zombieGroupPrefabs[i] = config.prefab;
+            _zombieGroupPools[i] = new ObjectPool<ZombieGroup>(
+                () =>
+                {
+                    var go = Instantiate(config.prefab);
+                    go.SetActive(true);
+                    go.SetActive(false);
+                    return go.GetComponent<ZombieGroup>();
+                },
+                g => g.gameObject.SetActive(true),
+                g => g.gameObject.SetActive(false),
                 config.initialStock
             );
         }

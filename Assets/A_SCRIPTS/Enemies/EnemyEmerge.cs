@@ -92,6 +92,7 @@ public class EnemyEmerge : MonoBehaviour
         Vector3 finalEuler = transform.eulerAngles;
         finalEuler.x = 0f;
         transform.eulerAngles = finalEuler;
+        yield return new WaitForSeconds(1f);
         foreach (var b in _behaviours)
             b.enabled = true;
         _emerging = false;
@@ -108,6 +109,13 @@ public class EnemyEmerge : MonoBehaviour
             foreach (var b in GetComponentsInChildren<BasicEnemy>())
                 list.Add(b);
             foreach (var b in GetComponentsInChildren<BasicEnemyShoot>())
+                list.Add(b);
+        }
+        var zombieGroup = GetComponent<ZombieGroup>();
+        if (zombieGroup != null)
+        {
+            list.Add(zombieGroup);
+            foreach (var b in GetComponentsInChildren<ZombieEnemy>())
                 list.Add(b);
         }
         var ship = GetComponent<ShipEnemy>();

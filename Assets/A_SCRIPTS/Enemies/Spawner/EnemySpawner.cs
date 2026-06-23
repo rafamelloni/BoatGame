@@ -41,6 +41,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float _minDistanceBetweenGroups = 30f;
     [SerializeField] private float _minDistanceBetweenShips = 20f;
     [SerializeField] private float _minDistanceBetweenRafas = 15f;
+    [SerializeField] private float _minDistanceBetweenZombies = 15f;
 
     [Header("Tumulto")]
     [SerializeField] private float _tumultoRadius = 20f;
@@ -55,10 +56,12 @@ public class EnemySpawner : MonoBehaviour
 
     // Posiciones activas
     private readonly Dictionary<EnemyGroup, Vector3> _activeGroupPositions = new();
+    private readonly Dictionary<ZombieGroup, Vector3> _activeZombieGroupPositions = new();
     private readonly List<Vector3> _activeShipPositions = new();
     private readonly List<Vector3> _activeRafaPositions = new();
 
     private int _activeGroupCount = 0;
+    private int _activeZombieGroupCount = 0;
 
     // Parámetros de fase actuales
     private float _groupInterval;
@@ -68,6 +71,9 @@ public class EnemySpawner : MonoBehaviour
     private int _maxShips;
     private float _rafaInterval;
     private int _maxRafas;
+    private float _zombieInterval;
+    private int _maxZombies;
+    private int _currentZombieGroupPrefabIndex;
     private int _tumultoMinGroupsPhase;
     private float _tumultoCheckCooldown;
     private float _tumultoActiveDuration;
@@ -78,6 +84,7 @@ public class EnemySpawner : MonoBehaviour
     private Coroutine _groupLoop;
     private Coroutine _shipLoop;
     private Coroutine _rafaLoop;
+    private Coroutine _zombieLoop;
 
     private float _lastTumultoCheck;
     private float _lastTumultoSpawn;
@@ -99,14 +106,12 @@ public class EnemySpawner : MonoBehaviour
     {
         if (!_isRunning) return;
 
-        // ——— Distance culling ———
         if (Time.time >= _lastDistanceCheck + _distanceCheckInterval)
         {
             _lastDistanceCheck = Time.time;
             DespawnFarGroups();
         }
 
-        // ——— Tumulto ———
         if (_tumultoActive)
         {
             if (Time.time >= _tumultoActiveUntil)
@@ -168,6 +173,7 @@ public class EnemySpawner : MonoBehaviour
     {
         StopSpawning();
         DespawnGroups();
+        DespawnZombieGroups();
         _factory.DespawnAll<ShipEnemy>();
         _factory.DespawnAll<RafaEnemy>();
         _activeShipPositions.Clear();
@@ -193,6 +199,9 @@ public class EnemySpawner : MonoBehaviour
         _maxShips = phase.maxActiveShips;
         _rafaInterval = phase.rafaSpawnInterval;
         _maxRafas = phase.maxActiveRafas;
+        _zombieInterval = phase.zombieSpawnInterval;
+        _maxZombies = phase.maxActiveZombies;
+        _currentZombieGroupPrefabIndex = phase.zombieGroupPrefabIndex;
         _tumultoMinGroupsPhase = phase.tumultoMinGroups > 0 ? phase.tumultoMinGroups : _tumultoMinGroups;
         _tumultoCheckCooldown = phase.tumultoCheckCooldown;
         _tumultoActiveDuration = phase.tumultoActiveDuration;
@@ -220,7 +229,6 @@ public class EnemySpawner : MonoBehaviour
             if (Vector3.Distance(kvp.Key.transform.position, _player.position) > _maxGroupDistanceFromPlayer)
                 toRemove.Add(kvp.Key);
         }
-
         foreach (var group in toRemove)
         {
             group.OnGroupDead -= ReturnGroup;
@@ -228,6 +236,21 @@ public class EnemySpawner : MonoBehaviour
             _activeGroupPositions.Remove(group);
             _activeGroupCount--;
             _factory.ReturnGroup(group);
+        }
+
+        var toRemoveZ = new List<ZombieGroup>();
+        foreach (var kvp in _activeZombieGroupPositions)
+        {
+            if (Vector3.Distance(kvp.Key.transform.position, _player.position) > _maxGroupDistanceFromPlayer)
+                toRemoveZ.Add(kvp.Key);
+        }
+        foreach (var group in toRemoveZ)
+        {
+            group.OnGroupDead -= ReturnZombieGroup;
+            group.OnGroupAlmostDead -= ReleaseZombieGroupSlot;
+            _activeZombieGroupPositions.Remove(group);
+            _activeZombieGroupCount--;
+            _factory.ReturnZombieGroup(group);
         }
     }
 
@@ -247,6 +270,9 @@ public class EnemySpawner : MonoBehaviour
                 break;
             case TumultoSpawnType.Rafa:
                 SpawnRafaAroundPlayer(spawnDir);
+                break;
+            case TumultoSpawnType.ZombieGroup:
+                SpawnZombieGroupAroundPlayer(spawnDir);
                 break;
         }
     }
@@ -274,6 +300,13 @@ public class EnemySpawner : MonoBehaviour
         RegisterRafa(_factory.Get<RafaEnemy>(pos.Value, _spawnYOffset));
     }
 
+    private void SpawnZombieGroupAroundPlayer(Vector3 directionBias)
+    {
+        var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
+        if (pos == null) return;
+        RegisterZombieGroup(_factory.GetZombieGroup(pos.Value, _spawnYOffset, _currentZombieGroupPrefabIndex));
+    }
+
     // ——— Loops de spawn ———
 
     private void RestartLoops()
@@ -282,6 +315,7 @@ public class EnemySpawner : MonoBehaviour
         _groupLoop = StartCoroutine(SpawnLoop(_groupInterval, () => _activeGroupCount < _maxGroups, SpawnGroup));
         _shipLoop = StartCoroutine(SpawnLoop(_shipInterval, () => _activeShipPositions.Count < _maxShips, SpawnShip));
         _rafaLoop = StartCoroutine(SpawnLoop(_rafaInterval, () => _activeRafaPositions.Count < _maxRafas, SpawnRafa));
+        _zombieLoop = StartCoroutine(SpawnLoop(_zombieInterval, () => _activeZombieGroupCount < _maxZombies, SpawnZombieGroup));
     }
 
     private void StopAllLoops()
@@ -289,6 +323,7 @@ public class EnemySpawner : MonoBehaviour
         if (_groupLoop != null) { StopCoroutine(_groupLoop); _groupLoop = null; }
         if (_shipLoop != null) { StopCoroutine(_shipLoop); _shipLoop = null; }
         if (_rafaLoop != null) { StopCoroutine(_rafaLoop); _rafaLoop = null; }
+        if (_zombieLoop != null) { StopCoroutine(_zombieLoop); _zombieLoop = null; }
     }
 
     private IEnumerator SpawnLoop(float interval, Func<bool> canSpawn, Action spawnAction)
@@ -375,7 +410,36 @@ public class EnemySpawner : MonoBehaviour
             rafa.GetComponent<EnemyHealth>().TakeDamage(999f);
     }
 
-    // ——— Despawn de grupos ———
+    private void SpawnZombieGroup()
+    {
+        var pos = TryGetValidPosition(IsTooCloseToZombie);
+        if (pos == null) return;
+        RegisterZombieGroup(_factory.GetZombieGroup(pos.Value, _spawnYOffset, _currentZombieGroupPrefabIndex));
+    }
+
+    private void RegisterZombieGroup(ZombieGroup group)
+    {
+        group.OnGroupDead += ReturnZombieGroup;
+        group.OnGroupAlmostDead += ReleaseZombieGroupSlot;
+        _activeZombieGroupPositions[group] = group.transform.position;
+        _activeZombieGroupCount++;
+    }
+
+    private void ReleaseZombieGroupSlot(ZombieGroup group)
+    {
+        group.OnGroupAlmostDead -= ReleaseZombieGroupSlot;
+        _activeZombieGroupPositions.Remove(group);
+        _activeZombieGroupCount--;
+    }
+
+    private void ReturnZombieGroup(ZombieGroup group)
+    {
+        group.OnGroupDead -= ReturnZombieGroup;
+        _activeZombieGroupPositions.Remove(group);
+        _factory.ReturnZombieGroup(group);
+    }
+
+    // ——— Despawn ———
 
     private void DespawnGroups()
     {
@@ -387,6 +451,18 @@ public class EnemySpawner : MonoBehaviour
         }
         _activeGroupPositions.Clear();
         _activeGroupCount = 0;
+    }
+
+    private void DespawnZombieGroups()
+    {
+        foreach (var group in _activeZombieGroupPositions.Keys)
+        {
+            group.OnGroupDead -= ReturnZombieGroup;
+            group.OnGroupAlmostDead -= ReleaseZombieGroupSlot;
+            _factory.ReturnZombieGroup(group);
+        }
+        _activeZombieGroupPositions.Clear();
+        _activeZombieGroupCount = 0;
     }
 
     // ——— Tumulto ———
@@ -427,12 +503,8 @@ public class EnemySpawner : MonoBehaviour
 
     // ——— Dirección inteligente de spawn ———
 
-    /// Calcula la mejor dirección para spawnear combinando:
-    /// 1. Dirección de movimiento del player (para cortarle el paso)
-    /// 2. Sector con menos enemigos activos (para cubrir flancos)
     private Vector3 GetSmartSpawnDirection()
     {
-        // Dirección de movimiento del player
         Vector3 movementDir = Vector3.zero;
         if (_playerRb != null)
         {
@@ -444,31 +516,24 @@ public class EnemySpawner : MonoBehaviour
                 movementDir = Vector3.zero;
         }
 
-        // Sector con menos enemigos
         Vector3 emptySectorDir = GetLeastPopulatedSectorDirection();
-
-        // Combinar con pesos
         Vector3 combined = movementDir * _movementDirWeight + emptySectorDir * _emptyDirWeight;
         combined.y = 0f;
 
         if (combined.sqrMagnitude < 0.01f)
-            combined = UnityEngine.Random.insideUnitCircle.magnitude > 0
-                ? new Vector3(UnityEngine.Random.insideUnitCircle.x, 0f, UnityEngine.Random.insideUnitCircle.y).normalized
-                : Vector3.forward;
+            combined = new Vector3(UnityEngine.Random.insideUnitCircle.x, 0f, UnityEngine.Random.insideUnitCircle.y).normalized;
 
         return combined.normalized;
     }
 
-    /// Divide el espacio alrededor del player en sectores y devuelve
-    /// la dirección del sector con menos enemigos activos.
     private Vector3 GetLeastPopulatedSectorDirection()
     {
         int[] sectorCounts = new int[_sectorCount];
         float sectorAngle = 360f / _sectorCount;
 
-        // Contar enemigos por sector (grupos + ships + rafas)
         var allPositions = new List<Vector3>();
         foreach (var pos in _activeGroupPositions.Values) allPositions.Add(pos);
+        foreach (var pos in _activeZombieGroupPositions.Values) allPositions.Add(pos);
         allPositions.AddRange(_activeShipPositions);
         allPositions.AddRange(_activeRafaPositions);
 
@@ -484,7 +549,6 @@ public class EnemySpawner : MonoBehaviour
             sectorCounts[sector]++;
         }
 
-        // Encontrar sector con menos enemigos
         int leastPopulated = 0;
         for (int i = 1; i < _sectorCount; i++)
             if (sectorCounts[i] < sectorCounts[leastPopulated])
@@ -501,7 +565,6 @@ public class EnemySpawner : MonoBehaviour
 
     private Vector3? TryGetValidPositionWithOffset(Func<Vector3, bool> isTooClose, Vector3 directionBias)
     {
-        // Si no hay bias externo (tumulto), usar dirección inteligente
         Vector3 spawnDir = directionBias != Vector3.zero ? directionBias : GetSmartSpawnDirection();
 
         for (int i = 0; i < _maxSpawnAttempts; i++)
@@ -516,14 +579,11 @@ public class EnemySpawner : MonoBehaviour
         return null;
     }
 
-    /// Genera una posición usando la proa del player como centro de spawn.
-    /// La dispersión aumenta con cada intento fallido.
     private Vector3 GetPositionInDirection(Vector3 direction, int attempt)
     {
         float halfX = _spawnAreaSize.x * 0.5f;
         float halfZ = _spawnAreaSize.y * 0.5f;
 
-        // Centro del spawn: punta de la proa + ray en dirección de movimiento
         Vector3 bowForward = _playerBow != null ? _playerBow.forward : _player.forward;
         bowForward.y = 0f;
         bowForward.Normalize();
@@ -532,7 +592,6 @@ public class EnemySpawner : MonoBehaviour
         spawnCenter.x = Mathf.Clamp(spawnCenter.x, _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
         spawnCenter.z = Mathf.Clamp(spawnCenter.z, _spawnCenter.position.z - halfZ, _spawnCenter.position.z + halfZ);
 
-        // Dispersión angular combinada con la dirección inteligente, aumenta con intentos fallidos
         float spreadAngle = Mathf.Min(attempt * 10f, 160f);
         float randomAngle = UnityEngine.Random.Range(-spreadAngle, spreadAngle) * Mathf.Deg2Rad;
 
@@ -578,6 +637,13 @@ public class EnemySpawner : MonoBehaviour
         return false;
     }
 
+    private bool IsTooCloseToZombie(Vector3 c)
+    {
+        foreach (var pos in _activeZombieGroupPositions.Values)
+            if (Vector3.Distance(c, pos) < _minDistanceBetweenZombies) return true;
+        return false;
+    }
+
     // ——— Gizmos ———
 
     private void OnDrawGizmos()
@@ -607,7 +673,6 @@ public class EnemySpawner : MonoBehaviour
             Gizmos.DrawWireSphere(_player.position + dir * 20f, 2f);
         }
 
-        // Ray desde la proa
         if (_playerBow != null)
         {
             Vector3 bowForward = _playerBow.forward;
@@ -619,7 +684,6 @@ public class EnemySpawner : MonoBehaviour
             Gizmos.DrawWireSphere(bowTip, 2f);
         }
 
-        // Dirección inteligente de spawn
         if (Application.isPlaying && _player != null)
         {
             Vector3 smartDir = GetSmartSpawnDirection();
