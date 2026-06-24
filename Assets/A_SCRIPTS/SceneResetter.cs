@@ -1,6 +1,7 @@
-using System.Collections;
+ï»¿using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SceneResetter : MonoBehaviour
 {
@@ -110,21 +111,29 @@ public class SceneResetter : MonoBehaviour
         _bossSequenceManager.ResetAll();
         BasicEnemy.ResetTier();
 
-        // Preselección
+        // PreselecciÃ³n
         PreselectionData.Reset();
         ShipPreselectionManager.Instance.Reset();
 
         // Boss
         BOSS.SetActive(false);
+
+        _enemySpawner.DespawnAll();
+        _coinSpawner.DespawnAll();
     }
+
 
     private IEnumerator PlayDeathVignette()
     {
         _movement.SetMovementEnabled(false);
-        _vignetteImage.gameObject.SetActive(true);
 
-        // 1. Fade in vignette + efectos simultáneos
+        // âœ… Despawnear enemigos inmediatamente al morir
+        _enemySpawner.DespawnAll();
+        _coinSpawner.DespawnAll();
+
+        _vignetteImage.gameObject.SetActive(true);
         _Canvas.SetActive(false);
+
         StartCoroutine(LerpFOV(_mainCamera.fieldOfView, _zoomFOV, _fadeInDuration));
         StartCoroutine(LerpTimeScale(_slowMotionScale, _slowMoFadeInDuration));
         StartCoroutine(PlayParticlesStaggered());
@@ -132,27 +141,26 @@ public class SceneResetter : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(_holdDuration);
 
-        // 2. Cerrar vignette del todo
         yield return StartCoroutine(AnimateRadiusUnscaled(_vignetteClosedRadius, 0f, _fadeOutDuration));
 
-        // 3. Reset — pantalla completamente negra
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
 
         ResetAll();
+
+        // âœ… Asegurarse que el movimiento sigue deshabilitado post-reset
+        _movement.SetMovementEnabled(false);
 
         foreach (var ps in _deathParticles)
             if (ps != null) ps.Stop();
 
         yield return new WaitForSecondsRealtime(_holdAfterResetDuration);
 
-        // 4. Abrir vignette
         _MESH.SetActive(true);
         yield return StartCoroutine(AnimateRadiusUnscaled(0f, 0.3f, _fadeOutDuration));
 
         StartCoroutine(LerpFOV(_mainCamera.fieldOfView, 50, 0.1f));
 
-        // 5. Swap cámaras y preselección
         _vignetteImage.gameObject.SetActive(false);
         _Canvas.SetActive(false);
         _mainCamera.gameObject.SetActive(false);

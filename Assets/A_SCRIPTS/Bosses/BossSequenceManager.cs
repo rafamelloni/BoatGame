@@ -59,6 +59,7 @@ public class BossSequenceManager : MonoBehaviour
 
     public void ResetAll()
     {
+        // Desuscribir el boss activo si hay uno
         if (_currentBossIndex >= 0 && _currentBossIndex < _bosses.Length)
         {
             GameObject bossGO = _bosses[_currentBossIndex];
@@ -69,9 +70,22 @@ public class BossSequenceManager : MonoBehaviour
 
                 MortarBossHealth mortarHealth = bossGO.GetComponent<MortarBossHealth>();
                 if (mortarHealth != null) mortarHealth.OnDeath -= OnCurrentBossDied;
-
-                bossGO.SetActive(false);
             }
+        }
+
+        // Resetear TODOS los bosses del array, no solo el activo
+        foreach (GameObject bossGO in _bosses)
+        {
+            if (bossGO == null) continue;
+
+            // Intentar reset específico por tipo
+            var dashBoss = bossGO.GetComponent<DashBossController>();
+            if (dashBoss != null) dashBoss.ResetBoss();
+
+            var mortarBoss = bossGO.GetComponent<MortarBossController>();
+            if (mortarBoss != null) mortarBoss.ResetBoss();
+
+            bossGO.SetActive(false);
         }
 
         _currentBossIndex = -1;

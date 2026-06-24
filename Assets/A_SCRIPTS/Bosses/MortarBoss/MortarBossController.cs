@@ -118,6 +118,26 @@ public class MortarBossController : MonoBehaviour
         Debug.Log("[MortarBoss] Muerto.");
     }
 
+    public void ResetBoss()
+    {
+        StopAllCoroutines();
+
+        _state = State.Idle;
+        _fase = 1;
+        _attackIndex = 0;
+
+        _UIShipUpgrade.SetActive(false);
+        if (_health == null) return;
+
+        _health.ResetHealth();        // asegurate que MortarBossHealth tenga este método
+
+        // Limpiar suscripciones y resuscribir limpio
+        _health.OnHealthChanged -= HandleHealthChanged;
+        _health.OnDeath -= HandleDeath;
+        _health.OnHealthChanged += HandleHealthChanged;
+        _health.OnDeath += HandleDeath;
+    }
+
     private void OnGUI()
     {
 #if UNITY_EDITOR

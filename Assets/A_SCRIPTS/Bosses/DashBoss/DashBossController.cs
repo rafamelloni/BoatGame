@@ -249,6 +249,35 @@ public class DashBossController : Enemy
         GameObject p = Instantiate(_dashFirePrefab, center, rotation);
         StartCoroutine(DespawnParticles(p));
     }
+    public void ResetBoss()
+    {
+        Debug.Log($"ResetBoss — movement:{_movement != null} shoot:{_shoot != null} enemyHealth:{_enemyHealth != null} active:{gameObject.activeInHierarchy}");
+
+        StopAllCoroutines();
+        foreach (var indicator in _activeIndicators)
+            if (indicator != null) Destroy(indicator.gameObject);
+        _activeIndicators.Clear();
+        _isBusy = false;
+        _nextDashTime = 0f;
+        _nextSpecialTime = Time.time + _specialCooldown;
+        _nextCircleSpecialTime = Time.time + _circleSpecialCooldown;
+
+        Debug.Log("Antes de movement.LockRotation");
+        if (_movement != null) _movement.LockRotation(false);
+
+        Debug.Log("Antes de shoot.SetCanShoot");
+        if (_shoot != null) _shoot.SetCanShoot(true);
+
+        Debug.Log("Antes de enemyHealth");
+        if (_enemyHealth != null)
+        {
+            _enemyHealth.OnDeath -= OnDeath;
+            _enemyHealth.OnDeath += OnDeath;
+            _enemyHealth.ResetHealth();
+        }
+
+        Debug.Log("ResetBoss completo");
+    }
 
     private IEnumerator DespawnParticles(GameObject fireP)
     {

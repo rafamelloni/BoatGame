@@ -83,7 +83,7 @@ public class MortarBossHealth : MonoBehaviour, IDamageable, IBoss
         if (_currentHealth <= 0f)
         {
             OnDeath?.Invoke();
-            Destroy(gameObject);
+            gameObject.SetActive(false);
         }
     }
 
@@ -125,5 +125,22 @@ public class MortarBossHealth : MonoBehaviour, IDamageable, IBoss
                     _damageParticleObjects[i].SetActive(true);
             }
         }
+    }
+
+    public void ResetHealth()
+    {
+        _currentHealth = _maxHealth;
+
+        // Resetear shader de grietas
+        UpdateCracks(1f);
+
+        // Apagar partículas de daño
+        if (_damageParticleObjects != null)
+            foreach (var p in _damageParticleObjects)
+                if (p != null) p.SetActive(false);
+
+        // Resetear flags
+        for (int i = 0; i < _activatedParticles.Length; i++)
+            _activatedParticles[i] = false;
     }
 }

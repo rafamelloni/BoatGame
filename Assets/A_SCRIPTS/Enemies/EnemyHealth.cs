@@ -23,6 +23,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     public void ResetHealth()
     {
+        if (_rtData == null) return;
         _rtData.Reset();
     }
 

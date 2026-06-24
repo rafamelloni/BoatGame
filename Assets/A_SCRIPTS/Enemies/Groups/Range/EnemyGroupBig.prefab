@@ -378,7 +378,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 7562924170256133534}
   leader: {fileID: 1775793466984374414}
   player: {fileID: 0}
-  speed: 2.3
+  speed: 2
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -634,7 +634,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 3715464197175340567}
   leader: {fileID: 1775793466984374414}
   player: {fileID: 0}
-  speed: 4
+  speed: 2
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -929,7 +929,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 559045322725610574}
   leader: {fileID: 1775793466984374414}
   player: {fileID: 0}
-  speed: 4
+  speed: 2
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -1224,7 +1224,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 174596643746797839}
   leader: {fileID: 1775793466984374414}
   player: {fileID: 0}
-  speed: 2.3
+  speed: 2
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -1459,7 +1459,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 7591484705861560922}
   leader: {fileID: 0}
   player: {fileID: 0}
-  speed: 2.3
+  speed: 2
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -1669,7 +1669,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 5462108269405984583}
   leader: {fileID: 1775793466984374414}
   player: {fileID: 0}
-  speed: 2.3
+  speed: 2
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
@@ -1956,7 +1956,7 @@ MonoBehaviour:
   _enemyHealth: {fileID: 1410239357160275936}
   leader: {fileID: 1775793466984374414}
   player: {fileID: 0}
-  speed: 2.3
+  speed: 2
   rotationSpeed: 3
   _trailP: {fileID: 0}
   obstacleRadius: 35
