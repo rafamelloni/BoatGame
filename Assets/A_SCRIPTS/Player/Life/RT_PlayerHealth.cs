@@ -77,6 +77,9 @@ public class RT_PlayerHealth : MonoBehaviour
     private Coroutine _vignettePulseRoutine;
 
     private static readonly int VignetteIntensityID = Shader.PropertyToID("_VignetteIntensity");
+
+    public float CurrentHealth => _stats.currentHealth;
+    public float MaxHealth => _stats.maxHealth;
     private void OnApplicationQuit()
     {
         _lifeVignette.SetFloat("_NombreDelProperty", 0f);

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Coin : MonoBehaviour
@@ -9,59 +10,91 @@ public class Coin : MonoBehaviour
 
     [Header("Pickup")]
     [SerializeField] private float _magnetRadius;
-    [SerializeField] private float _orbitRadius = 1.2f;
+    [SerializeField] private float _orbitRadius = 0.5f;
     [SerializeField] private float _magnetSpeed = 8f;
 
-    private float _baseY;
-    private Transform _player;
+    [Header("Player Avoidance")]
+    [SerializeField] private float _avoidRadius = 1.5f;      // distancia a la que empieza a esquivar
+    [SerializeField] private float _avoidStrength = 5f;      // fuerza del desvio
 
-    private enum State { Float, Pull, Orbit }
+    [Header("Arrival")]
+    [SerializeField] private float _arrivalRadius = 3f;      // distancia al cofre para empezar el arco
+    [SerializeField] private float _arcHeight = 2f;          // altura maxima del arco
+    [SerializeField] private float _descendSpeed = 4f;       // velocidad de bajada final
+    [SerializeField] private float _scaleDownDistance = 3f;  // distancia al cofre para empezar a achicarse
+
+    private float _baseY;
+    private Transform _target;
+    private Transform _player;
+    private Vector3 _velocity;
+
+    private enum State { Float, Pull, Arrive }
     private State _state = State.Float;
 
-
-
     public event System.Action<Coin> OnCollected;
+
     [SerializeField] private TrailRenderer _trail;
+    public static event System.Action OnCoinArriving;
+    public static event System.Action OnCoinCollected;
+
 
     private void OnDisable()
     {
         if (_trail != null)
             _trail.Clear();
+        transform.localScale = Vector3.one;
+        StopAllCoroutines();
     }
-    public void Init(Transform player, Vector3 spawnPos, float pickupRange)
+
+    public void Init(Transform target, Transform player, Vector3 spawnPos, float pickupRange)
     {
+        _target = target;
         _player = player;
         transform.position = spawnPos;
         _baseY = spawnPos.y;
         _state = State.Float;
         _magnetRadius = pickupRange;
+        _velocity = Vector3.zero;
+        transform.localScale = Vector3.one;
     }
 
     private void Update()
     {
-        if (_player == null) return;
+        if (_target == null) return;
+
+        float distToTarget = Vector3.Distance(transform.position, _target.position);
+
+        // Achicarse cuando esta cerca del cofre
+        if (_state == State.Pull || _state == State.Arrive)
+        {
+            float t = 1f - Mathf.Clamp01(distToTarget / _scaleDownDistance);
+            float scale = Mathf.Lerp(1f, 0.1f, t);
+            transform.localScale = Vector3.one * scale;
+        }
+
         switch (_state)
         {
             case State.Float:
                 DoFloat();
-                if (Vector3.Distance(transform.position, _player.position) <= _magnetRadius)
+                if (distToTarget <= _magnetRadius)
                     _state = State.Pull;
                 break;
+
             case State.Pull:
                 DoPull();
-                if (Vector3.Distance(transform.position, _player.position) <= _orbitRadius)
+                if (distToTarget <= _arrivalRadius)
                 {
-                    OnCollected?.Invoke(this);
-                    gameObject.SetActive(false);
-                    CoinManager.Instance.AddCoin();
+                    OnCoinArriving?.Invoke(); // agregá esto
+                    _state = State.Arrive;
                 }
+                   
+                break;
+
+            case State.Arrive:
+                DoArrive();
                 break;
         }
     }
-
-
-
-
 
     private void DoFloat()
     {
@@ -72,42 +105,55 @@ public class Coin : MonoBehaviour
 
     private void DoPull()
     {
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            _player.position,
-            _magnetSpeed * Time.deltaTime
-        );
+        Vector3 toTarget = (_target.position - transform.position);
+        toTarget.y = 0f;
+        Vector3 moveDir = toTarget.normalized;
 
-        float dist = Vector3.Distance(transform.position, _player.position);
-        float speedMultiplier = Mathf.Lerp(6f, 1f, dist / _magnetRadius); // más rápido cuanto más cerca
-        transform.Rotate(Vector3.up, _rotationSpeed * speedMultiplier * Time.deltaTime);
+        // Esquive suave del player
+        if (_player != null)
+        {
+            Vector3 toPlayer = transform.position - _player.position;
+            toPlayer.y = 0f;
+            float distToPlayer = toPlayer.magnitude;
+            if (distToPlayer < _avoidRadius && distToPlayer > 0.01f)
+            {
+                float avoidForce = (1f - distToPlayer / _avoidRadius) * _avoidStrength;
+                moveDir += toPlayer.normalized * avoidForce;
+                moveDir.Normalize();
+            }
+        }
+
+        float dist = Vector3.Distance(transform.position, _target.position);
+        float speedMultiplier = Mathf.Lerp(2f, 1f, dist / _magnetRadius);
+
+        Vector3 newPos = transform.position + moveDir * _magnetSpeed * speedMultiplier * Time.deltaTime;
+        newPos.y = _baseY + Mathf.Sin(Time.time * _bobSpeed) * _bobAmplitude * 0.5f;
+        transform.position = newPos;
+
+        transform.Rotate(Vector3.up, _rotationSpeed * Time.deltaTime);
     }
 
-    //private void DoOrbit()
-    //{
-    //    _orbitTimer += Time.deltaTime;
-    //    _orbitAngle += _orbitSpeed * Time.deltaTime;
+    private void DoArrive()
+    {
+        Vector3 above = new Vector3(_target.position.x, _target.position.y + _arcHeight, _target.position.z);
 
-    //    float t = _orbitTimer / _orbitDuration;
-    //    float currentRadius = Mathf.Lerp(_orbitRadius, 0f, t);
+        if (transform.position.y < above.y - 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, above, _magnetSpeed * 1.5f * Time.deltaTime);
+        }
+        else
+        {
+            Vector3 stopPos = new Vector3(_target.position.x, _target.position.y + 0.3f, _target.position.z);
+            transform.position = Vector3.MoveTowards(transform.position, stopPos, _descendSpeed * Time.deltaTime);
+            if (Vector3.Distance(transform.position, stopPos) <= _orbitRadius)
+            {
+                OnCoinCollected?.Invoke(); // agregá esto
+                OnCollected?.Invoke(this);
+                gameObject.SetActive(false);
+                CoinManager.Instance.AddCoin();
+            }
+        }
 
-    //    float rad = _orbitAngle * Mathf.Deg2Rad;
-    //    Vector3 offset = new Vector3(Mathf.Cos(rad), 0f, Mathf.Sin(rad)) * currentRadius;
-
-    //    transform.position = new Vector3(
-    //        _player.position.x + offset.x,
-    //        transform.position.y,
-    //        _player.position.z + offset.z
-    //    );
-
-    //    transform.Rotate(Vector3.up, _rotationSpeed * (1f + t * 8f) * Time.deltaTime); // acelera al espiralizar
-
-    //    if (_orbitTimer >= _orbitDuration)
-    //    {
-    //        OnCollected?.Invoke(this);
-    //        gameObject.SetActive(false);
-    //        CoinManager.Instance.AddCoin();
-
-    //    }
-    //}
+        transform.Rotate(Vector3.up, _rotationSpeed * 2f * Time.deltaTime);
+    }
 }

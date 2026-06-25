@@ -173,8 +173,8 @@ TrailRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
+      key0: {r: 1, g: 0.91147983, b: 0, a: 1}
+      key1: {r: 1, g: 0.9676375, b: 0, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -198,7 +198,7 @@ TrailRenderer:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 0
@@ -228,10 +228,14 @@ MonoBehaviour:
   _bobSpeed: 1.62
   _rotationSpeed: 158
   _magnetRadius: 10
-  _orbitRadius: 3
+  _orbitRadius: 2
   _magnetSpeed: 15
-  _orbitSpeed: 360
-  _orbitDuration: 1
+  _avoidRadius: 1.5
+  _avoidStrength: 5
+  _arrivalRadius: 3
+  _arcHeight: 2
+  _descendSpeed: 4
+  _scaleDownDistance: 3
   _trail: {fileID: 6179726084377007146}
 --- !u!1 &6688106002761261348
 GameObject:

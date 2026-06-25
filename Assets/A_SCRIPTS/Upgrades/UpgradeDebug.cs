@@ -14,19 +14,19 @@ public class UpgradeDebug : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) MaxPath(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) MaxPath(1);
-        if (Input.GetKeyDown(KeyCode.Alpha3)) MaxPath(2);
-        if (Input.GetKeyDown(KeyCode.Alpha4)) MaxPath(3);
-        if (Input.GetKeyDown(KeyCode.Alpha5)) MaxPath(4);
-        if (Input.GetKeyDown(KeyCode.Alpha6)) MaxPath(5);
-        if (Input.GetKeyDown(KeyCode.Alpha8)) MaxPath(6);
+        //if (Input.GetKeyDown(KeyCode.Alpha1)) MaxPath(0);
+        //if (Input.GetKeyDown(KeyCode.Alpha2)) MaxPath(1);
+        //if (Input.GetKeyDown(KeyCode.Alpha3)) MaxPath(2);
+        //if (Input.GetKeyDown(KeyCode.Alpha4)) MaxPath(3);
+        //if (Input.GetKeyDown(KeyCode.Alpha5)) MaxPath(4);
+        //if (Input.GetKeyDown(KeyCode.Alpha6)) MaxPath(5);
+        //if (Input.GetKeyDown(KeyCode.Alpha8)) MaxPath(6);
 
 
-        if (Input.GetKeyDown(KeyCode.Alpha7)) _bossMortar.SetActive(true);
+        //if (Input.GetKeyDown(KeyCode.Alpha7)) _bossMortar.SetActive(true);
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-            _pergamino.ClosePergamino(null);
+        //if (Input.GetKeyDown(KeyCode.Escape))
+        //    _pergamino.ClosePergamino(null);
     }
 
     private void MaxPath(int index)

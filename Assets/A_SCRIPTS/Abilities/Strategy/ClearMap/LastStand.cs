@@ -44,12 +44,6 @@ public class LastStand : MonoBehaviour
             shockwaveVFX.SetActive(false);
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            Activate();
-    }
-
     private void OnEnable()
     {
         if (_playerHealth != null)

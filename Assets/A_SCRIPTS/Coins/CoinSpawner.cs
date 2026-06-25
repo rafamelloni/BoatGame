@@ -7,6 +7,7 @@ public class CoinSpawner : MonoBehaviour
     [Header("References")]
     [SerializeField] private GameObject _coinPrefab;
     [SerializeField] private Transform _player;
+    [SerializeField] private Transform _chest;
     [SerializeField] private RT_PlayerStats _stats;
 
     [Header("Drop config")]
@@ -64,7 +65,7 @@ public class CoinSpawner : MonoBehaviour
             );
 
             Coin coin = _pool.Get();
-            coin.Init(_player, spawnPos, _stats.pickUpRange);
+            coin.Init(_chest, _player, spawnPos, _stats.pickUpRange);
         }
     }
 
