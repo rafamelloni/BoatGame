@@ -359,7 +359,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec59a1977d3f0684f90b5659cf69eb8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieEnemy
-  baseData: {fileID: 11400000, guid: 25ece4a7469ef844a96afcfec1e4f25e, type: 2}
+  baseData: {fileID: 11400000, guid: 4983826c770237643b56911a0abc623b, type: 2}
   _enemyHealth: {fileID: 559045322725610574}
   _speed: 3
   _damage: 10
@@ -566,7 +566,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec59a1977d3f0684f90b5659cf69eb8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieEnemy
-  baseData: {fileID: 11400000, guid: 25ece4a7469ef844a96afcfec1e4f25e, type: 2}
+  baseData: {fileID: 11400000, guid: 4983826c770237643b56911a0abc623b, type: 2}
   _enemyHealth: {fileID: 174596643746797839}
   _speed: 3
   _damage: 10
@@ -772,7 +772,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec59a1977d3f0684f90b5659cf69eb8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieEnemy
-  baseData: {fileID: 11400000, guid: 25ece4a7469ef844a96afcfec1e4f25e, type: 2}
+  baseData: {fileID: 11400000, guid: 4983826c770237643b56911a0abc623b, type: 2}
   _enemyHealth: {fileID: 7591484705861560922}
   _speed: 3
   _damage: 10
@@ -979,7 +979,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec59a1977d3f0684f90b5659cf69eb8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieEnemy
-  baseData: {fileID: 11400000, guid: 25ece4a7469ef844a96afcfec1e4f25e, type: 2}
+  baseData: {fileID: 11400000, guid: 4983826c770237643b56911a0abc623b, type: 2}
   _enemyHealth: {fileID: 5462108269405984583}
   _speed: 3
   _damage: 10

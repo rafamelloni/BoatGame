@@ -23,5 +23,8 @@ MonoBehaviour:
   waterSplash: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}
   trasilRederer: {fileID: 0}
   tieredMaterials:
-  - {fileID: 2100000, guid: ffdebd8ef5c4d8045bdd44de4ac1a932, type: 2}
-  - {fileID: 2100000, guid: 5a2ab56299dfbc948a39969884093fde, type: 2}
+  - {fileID: 2100000, guid: eca475621e8ac3747a3838df53cc2bf4, type: 2}
+  - {fileID: 2100000, guid: 7f4396c84d2fd1146a0bbb578b821695, type: 2}
+  tieredModels:
+  - {fileID: 0}
+  - {fileID: 0}

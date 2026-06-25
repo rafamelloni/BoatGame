@@ -20,4 +20,5 @@ public class SO_EnemyData : ScriptableObject
 
     [Header("Boss Upgrade")]
     public Material[] tieredMaterials;
+    public GameObject[] tieredModels; // mismo índice que tieredMaterials
 }
