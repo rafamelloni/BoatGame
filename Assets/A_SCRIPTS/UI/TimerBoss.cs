@@ -16,7 +16,8 @@ public class TimerBoss : MonoBehaviour
 
     [Header("Referencias")]
     [SerializeField] private BossSequenceManager _bossSequenceManager;
-    [SerializeField] private EnemySpawner enemySpawner;
+    [SerializeField] private EnemySpawner _enemySpawner;
+    [SerializeField] private IslandSpawnManager _islandSpawner;
 
     private float tiempoActual;
     private bool timerActivo = false;
@@ -42,7 +43,8 @@ public class TimerBoss : MonoBehaviour
             if (tiempoActual <= tiempoRestanteParaBoss)
             {
                 timerActivo = false;
-                enemySpawner?.DespawnAll();
+                _enemySpawner?.DespawnAll();
+                _islandSpawner?.ResetIslands();
                 _bossSequenceManager?.ActivateNextBoss();
                 _nextBossIndex++;
             }
@@ -56,8 +58,7 @@ public class TimerBoss : MonoBehaviour
 
     private void ActualizarUI()
     {
-        float porcentaje = tiempoActual / tiempoTotal;
-        int minutos = Mathf.FloorToInt(tiempoActual / 60f);
+        float porcentaje = 1f - (tiempoActual / tiempoTotal); int minutos = Mathf.FloorToInt(tiempoActual / 60f);
         int segundos = Mathf.FloorToInt(tiempoActual % 60f);
 
         if (textoTimer != null)

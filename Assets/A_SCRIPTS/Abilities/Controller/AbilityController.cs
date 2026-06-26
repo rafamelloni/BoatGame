@@ -39,6 +39,9 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private GameObject _cannonR;
     [SerializeField] private GameObject _cannonL;
     [SerializeField] private GameObject _mortar;
+    [SerializeField] private Transform _treasureChest;
+
+    [SerializeField] private Transform _newTreasureChestPos;
     [SerializeField] private Transform _newCannonPosR;
     [SerializeField] private Transform _newCannonPosL;
     [SerializeField] private Transform _newMortarPos;
@@ -65,6 +68,7 @@ public class AbilityController : MonoBehaviour
     private Vector3 _originalMortarPos;
     private Vector3 _originalCrossbowLaunchPos;
     private Vector3 _originalCrossbowGOPos;
+    private Vector3 _originalTreasureChest;
 
     private void Awake()
     {
@@ -80,11 +84,13 @@ public class AbilityController : MonoBehaviour
 
     private void Start()
     {
-        _originalCannonRPos = _cannonR.transform.position;
-        _originalCannonLPos = _cannonL.transform.position;
-        _originalMortarPos = _mortar.transform.position;
-        _originalCrossbowLaunchPos = _crossbowLaunchPoint.position;
-        _originalCrossbowGOPos = _crossbowGO.transform.position;
+        _originalCannonRPos = _cannonR.transform.localPosition;
+        _originalCannonLPos = _cannonL.transform.localPosition;
+        _originalMortarPos = _mortar.transform.localPosition;
+        _originalCrossbowLaunchPos = _crossbowLaunchPoint.localPosition;
+        _originalCrossbowGOPos = _crossbowGO.transform.localPosition;
+        _originalCrossbowGOPos = _crossbowGO.transform.localPosition;
+        _originalTreasureChest = _treasureChest.transform.localPosition;
     }
 
     private void SetupCannon(ShipHardpoints hardpoints, CoroutineRunner runner)
@@ -149,23 +155,25 @@ public class AbilityController : MonoBehaviour
         cannonMesh.SetActive(false);
         cooldownC.SetActive(false);
 
-        //_cannonR.transform.position = _originalCannonRPos;
-        //_cannonL.transform.position = _originalCannonLPos;
-       
-        //_crossbowLaunchPoint.position = _originalCrossbowLaunchPos;
-        //_crossbowGO.transform.position = _originalCrossbowGOPos;
+        _cannonR.transform.localPosition = _originalCannonRPos;
+        _cannonL.transform.localPosition = _originalCannonLPos;
+        _crossbowLaunchPoint.localPosition = _originalCrossbowLaunchPos;
+        _crossbowGO.transform.localPosition = _originalCrossbowGOPos;
+        _treasureChest.transform.localPosition = _originalTreasureChest;
 
-        //_recoilCannonR.UpdateLocalOrgin();
-        //_recoilCannonL.UpdateLocalOrgin();
+
+        _recoilCannonR.UpdateLocalOrgin();
+        _recoilCannonL.UpdateLocalOrgin();
     }
 
     public void ShipUpgraded()
     {
-        _cannonR.transform.position = _newCannonPosR.position;
-        _cannonL.transform.position = _newCannonPosL.position;
-        _mortar.transform.position = _newMortarPos.position;
-        _crossbowLaunchPoint.transform.position = _crossbowLaunchPointNewShip.transform.position;
-        _crossbowGO.transform.position = _crossbowGOT2.transform.position;
+        _cannonR.transform.localPosition = _newCannonPosR.localPosition;
+        _cannonL.transform.localPosition = _newCannonPosL.localPosition;
+        _mortar.transform.localPosition = _newMortarPos.localPosition;
+        _crossbowLaunchPoint.localPosition = _crossbowLaunchPointNewShip.localPosition;
+        _crossbowGO.transform.localPosition = _crossbowGOT2.transform.localPosition;
+        _treasureChest.transform.localPosition = _newTreasureChestPos.transform.localPosition;
 
         _recoilCannonR.UpdateLocalOrgin();
         _recoilCannonL.UpdateLocalOrgin();

@@ -32,8 +32,7 @@ public class LifeBoxSpawner : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F))
-            SpawnBatch();
+        
 
         CheckAutoSpawn();
     }

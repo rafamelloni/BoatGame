@@ -5,6 +5,8 @@ public class BossSequenceManager : MonoBehaviour
     [SerializeField] private GameObject[] _bosses;
     [SerializeField] private TimerBoss _timerBoss;
     [SerializeField] private EnemySpawner _enemySpawner;
+    [SerializeField] private IslandSpawnManager _islandSpawner;
+    [SerializeField] private BossArrivalText _bossArrivalText;
 
     private int _currentBossIndex = -1;
 
@@ -12,20 +14,28 @@ public class BossSequenceManager : MonoBehaviour
     {
         _currentBossIndex++;
         Debug.Log($"ActivateNextBoss llamado, index: {_currentBossIndex}");
+
         if (_currentBossIndex >= _bosses.Length)
         {
             Debug.Log("No hay mas bosses");
             return;
         }
+
         GameObject bossGO = _bosses[_currentBossIndex];
         Debug.Log($"Activando boss: {bossGO.name}");
         bossGO.SetActive(true);
+        _bossArrivalText?.Play();
+
+        // Posicionar e inicializar indicador
+        bossGO.GetComponent<BossSpawnPositioner>()?.PositionAndInit();
+
         EnemyHealth enemyHealth = bossGO.GetComponent<EnemyHealth>();
         if (enemyHealth != null)
         {
             enemyHealth.OnDeath += OnCurrentBossDied;
             return;
         }
+
         MortarBossHealth mortarHealth = bossGO.GetComponent<MortarBossHealth>();
         if (mortarHealth != null)
         {
@@ -40,7 +50,6 @@ public class BossSequenceManager : MonoBehaviour
 
     private void OnCurrentBossDied()
     {
-
         Debug.Log($"Boss {_currentBossIndex} murio, resumiendo timer y spawner");
 
         GameObject bossGO = _bosses[_currentBossIndex];
@@ -53,13 +62,16 @@ public class BossSequenceManager : MonoBehaviour
         if (mortarHealth != null)
             mortarHealth.OnDeath -= OnCurrentBossDied;
 
+        // Limpiar indicador
+        bossGO.GetComponent<BossSpawnPositioner>()?.Cleanup();
+
         _enemySpawner?.ResumeSpawning();
+        _islandSpawner?.StartSpawning();
         _timerBoss.ResumeTimer();
     }
 
     public void ResetAll()
     {
-        // Desuscribir el boss activo si hay uno
         if (_currentBossIndex >= 0 && _currentBossIndex < _bosses.Length)
         {
             GameObject bossGO = _bosses[_currentBossIndex];
@@ -73,12 +85,12 @@ public class BossSequenceManager : MonoBehaviour
             }
         }
 
-        // Resetear TODOS los bosses del array, no solo el activo
         foreach (GameObject bossGO in _bosses)
         {
             if (bossGO == null) continue;
 
-            // Intentar reset específico por tipo
+            bossGO.GetComponent<BossSpawnPositioner>()?.Cleanup();
+
             var dashBoss = bossGO.GetComponent<DashBossController>();
             if (dashBoss != null) dashBoss.ResetBoss();
 

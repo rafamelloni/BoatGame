@@ -51,6 +51,12 @@ public class UIHealthBarDashBoss : MonoBehaviour
 
     private void OnEnable()
     {
+        // resetear partículas
+        _activatedParticles = new bool[_damageParticleObjects.Length];
+        for (int i = 0; i < _damageParticleObjects.Length; i++)
+            if (_damageParticleObjects[i] != null)
+                _damageParticleObjects[i].SetActive(false);
+
         if (_bossHealth != null)
         {
             _bossHealth.OnDamage += UpdateBar;
@@ -60,6 +66,7 @@ public class UIHealthBarDashBoss : MonoBehaviour
                 UpdateBar(_bossHealth.GetCurrenHealt());
         }
         _islandSpawner.ResetIslands();
+
 
     }
 
@@ -71,7 +78,7 @@ public class UIHealthBarDashBoss : MonoBehaviour
             _bossHealth.OnDeath += DieBoss;
         }
 
-        _islandSpawner.StartSpawning();
+        
 
     }
 

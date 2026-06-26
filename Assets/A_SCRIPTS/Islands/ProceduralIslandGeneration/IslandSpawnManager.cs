@@ -33,6 +33,8 @@ public class IslandSpawnManager : MonoBehaviour
 
     public void StartSpawning() 
     {
+        Debug.Log("StartSpawning llamado");
+        StopAllCoroutines();
         StartCoroutine(SpawnRoutine());
     }
 
@@ -111,11 +113,12 @@ public class IslandSpawnManager : MonoBehaviour
     public void ResetIslands()
     {
         StopAllCoroutines();
+        _islandSpawner.OnIslandReturned -= OnIslandRemoved; // desuscribite primero
         _islandSpawner.DespawnAll();
+        _islandSpawner.OnIslandReturned += OnIslandRemoved; // volvé a suscribirte
         _spawnedPositions.Clear();
         _currentIslandCount = 0;
-        //StartCoroutine(SpawnRoutine());
-    }
+    }   
 
     private void OnDrawGizmos()
     {

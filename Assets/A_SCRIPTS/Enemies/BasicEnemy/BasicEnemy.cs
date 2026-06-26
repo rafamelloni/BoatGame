@@ -25,7 +25,7 @@ public class BasicEnemy : Enemy
     [SerializeField] private GameObject[] _localModels; // hijos del prefab, uno por tier
 
     public static event Action OnBossDefeated;
-    private static int _tier = 0;
+    public static int _tier = 0;
 
     public Vector3 OriginalLocalPosition { get; private set; }
     public Quaternion OriginalLocalRotation { get; private set; }

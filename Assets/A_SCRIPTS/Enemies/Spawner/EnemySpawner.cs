@@ -328,6 +328,7 @@ public class EnemySpawner : MonoBehaviour
 
     private IEnumerator SpawnLoop(float interval, Func<bool> canSpawn, Action spawnAction)
     {
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0f, interval));
         if (canSpawn()) spawnAction();
         while (true)
         {
@@ -443,7 +444,8 @@ public class EnemySpawner : MonoBehaviour
 
     private void DespawnGroups()
     {
-        foreach (var group in _activeGroupPositions.Keys)
+        var active = FindObjectsByType<EnemyGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var group in active)
         {
             group.OnGroupDead -= ReturnGroup;
             group.OnGroupAlmostDead -= ReleaseGroupSlot;
@@ -455,7 +457,8 @@ public class EnemySpawner : MonoBehaviour
 
     private void DespawnZombieGroups()
     {
-        foreach (var group in _activeZombieGroupPositions.Keys)
+        var active = FindObjectsByType<ZombieGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var group in active)
         {
             group.OnGroupDead -= ReturnZombieGroup;
             group.OnGroupAlmostDead -= ReleaseZombieGroupSlot;

@@ -10,7 +10,7 @@ public class PauseManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && Time.timeScale !=0f || Input.GetKeyDown(KeyCode.Escape) && _pausePanel.activeSelf)
             SetPause(!_paused);
     }
 
@@ -22,7 +22,7 @@ public class PauseManager : MonoBehaviour
         _pausePanel.SetActive(_paused);
         _ExitPanel.SetActive(_paused);
 
-        foreach (var go in _objectsToDeactivate)
+        foreach (var go in _objectsToDeactivate) 
             go.SetActive(!_paused);
     }
 }   

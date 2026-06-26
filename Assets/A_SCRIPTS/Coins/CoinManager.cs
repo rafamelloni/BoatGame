@@ -37,4 +37,12 @@ public class CoinManager : MonoBehaviour
         _coinsToFill = amount;
         OnCoinChanged?.Invoke(Mathf.Clamp01((float)_coins / _coinsToFill));
     }
+
+    public void ResetCoins()
+    {
+        _coins = 0;
+        _level = 0;
+        OnCoinChanged?.Invoke(0f);
+        OnLevelChanged?.Invoke(0);
+    }
 }

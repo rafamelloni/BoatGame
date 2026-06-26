@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class DashBossController : Enemy
 {
     [Header("References")]
@@ -42,6 +41,7 @@ public class DashBossController : Enemy
     private bool _isBusy;
 
     private readonly List<DashCircleIndicator> _activeIndicators = new();
+    private readonly List<GameObject> _activeFires = new();
 
     private void Awake()
     {
@@ -80,6 +80,7 @@ public class DashBossController : Enemy
     private void OnDeath()
     {
         StopAllCoroutines();
+        ClearFires();
         foreach (var indicator in _activeIndicators)
             if (indicator != null)
                 Destroy(indicator.gameObject);
@@ -247,13 +248,31 @@ public class DashBossController : Enemy
         dir.y = 0f;
         Quaternion rotation = Quaternion.LookRotation(dir.normalized) * Quaternion.Euler(0f, 90f, 0f);
         GameObject p = Instantiate(_dashFirePrefab, center, rotation);
+        _activeFires.Add(p);
         StartCoroutine(DespawnParticles(p));
     }
+
+    private IEnumerator DespawnParticles(GameObject fireP)
+    {
+        yield return new WaitForSeconds(3f);
+        if (fireP != null)
+        {
+            _activeFires.Remove(fireP);
+            Destroy(fireP);
+        }
+    }
+
+    private void ClearFires()
+    {
+        foreach (var fire in _activeFires)
+            if (fire != null) Destroy(fire);
+        _activeFires.Clear();
+    }
+
     public void ResetBoss()
     {
-        Debug.Log($"ResetBoss — movement:{_movement != null} shoot:{_shoot != null} enemyHealth:{_enemyHealth != null} active:{gameObject.activeInHierarchy}");
-
         StopAllCoroutines();
+        ClearFires();
         foreach (var indicator in _activeIndicators)
             if (indicator != null) Destroy(indicator.gameObject);
         _activeIndicators.Clear();
@@ -262,27 +281,14 @@ public class DashBossController : Enemy
         _nextSpecialTime = Time.time + _specialCooldown;
         _nextCircleSpecialTime = Time.time + _circleSpecialCooldown;
 
-        Debug.Log("Antes de movement.LockRotation");
         if (_movement != null) _movement.LockRotation(false);
-
-        Debug.Log("Antes de shoot.SetCanShoot");
         if (_shoot != null) _shoot.SetCanShoot(true);
 
-        Debug.Log("Antes de enemyHealth");
         if (_enemyHealth != null)
         {
             _enemyHealth.OnDeath -= OnDeath;
             _enemyHealth.OnDeath += OnDeath;
             _enemyHealth.ResetHealth();
         }
-
-        Debug.Log("ResetBoss completo");
-    }
-
-    private IEnumerator DespawnParticles(GameObject fireP)
-    {
-        yield return new WaitForSeconds(3f);
-        if (fireP != null)
-            Destroy(fireP.gameObject);
     }
 }

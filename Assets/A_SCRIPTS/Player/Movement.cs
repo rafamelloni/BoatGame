@@ -85,6 +85,8 @@ public class Movement : MonoBehaviour
     void FixedUpdate()
     {
         if (!enabled) return;
+        _rb.angularVelocity = Vector3.zero; // siempre, sin condición
+        _rb.linearVelocity = Vector3.zero;
 
         float newYaw = _rb.rotation.eulerAngles.y + _smoothTurn * Time.fixedDeltaTime;
 

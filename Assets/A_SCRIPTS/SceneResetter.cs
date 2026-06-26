@@ -25,6 +25,7 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private BossSequenceManager _bossSequenceManager;
     [SerializeField] private UpgradeShipBOSS _bossShip;
     [SerializeField] private LifeBoxSpawner _lifeBoxSpawner;
+    [SerializeField] private CoinManager _coinManager;
 
     [Header("Player")]
     [SerializeField] private Transform _playerTransform;
@@ -103,6 +104,7 @@ public class SceneResetter : MonoBehaviour
         _abilityUpgradeSystem.ResetAllUpgradesStats();
         _upgradeStatsUI.ResetStats();
         _coinBarUI.ResetBar();
+        _coinManager.ResetCoins();
 
         // World
         _islandSpawnManager.ResetIslands();

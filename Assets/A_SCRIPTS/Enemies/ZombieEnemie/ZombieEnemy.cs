@@ -18,6 +18,10 @@ public class ZombieEnemy : Enemy
     [SerializeField] private float _separationForce = 2f;
     [SerializeField] private LayerMask _enemyLayer;
 
+    [Header("Boss Upgrade")]
+    [SerializeField] private Renderer _meshRenderer;
+    [SerializeField] private GameObject[] _localModels;
+
     private Transform _player;
     private bool _stopped;
     private FakeWaveMovement _wave;
@@ -34,6 +38,49 @@ public class ZombieEnemy : Enemy
         OriginalLocalPosition = transform.localPosition;
         OriginalLocalRotation = transform.localRotation;
         _enemyHealth.OnDeath += () => OnDead?.Invoke(this);
+    }
+
+    private void OnEnable()
+    {
+        BasicEnemy.OnBossDefeated += ApplyTier;
+        if (BasicEnemy._tier > 0)
+            ApplyTier();
+    }
+
+    private void OnDisable()
+    {
+        BasicEnemy.OnBossDefeated -= ApplyTier;
+    }
+
+    private void ApplyTier()
+    {
+        ApplyUpgradedMaterial();
+        ApplyUpgradedModel();
+    }
+
+    private void ApplyUpgradedMaterial()
+    {
+        if (_meshRenderer == null || baseData?.tieredMaterials == null) return;
+        int idx = BasicEnemy._tier - 1;
+        if (idx >= 0 && idx < baseData.tieredMaterials.Length)
+            _meshRenderer.material = baseData.tieredMaterials[idx];
+    }
+
+    private void ApplyUpgradedModel()
+    {
+        if (_localModels == null || _localModels.Length == 0) return;
+        int idx = BasicEnemy._tier - 1;
+        for (int i = 0; i < _localModels.Length; i++)
+        {
+            if (_localModels[i] != null)
+                _localModels[i].SetActive(i == idx);
+        }
+
+        if (idx >= 0 && idx < _localModels.Length && _localModels[idx] != null)
+        {
+            Renderer r = _localModels[idx].GetComponentInChildren<Renderer>();
+            if (r != null) _meshRenderer = r;
+        }
     }
 
     public void SetPlayer(Transform player)

@@ -11,11 +11,15 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     //Notifyers
     public event Action OnDeath;
     public event Action<float> OnDamage; // para UI o feedback
+    private HitFlash _hitFlash;
     public static event Action<Vector3> OnAnyEnemyDied;
 
     public bool IsDying { get; private set; }
 
-
+    private void Awake()
+    {
+        _hitFlash = GetComponent<HitFlash>();
+    }
     public void InitializeComponent(SO_EnemyData baseData)
     {
         _rtData = new RT_EnemyStats(baseData);
@@ -32,6 +36,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         
         _rtData.currentHealth -= damage;
         OnDamage?.Invoke(_rtData.currentHealth);
+        _hitFlash?.Flash();
         if (_rtData.currentHealth <= 0)
         {
             Die();
