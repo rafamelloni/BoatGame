@@ -14,19 +14,44 @@ public class BossSequenceManager : MonoBehaviour
     {
         _currentBossIndex++;
         Debug.Log($"ActivateNextBoss llamado, index: {_currentBossIndex}");
-
         if (_currentBossIndex >= _bosses.Length)
         {
             Debug.Log("No hay mas bosses");
             return;
         }
+        ActivateBossInternal(_currentBossIndex);
+    }
 
-        GameObject bossGO = _bosses[_currentBossIndex];
+    public void ActivateBoss(int index)
+    {
+        if (index < 0 || index >= _bosses.Length)
+        {
+            Debug.LogWarning($"[BossSequenceManager] Index {index} fuera de rango.");
+            return;
+        }
+
+        // Limpiar el boss actual si hay uno activo
+        if (_currentBossIndex >= 0 && _currentBossIndex < _bosses.Length)
+            CleanupBoss(_currentBossIndex);
+
+        _currentBossIndex = index;
+        ActivateBossInternal(_currentBossIndex);
+    }
+
+    private void ActivateBossInternal(int index)
+    {
+        GameObject bossGO = _bosses[index];
         Debug.Log($"Activando boss: {bossGO.name}");
+
+        var dashBoss = bossGO.GetComponent<DashBossController>();
+        if (dashBoss != null) dashBoss.ResetBoss();
+
+        var mortarBoss = bossGO.GetComponent<MortarBossController>();
+        if (mortarBoss != null) mortarBoss.ResetBoss();
+
         bossGO.SetActive(true);
         _bossArrivalText?.Play();
 
-        // Posicionar e inicializar indicador
         bossGO.GetComponent<BossSpawnPositioner>()?.PositionAndInit();
 
         EnemyHealth enemyHealth = bossGO.GetComponent<EnemyHealth>();
@@ -39,20 +64,26 @@ public class BossSequenceManager : MonoBehaviour
         MortarBossHealth mortarHealth = bossGO.GetComponent<MortarBossHealth>();
         if (mortarHealth != null)
         {
-            Debug.Log("MortarBossHealth encontrado, suscribiendo OnDeath");
             mortarHealth.OnDeath += OnCurrentBossDied;
+            return;
         }
-        else
-        {
-            Debug.LogWarning($"Boss {bossGO.name} no tiene EnemyHealth ni MortarBossHealth!");
-        }
+
+        Debug.LogWarning($"Boss {bossGO.name} no tiene EnemyHealth ni MortarBossHealth!");
     }
 
     private void OnCurrentBossDied()
     {
         Debug.Log($"Boss {_currentBossIndex} murio, resumiendo timer y spawner");
+        CleanupBoss(_currentBossIndex);
+        _enemySpawner?.ResumeSpawning();
+        _islandSpawner?.StartSpawning();
+        _timerBoss.ResumeTimer();
+    }
 
-        GameObject bossGO = _bosses[_currentBossIndex];
+    private void CleanupBoss(int index)
+    {
+        GameObject bossGO = _bosses[index];
+        if (bossGO == null) return;
 
         EnemyHealth enemyHealth = bossGO.GetComponent<EnemyHealth>();
         if (enemyHealth != null)
@@ -62,41 +93,22 @@ public class BossSequenceManager : MonoBehaviour
         if (mortarHealth != null)
             mortarHealth.OnDeath -= OnCurrentBossDied;
 
-        // Limpiar indicador
         bossGO.GetComponent<BossSpawnPositioner>()?.Cleanup();
-
-        _enemySpawner?.ResumeSpawning();
-        _islandSpawner?.StartSpawning();
-        _timerBoss.ResumeTimer();
     }
 
     public void ResetAll()
     {
         if (_currentBossIndex >= 0 && _currentBossIndex < _bosses.Length)
-        {
-            GameObject bossGO = _bosses[_currentBossIndex];
-            if (bossGO != null)
-            {
-                EnemyHealth enemyHealth = bossGO.GetComponent<EnemyHealth>();
-                if (enemyHealth != null) enemyHealth.OnDeath -= OnCurrentBossDied;
-
-                MortarBossHealth mortarHealth = bossGO.GetComponent<MortarBossHealth>();
-                if (mortarHealth != null) mortarHealth.OnDeath -= OnCurrentBossDied;
-            }
-        }
+            CleanupBoss(_currentBossIndex);
 
         foreach (GameObject bossGO in _bosses)
         {
             if (bossGO == null) continue;
-
             bossGO.GetComponent<BossSpawnPositioner>()?.Cleanup();
-
             var dashBoss = bossGO.GetComponent<DashBossController>();
             if (dashBoss != null) dashBoss.ResetBoss();
-
             var mortarBoss = bossGO.GetComponent<MortarBossController>();
             if (mortarBoss != null) mortarBoss.ResetBoss();
-
             bossGO.SetActive(false);
         }
 

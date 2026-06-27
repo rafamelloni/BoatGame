@@ -29,6 +29,12 @@ public class BossSpawnPattern : MonoBehaviour
     [SerializeField] private float _lineaSpacing = 3f;
     [SerializeField] private float _lineaDelayEntreFilas = 1f;
 
+    [Header("Cerco Progresivo")]
+    [SerializeField] private int _cercoGroupPrefabIndex = -1; // -1 = random
+
+    [Header("Linea de Fuego Groups")]
+    [SerializeField] private int _lineaGroupPrefabIndex = -1; // -1 = random
+
     private readonly List<EnemyGroup> _activeGroups = new();
 
     private void Update()
@@ -118,7 +124,7 @@ public class BossSpawnPattern : MonoBehaviour
             Vector3 spawnPos = player.position + offset;
             spawnPos.y = player.position.y;
 
-            var group = _factory.GetGroup(spawnPos, 0f);
+            var group = _factory.GetGroup(spawnPos, 0f, _cercoGroupPrefabIndex);
             _activeGroups.Add(group);
             group.GetComponent<EnemyEmerge>()?.Emerge(player);
         }
@@ -143,7 +149,7 @@ public class BossSpawnPattern : MonoBehaviour
             Vector3 spawnPos = player.position + new Vector3(-_lineaSpawnDistance, 0f, zOffset);
             spawnPos.y = player.position.y;
 
-            var group = _factory.GetGroup(spawnPos, 0f);
+            var group = _factory.GetGroup(spawnPos, 0f, _lineaGroupPrefabIndex);
             _activeGroups.Add(group);
             group.GetComponent<EnemyEmerge>()?.Emerge(player);
         }
@@ -157,7 +163,7 @@ public class BossSpawnPattern : MonoBehaviour
             Vector3 spawnPos = player.position + new Vector3(_lineaSpawnDistance, 0f, zOffset);
             spawnPos.y = player.position.y;
 
-            var group = _factory.GetGroup(spawnPos, 0f);
+            var group = _factory.GetGroup(spawnPos, 0f, _lineaGroupPrefabIndex);
             _activeGroups.Add(group);
             group.GetComponent<EnemyEmerge>()?.Emerge(player);
         }

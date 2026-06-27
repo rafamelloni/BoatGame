@@ -136,6 +136,7 @@ public class MortarBossController : MonoBehaviour
         _health.OnDeath -= HandleDeath;
         _health.OnHealthChanged += HandleHealthChanged;
         _health.OnDeath += HandleDeath;
+        StartCoroutine(BossLoop());
     }
 
     private void OnGUI()
