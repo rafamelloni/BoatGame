@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Playables;
 
 public class BossOrbitAttack : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class BossOrbitAttack : MonoBehaviour
     [SerializeField] private float _duration = 3f;
     [SerializeField] private float _rotationSpeed = 6f;
     [SerializeField] private float _meshRotationOffset = -90f;
+    [SerializeField] private ParticleSystem Poison;
+
 
 
     private bool _isOrbiting = false;
@@ -26,7 +29,7 @@ public class BossOrbitAttack : MonoBehaviour
     private IEnumerator OrbitRoutine()
     {
         _isOrbiting = true;
-
+        Poison.Play();
         Vector3 startPos = transform.position;
         startPos.y = transform.position.y;
 
@@ -81,6 +84,7 @@ public class BossOrbitAttack : MonoBehaviour
 
         transform.position = endPos;
         _isOrbiting = false;
+        Poison.Stop();
     }
 
     private Vector3 QuadraticBezier(Vector3 p0, Vector3 p1, Vector3 p2, float t)
