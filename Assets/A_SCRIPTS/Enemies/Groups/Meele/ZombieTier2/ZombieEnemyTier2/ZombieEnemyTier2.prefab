@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: polySurface32 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 7635641011983415094, guid: 9ec6271ffd777844d82817c1096e86b1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7e37033fb335ee8449c8adaf07d083af, type: 2}
     - target: {fileID: 8980627108022909155, guid: 9ec6271ffd777844d82817c1096e86b1, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.004115856
