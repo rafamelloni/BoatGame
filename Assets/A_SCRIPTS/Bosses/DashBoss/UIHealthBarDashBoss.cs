@@ -30,10 +30,13 @@ public class UIHealthBarDashBoss : MonoBehaviour
 
     [Header("Spawner")]
     [SerializeField] private EnemySpawner _enemySpawner;
+ 
     [SerializeField] private IslandSpawnManager _islandSpawner;
 
     private Material _materialInstance;
     private bool[] _activatedParticles;
+
+    [SerializeField] private ParticleSystem BossExplotion;
 
     private void Awake()
     {
@@ -134,6 +137,7 @@ public class UIHealthBarDashBoss : MonoBehaviour
 
     private void DieBoss()
     {
+        BossExplotion.Play();
         _UIShipUpgrade.SetActive(true);
        // _enemySpawner.ResumeSpawning();
         BasicEnemy.TriggerBossDefeated();
