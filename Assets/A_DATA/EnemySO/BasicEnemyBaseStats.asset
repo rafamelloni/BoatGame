@@ -26,5 +26,6 @@ MonoBehaviour:
   - {fileID: 2100000, guid: eca475621e8ac3747a3838df53cc2bf4, type: 2}
   - {fileID: 2100000, guid: 7f4396c84d2fd1146a0bbb578b821695, type: 2}
   tieredModels:
+  - {fileID: 8735624647905890038, guid: 82dbd50bac960b14481f3c846822c189, type: 3}
   - {fileID: 99130179370784437, guid: 3b9a37696e4d7164a99973069407fe2b, type: 3}
   - {fileID: 3449208288661294499, guid: d64950637fc70be47a417b2ba0c3e87a, type: 3}

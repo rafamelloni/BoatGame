@@ -40,10 +40,15 @@ public class TimerBoss : MonoBehaviour
         if (_nextBossIndex < bossTimestamps.Length)
         {
             float tiempoRestanteParaBoss = tiempoTotal - bossTimestamps[_nextBossIndex];
+
+            // 10 segundos antes del boss
+            if (tiempoActual <= tiempoRestanteParaBoss + 15f)
+                _enemySpawner?.StopSpawning();
+
             if (tiempoActual <= tiempoRestanteParaBoss)
             {
                 timerActivo = false;
-                _enemySpawner?.DespawnAll();
+                //_enemySpawner?.DespawnAll();
                 _islandSpawner?.ResetIslands();
                 _bossSequenceManager?.ActivateNextBoss();
                 _nextBossIndex++;

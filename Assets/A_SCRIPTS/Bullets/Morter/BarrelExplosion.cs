@@ -90,4 +90,11 @@ public class BarrelExplosion : BulletsBase
             }
         }
     }
+
+    public void ForceReturn()
+    {
+        if (_indicator != null)
+            _indicator.ResetIndicator();
+        Pool.Return(this);
+    }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public class BasicEnemy : Enemy
@@ -44,6 +44,7 @@ public class BasicEnemy : Enemy
 
     private void OnEnable()
     {
+        OnBossDefeated -= ApplyTier;
         OnBossDefeated += ApplyTier;
         if (_tier > 0)
             ApplyTier();
@@ -56,7 +57,7 @@ public class BasicEnemy : Enemy
 
     private void ApplyTier()
     {
-        ApplyUpgradedMaterial();
+        //ApplyUpgradedMaterial();
         ApplyUpgradedModel();
     }
 
@@ -71,17 +72,18 @@ public class BasicEnemy : Enemy
     private void ApplyUpgradedModel()
     {
         if (_localModels == null || _localModels.Length == 0) return;
-        int idx = _tier - 1;
         for (int i = 0; i < _localModels.Length; i++)
-        {
             if (_localModels[i] != null)
-                _localModels[i].SetActive(i == idx);
-        }
+            {
+                bool active = i == _tier;
+                Debug.Log($"[{gameObject.name}] Model {i} → {active} (tier={_tier})");
+                _localModels[i].SetActive(active);
+            }
 
         // Actualizar el renderer al modelo activo
-        if (idx >= 0 && idx < _localModels.Length && _localModels[idx] != null)
+        if (_tier >= 0 && _tier < _localModels.Length && _localModels[_tier] != null)
         {
-            Renderer r = _localModels[idx].GetComponentInChildren<Renderer>();
+            Renderer r = _localModels[_tier].GetComponentInChildren<Renderer>();
             if (r != null) _meshRenderer = r;
         }
     }
@@ -95,6 +97,15 @@ public class BasicEnemy : Enemy
     public static void ResetTier()
     {
         _tier = 0;
+        
+    }
+
+    public void ResetModel()
+    {
+        if (_localModels == null) return;
+        for (int i = 0; i < _localModels.Length; i++)
+            if (_localModels[i] != null)
+                _localModels[i].SetActive(i == 0);
     }
 
     // ... resto igual

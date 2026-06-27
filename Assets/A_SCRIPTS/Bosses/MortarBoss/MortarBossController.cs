@@ -113,9 +113,14 @@ public class MortarBossController : MonoBehaviour
     {
         _state = State.Dead;
         StopAllCoroutines();
+
+        // Limpiar balas activas
+        var activeBullets = FindObjectsByType<BarrelExplosion>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var bullet in activeBullets)
+            bullet.ForceReturn();
+
         _UIShipUpgrade.SetActive(true);
         BasicEnemy.TriggerBossDefeated();
-        Debug.Log("[MortarBoss] Muerto.");
     }
 
     public void ResetBoss()

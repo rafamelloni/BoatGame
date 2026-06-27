@@ -21,13 +21,23 @@ public class UpgradeShipBOSS : MonoBehaviour
     [SerializeField] EnemySpawner _enemySpawner;
 
     [SerializeField] RT_PlayerStats _playerHealth;
+    [SerializeField] RT_PlayerHealth _playerHealthRT;
 
     public void Onclick()
     {
         AnimateShip();
         _canvasShipUpgrades.SetActive(false);
+        _playerHealth.maxHealth = 250;
+
         _playerHealth.currentHealth = _playerHealth.maxHealth;
-        //_enemySpawner.ResumeSpawning();
+        _playerHealthRT.TakeDamage(1f);
+    }
+
+    public void OnclickSpeed()
+    {
+        AnimateShip();
+        _canvasShipUpgrades.SetActive(false);
+        _playerHealth.moveSpeed = 11;
 
     }
 

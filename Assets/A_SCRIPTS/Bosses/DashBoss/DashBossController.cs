@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public class DashBossController : Enemy
 {
     [Header("References")]
@@ -10,6 +11,7 @@ public class DashBossController : Enemy
     [Header("Dash Settings")]
     [SerializeField] private float _telegraphDuration = 0.8f;
     [SerializeField] private float _timeBetweenDashes = 2f;
+    [SerializeField] private float _approachDistance = 15f;
 
     [Header("Special Attack")]
     [SerializeField] private int _specialDashCount = 3;
@@ -87,10 +89,6 @@ public class DashBossController : Enemy
         _activeIndicators.Clear();
     }
 
-    // ─────────────────────────────────────────────
-    //  Helpers para el indicador
-    // ─────────────────────────────────────────────
-
     private DashCircleIndicator SpawnIndicator(Vector3 destination, float duration, System.Action onComplete = null)
     {
         DashCircleIndicator indicator = Instantiate(_dashCirclePrefab, destination, Quaternion.identity);
@@ -116,6 +114,11 @@ public class DashBossController : Enemy
     {
         _isBusy = true;
         _shoot.SetCanShoot(false);
+        _movement.LockRotation(false);
+
+        // Acercarse al player si está muy lejos
+        yield return _movement.ApproachPlayer(_approachDistance);
+
         _movement.LockRotation(true);
 
         Vector3 playerPos = _player.position;

@@ -113,6 +113,9 @@ public class SceneResetter : MonoBehaviour
         _coinSpawner.DespawnAll();
         _bossSequenceManager.ResetAll();
         BasicEnemy.ResetTier();
+        var enemies = FindObjectsByType<BasicEnemy>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var e in enemies)
+            e.ResetModel();
         _lifeBoxSpawner.ClearAllCrates();
 
         // Preselección
