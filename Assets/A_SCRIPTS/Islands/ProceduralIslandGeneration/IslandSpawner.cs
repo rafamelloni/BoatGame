@@ -81,7 +81,7 @@ public class IslandSpawner : MonoBehaviour
         var defensePoints = allPoints
             .Where(p => p.pointType == SpawnPointType.Defense)
             .OrderBy(_ => UnityEngine.Random.value)
-            .Take(2);
+            .Take(1);
 
         foreach (var point in normalPoints.Concat(defensePoints))
         {

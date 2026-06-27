@@ -1,15 +1,29 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BossSpawnPattern : MonoBehaviour
 {
+    [Serializable]
+    private struct BossGroupConfig
+    {
+        public GameObject prefab;
+        public int initialStock;
+    }
+
     [Header("Referencias")]
     [SerializeField] private GameObject dashEnemyPrefab;
-    [SerializeField] private EnemyFactory _factory;
     [SerializeField] private Transform player;
+    [SerializeField] private BulletFactory _bulletFactory;
 
-    // ─── Patron 1: Linea de Fuego ─────────────────────────────────────────
+    [Header("Boss Groups")]
+    [SerializeField] private BossGroupConfig[] _bossGroupConfigs;
+
+    private ObjectPool<ZombieGroup>[] _bossGroupPools;
+    private GameObject[] _bossGroupPrefabs;
+
+    // ─── Patron 1: DashBossEnemy ──────────────────────────────────────────
     [Header("Linea de Fuego")]
     [SerializeField] private float delayBetweenRows = 0.8f;
     [SerializeField] private float spawnDistance = 3f;
@@ -21,6 +35,7 @@ public class BossSpawnPattern : MonoBehaviour
     [SerializeField] private float _cercoRadiusInicial = 15f;
     [SerializeField] private float _cercoRadiusFinal = 8f;
     [SerializeField] private float _cercoDelayEntreOlas = 2f;
+    [SerializeField] private int _cercoGroupPrefabIndex = 0;
 
     // ─── Patron 3: Linea de Fuego Groups ─────────────────────────────────
     [Header("Linea de Fuego Groups")]
@@ -28,23 +43,60 @@ public class BossSpawnPattern : MonoBehaviour
     [SerializeField] private float _lineaSpawnDistance = 12f;
     [SerializeField] private float _lineaSpacing = 3f;
     [SerializeField] private float _lineaDelayEntreFilas = 1f;
+    [SerializeField] private int _lineaGroupPrefabIndex = 0;
 
-    [Header("Cerco Progresivo")]
-    [SerializeField] private int _cercoGroupPrefabIndex = -1; // -1 = random
+    private readonly List<ZombieGroup> _activeGroups = new();
 
-    [Header("Linea de Fuego Groups")]
-    [SerializeField] private int _lineaGroupPrefabIndex = -1; // -1 = random
-
-    private readonly List<EnemyGroup> _activeGroups = new();
-
-    private void Update()
+    private void Awake()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-            ExecutePattern();
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            ExecuteCercoProgresivo();
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-            ExecuteLineaFuegoGroups();
+        InitBossGroupPools();
+    }
+
+    private void InitBossGroupPools()
+    {
+        if (_bossGroupConfigs == null || _bossGroupConfigs.Length == 0) return;
+
+        _bossGroupPools = new ObjectPool<ZombieGroup>[_bossGroupConfigs.Length];
+        _bossGroupPrefabs = new GameObject[_bossGroupConfigs.Length];
+
+        for (int i = 0; i < _bossGroupConfigs.Length; i++)
+        {
+            var config = _bossGroupConfigs[i];
+            _bossGroupPrefabs[i] = config.prefab;
+            _bossGroupPools[i] = new ObjectPool<ZombieGroup>(
+                () => { var go = Instantiate(config.prefab); go.SetActive(false); return go.GetComponent<ZombieGroup>(); },
+                g => g.gameObject.SetActive(true),
+                g => g.gameObject.SetActive(false),
+                config.initialStock
+            );
+        }
+    }
+
+    private ZombieGroup GetBossGroup(Vector3 position, int prefabIndex)
+    {
+        int idx = Mathf.Clamp(prefabIndex, 0, _bossGroupPools.Length - 1);
+        var group = _bossGroupPools[idx].Get();
+        group.transform.position = position;
+        group.gameObject.SetActive(true);
+        group.Init(player, _bulletFactory);
+        group.GetComponent<EnemyEmerge>()?.Emerge(player);
+        _activeGroups.Add(group);
+        return group;
+    }
+
+    private void ReturnBossGroup(ZombieGroup group)
+    {
+        group.GetComponent<EnemyEmerge>()?.Reset();
+        group.Cleanup();
+        _activeGroups.Remove(group);
+        for (int i = 0; i < _bossGroupPrefabs.Length; i++)
+        {
+            if (group.gameObject.name.Contains(_bossGroupPrefabs[i].name))
+            {
+                _bossGroupPools[i].Return(group);
+                return;
+            }
+        }
     }
 
     // ═════════════════════════════════════════════════════════════════════
@@ -94,8 +146,6 @@ public class BossSpawnPattern : MonoBehaviour
 
     // ═════════════════════════════════════════════════════════════════════
     //  PATRON 2: Cerco Progresivo
-    //  Ola 1: groups en circulo grande → se acercan
-    //  Ola 2: groups en circulo mas chico → se acercan
     // ═════════════════════════════════════════════════════════════════════
 
     public void ExecuteCercoProgresivo()
@@ -105,16 +155,12 @@ public class BossSpawnPattern : MonoBehaviour
 
     private IEnumerator CercoProgresivoSequence()
     {
-        // Ola exterior
-        SpawnCirculo(_cercoRadiusInicial);
-
+        SpawnCirculo(_cercoRadiusInicial, _cercoGroupPrefabIndex);
         yield return new WaitForSeconds(_cercoDelayEntreOlas);
-
-        // Ola interior
-        SpawnCirculo(_cercoRadiusFinal);
+        SpawnCirculo(_cercoRadiusFinal, _cercoGroupPrefabIndex);
     }
 
-    private void SpawnCirculo(float radius)
+    private void SpawnCirculo(float radius, int prefabIndex)
     {
         float angleStep = 360f / _cercoGroupCount;
         for (int i = 0; i < _cercoGroupCount; i++)
@@ -123,16 +169,12 @@ public class BossSpawnPattern : MonoBehaviour
             Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
             Vector3 spawnPos = player.position + offset;
             spawnPos.y = player.position.y;
-
-            var group = _factory.GetGroup(spawnPos, 0f, _cercoGroupPrefabIndex);
-            _activeGroups.Add(group);
-            group.GetComponent<EnemyEmerge>()?.Emerge(player);
+            GetBossGroup(spawnPos, prefabIndex);
         }
     }
 
     // ═════════════════════════════════════════════════════════════════════
     //  PATRON 3: Linea de Fuego con Groups
-    //  Fila izquierda y fila derecha se cierran hacia el centro
     // ═════════════════════════════════════════════════════════════════════
 
     public void ExecuteLineaFuegoGroups()
@@ -142,30 +184,22 @@ public class BossSpawnPattern : MonoBehaviour
 
     private IEnumerator LineaFuegoSequence()
     {
-        // Fila izquierda
         for (int i = 0; i < _lineaGroupCount; i++)
         {
             float zOffset = (i - (_lineaGroupCount - 1) / 2f) * _lineaSpacing;
             Vector3 spawnPos = player.position + new Vector3(-_lineaSpawnDistance, 0f, zOffset);
             spawnPos.y = player.position.y;
-
-            var group = _factory.GetGroup(spawnPos, 0f, _lineaGroupPrefabIndex);
-            _activeGroups.Add(group);
-            group.GetComponent<EnemyEmerge>()?.Emerge(player);
+            GetBossGroup(spawnPos, _lineaGroupPrefabIndex);
         }
 
         yield return new WaitForSeconds(_lineaDelayEntreFilas);
 
-        // Fila derecha
         for (int i = 0; i < _lineaGroupCount; i++)
         {
             float zOffset = (i - (_lineaGroupCount - 1) / 2f) * _lineaSpacing;
             Vector3 spawnPos = player.position + new Vector3(_lineaSpawnDistance, 0f, zOffset);
             spawnPos.y = player.position.y;
-
-            var group = _factory.GetGroup(spawnPos, 0f, _lineaGroupPrefabIndex);
-            _activeGroups.Add(group);
-            group.GetComponent<EnemyEmerge>()?.Emerge(player);
+            GetBossGroup(spawnPos, _lineaGroupPrefabIndex);
         }
     }
 
@@ -178,7 +212,6 @@ public class BossSpawnPattern : MonoBehaviour
         if (player == null) return;
         Vector3 center = player.position;
 
-        // Patron 1 - DashBossEnemy
         float[] xOffsets = { -columnSpacing, 0f, columnSpacing };
         Gizmos.color = Color.cyan;
         foreach (float x in xOffsets)
@@ -195,9 +228,8 @@ public class BossSpawnPattern : MonoBehaviour
             Gizmos.DrawLine(pos, pos + Vector3.forward * 2f);
         }
 
-        // Patron 2 - Cerco Progresivo
         float angleStep = 360f / _cercoGroupCount;
-        Gizmos.color = new Color(1f, 0.5f, 0f); // naranja - ola exterior
+        Gizmos.color = new Color(1f, 0.5f, 0f);
         for (int i = 0; i < _cercoGroupCount; i++)
         {
             float angle = i * angleStep * Mathf.Deg2Rad;
@@ -205,7 +237,7 @@ public class BossSpawnPattern : MonoBehaviour
             Gizmos.DrawSphere(pos, 0.4f);
             Gizmos.DrawLine(pos, center);
         }
-        Gizmos.color = Color.magenta; // interior
+        Gizmos.color = Color.magenta;
         for (int i = 0; i < _cercoGroupCount; i++)
         {
             float angle = i * angleStep * Mathf.Deg2Rad;
@@ -214,7 +246,6 @@ public class BossSpawnPattern : MonoBehaviour
             Gizmos.DrawLine(pos, center);
         }
 
-        // Patron 3 - Linea de Fuego
         Gizmos.color = Color.green;
         for (int i = 0; i < _lineaGroupCount; i++)
         {
@@ -227,7 +258,6 @@ public class BossSpawnPattern : MonoBehaviour
             Gizmos.DrawLine(posR, posR + Vector3.left * 2f);
         }
 
-        // Player
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(center, 0.25f);
     }
