@@ -63,6 +63,7 @@ Material:
     - _NormalStrnegth: 82.52
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _alpha: 1
     - _power: 1.87
     m_Colors:
     - _fresnelcolor: {r: 0, g: 42.722507, b: 0.44735187, a: 0.3921569}
