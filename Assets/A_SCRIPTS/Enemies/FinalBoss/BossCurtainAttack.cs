@@ -7,6 +7,13 @@ public class BossCurtainAttack : MonoBehaviour
     [SerializeField] private GameObject _bulletPrefab;
     [SerializeField] private Transform _mesh;
     [SerializeField] private Transform _player;
+    [SerializeField] private GameObject canons;
+
+    [Header("Material / Shader")]
+    [SerializeField] private Renderer[] _materialRenderers;
+    [SerializeField] private string _materialProperty = "_Progress";
+    [SerializeField] private float _materialFadeInDuration = 1f;
+    [SerializeField] private float _materialFadeOutDuration = 0.5f;
 
     [Header("Spin")]
     [SerializeField] private float _spinSpeed = 180f;
@@ -25,7 +32,15 @@ public class BossCurtainAttack : MonoBehaviour
     private float _gapCenter = 0f;
     private bool _isSpinning = false;
 
+    private MaterialPropertyBlock _propertyBlock;
+
     public bool IsSpinning => _isSpinning;
+
+    private void Awake()
+    {
+        _propertyBlock = new MaterialPropertyBlock();
+        SetMaterialValue(0f);
+    }
 
     public void DoSpinGapAttack()
     {
@@ -37,7 +52,11 @@ public class BossCurtainAttack : MonoBehaviour
     {
         _isSpinning = true;
 
-        // Gap arranca apuntando al player
+        if (canons != null)
+            canons.SetActive(true);
+
+        yield return StartCoroutine(AnimateMaterialValue(0f, 1f, _materialFadeInDuration));
+
         Vector3 dirToPlayer = _player.position - transform.position;
         dirToPlayer.y = 0f;
         _gapCenter = Mathf.Atan2(dirToPlayer.x, dirToPlayer.z) * Mathf.Rad2Deg;
@@ -69,7 +88,50 @@ public class BossCurtainAttack : MonoBehaviour
         if (_mesh != null)
             _mesh.localRotation = Quaternion.identity;
 
+        yield return StartCoroutine(AnimateMaterialValue(1f, 0f, _materialFadeOutDuration));
+
+        if (canons != null)
+            canons.SetActive(false);
+
         _isSpinning = false;
+    }
+
+    private IEnumerator AnimateMaterialValue(float from, float to, float duration)
+    {
+        if (duration <= 0f)
+        {
+            SetMaterialValue(to);
+            yield break;
+        }
+
+        float t = 0f;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float normalized = Mathf.Clamp01(t / duration);
+            float value = Mathf.Lerp(from, to, normalized);
+
+            SetMaterialValue(value);
+
+            yield return null;
+        }
+
+        SetMaterialValue(to);
+    }
+
+    private void SetMaterialValue(float value)
+    {
+        if (_materialRenderers == null) return;
+
+        for (int i = 0; i < _materialRenderers.Length; i++)
+        {
+            if (_materialRenderers[i] == null) continue;
+
+            _materialRenderers[i].GetPropertyBlock(_propertyBlock);
+            _propertyBlock.SetFloat(_materialProperty, value);
+            _materialRenderers[i].SetPropertyBlock(_propertyBlock);
+        }
     }
 
     private void FireSpiralWithGap(float angleDeg)
@@ -85,10 +147,11 @@ public class BossCurtainAttack : MonoBehaviour
 
         float rad = angleDeg * Mathf.Deg2Rad;
         Vector3 dir = new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad));
+
         Vector3 spawnPos = transform.position + dir * _bulletSpawnOffset;
         spawnPos.y = transform.position.y + _bulletYOffset;
 
-        var go = Instantiate(_bulletPrefab, spawnPos, Quaternion.identity);
+        GameObject go = Instantiate(_bulletPrefab, spawnPos, Quaternion.identity);
         go.GetComponent<BossBullet>()?.Launch(dir);
     }
 
