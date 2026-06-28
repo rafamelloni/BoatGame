@@ -22,7 +22,7 @@ public class BasicEnemy : Enemy
 
     [Header("Boss Upgrade")]
     [SerializeField] private Renderer _meshRenderer;
-    [SerializeField] private GameObject[] _localModels; // hijos del prefab, uno por tier
+    [SerializeField] private GameObject[] _localModels;
 
     public static event Action OnBossDefeated;
     public static int _tier = 0;
@@ -42,12 +42,16 @@ public class BasicEnemy : Enemy
         OriginalLocalRotation = transform.localRotation;
     }
 
+    public void ForceApplyModel()
+    {
+        ApplyUpgradedModel();
+    }
+
     private void OnEnable()
     {
         OnBossDefeated -= ApplyTier;
         OnBossDefeated += ApplyTier;
-        if (_tier > 0)
-            ApplyTier();
+        ApplyUpgradedModel();
     }
 
     private void OnDisable()
@@ -57,39 +61,26 @@ public class BasicEnemy : Enemy
 
     private void ApplyTier()
     {
-        //ApplyUpgradedMaterial();
         ApplyUpgradedModel();
-    }
-
-    private void ApplyUpgradedMaterial()
-    {
-        if (_meshRenderer == null || baseData?.tieredMaterials == null) return;
-        int idx = _tier - 1;
-        if (idx >= 0 && idx < baseData.tieredMaterials.Length)
-            _meshRenderer.material = baseData.tieredMaterials[idx];
     }
 
     private void ApplyUpgradedModel()
     {
         if (_localModels == null || _localModels.Length == 0) return;
+        int clampedTier = Mathf.Clamp(_tier, 0, _localModels.Length - 1);
         for (int i = 0; i < _localModels.Length; i++)
             if (_localModels[i] != null)
-            {
-                bool active = i == _tier;
-                Debug.Log($"[{gameObject.name}] Model {i} → {active} (tier={_tier})");
-                _localModels[i].SetActive(active);
-            }
+                _localModels[i].SetActive(i == clampedTier);
 
-        // Actualizar el renderer al modelo activo
-        if (_tier >= 0 && _tier < _localModels.Length && _localModels[_tier] != null)
+        if (_localModels[clampedTier] != null)
         {
-            Renderer r = _localModels[_tier].GetComponentInChildren<Renderer>();
+            Renderer r = _localModels[clampedTier].GetComponentInChildren<Renderer>();
             if (r != null) _meshRenderer = r;
         }
     }
-
     public static void TriggerBossDefeated()
     {
+        if (_tier >= 2) return;
         _tier++;
         OnBossDefeated?.Invoke();
     }
@@ -97,19 +88,9 @@ public class BasicEnemy : Enemy
     public static void ResetTier()
     {
         _tier = 0;
-        
     }
 
-    public void ResetModel()
-    {
-        if (_localModels == null) return;
-        for (int i = 0; i < _localModels.Length; i++)
-            if (_localModels[i] != null)
-                _localModels[i].SetActive(i == 0);
-    }
-
-    // ... resto igual
-    public void SetPlayer(Transform player) { /* sin cambios */ this.player = player; if (leader != null) formationOffset = transform.position - leader.position; }
+    public void SetPlayer(Transform player) { this.player = player; if (leader != null) formationOffset = transform.position - leader.position; }
     public void SetStopped(bool stopped) { _stopped = stopped; }
     private void ApplyYaw(Quaternion targetRot) { Quaternion smoothed = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime); if (_wave != null) _wave.SetYaw(smoothed.eulerAngles.y); else transform.rotation = smoothed; }
 

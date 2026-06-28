@@ -93,6 +93,7 @@ public class EnemyGroup : MonoBehaviour
             var basicEnemy = member.GetComponent<BasicEnemy>();
             if (basicEnemy != null)
             {
+                basicEnemy.ForceApplyModel();
                 member.transform.localPosition = basicEnemy.OriginalLocalPosition;
                 member.transform.localRotation = basicEnemy.OriginalLocalRotation;
             }

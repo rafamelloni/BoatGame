@@ -97,8 +97,8 @@ public class SceneResetter : MonoBehaviour
 
         // Abilities
         _abilityController.ResetAbilities();
-        _upgradeSystemRougelike.ResetAll();         // resetea RT_PlayerUpgrades + AbilityController
-        _upgradeSystemIslands.ResetAll();         // resetea RT_PlayerUpgrades + AbilityController
+        _upgradeSystemRougelike.ResetAll();
+        _upgradeSystemIslands.ResetAll();
 
         // UI
         _abilityUpgradeSystem.ResetAllUpgradesStats();
@@ -106,16 +106,13 @@ public class SceneResetter : MonoBehaviour
         _coinBarUI.ResetBar();
         _coinManager.ResetCoins();
 
-        // World
+        // World - ResetTier ANTES de DespawnAll
+        
         _islandSpawnManager.ResetIslands();
         _enemySpawner.DespawnAll();
         _timerBoss.ResetTimer();
         _coinSpawner.DespawnAll();
         _bossSequenceManager.ResetAll();
-        BasicEnemy.ResetTier();
-        var enemies = FindObjectsByType<BasicEnemy>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        foreach (var e in enemies)
-            e.ResetModel();
         _lifeBoxSpawner.ClearAllCrates();
 
         // Preselección
@@ -124,9 +121,6 @@ public class SceneResetter : MonoBehaviour
 
         // Boss
         BOSS.SetActive(false);
-
-        _enemySpawner.DespawnAll();
-        _coinSpawner.DespawnAll();
     }
 
 
@@ -135,6 +129,7 @@ public class SceneResetter : MonoBehaviour
         _movement.SetMovementEnabled(false);
 
         // ✅ Despawnear enemigos inmediatamente al morir
+        BasicEnemy.ResetTier();
         _enemySpawner.DespawnAll();
         _coinSpawner.DespawnAll();
 
