@@ -6,6 +6,7 @@ public class RT_EnemyStats
     //RunetimeStats Enemigo
     public float currentHealth;
     public float maxHealth;
+    public float originalMaxHealth;
     public float fireRate;
     public float damage;
     [HideInInspector]public GameObject woodExplosion;
@@ -21,6 +22,7 @@ public class RT_EnemyStats
     public RT_EnemyStats(SO_EnemyData baseData)
     {
         maxHealth = baseData.maxHealth;
+        originalMaxHealth = baseData .maxHealth;
         woodExplosion = baseData.woodExplosionVFX;
         fireRate = baseData.fireRate;
         currentHealth = maxHealth;
@@ -36,6 +38,9 @@ public class RT_EnemyStats
 
     public void Reset()
     {
+        maxHealth = originalMaxHealth;
         currentHealth = maxHealth;
     }
+
+
 }

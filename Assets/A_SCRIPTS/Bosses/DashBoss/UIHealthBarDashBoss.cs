@@ -140,6 +140,6 @@ public class UIHealthBarDashBoss : MonoBehaviour
         BossExplotion.Play();
         _UIShipUpgrade.SetActive(true);
        // _enemySpawner.ResumeSpawning();
-        BasicEnemy.TriggerBossDefeated();
+        //BasicEnemy.TriggerBossDefeated();
     }
 }

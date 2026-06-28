@@ -130,6 +130,7 @@ public class SceneResetter : MonoBehaviour
 
         // ✅ Despawnear enemigos inmediatamente al morir
         BasicEnemy.ResetTier();
+        ZombieEnemy.ResetZombieTier();
         _enemySpawner.DespawnAll();
         _coinSpawner.DespawnAll();
 

@@ -5,16 +5,21 @@ using UnityEngine;
 
 public class UpgradesIslands : MonoBehaviour
 {
+    [SerializeField] public RT_CannonData datac;
+    [SerializeField] public RT_CannonData dataCannon;
+    [SerializeField] public RT_CannonData dataCannon1;
     public AbilityController ability;
     [SerializeField] PlayerUpgrades _playerUpgrades;
 
     public GameObject bnner;
 
     public GameObject UIDesactivar;
+    public GameObject UIDesactivar1;
 
 
 
     public GameObject canvas;
+   
 
 
     private void Start()
@@ -29,6 +34,7 @@ public class UpgradesIslands : MonoBehaviour
     public void FakeUpgrade()
     {
         // _cannonUpgrades.AddCharge();
+       // datac.shotsPerBurst += 1;
         canvas.SetActive(false);
         OnRouglikeExit();
 

@@ -120,7 +120,7 @@ public class MortarBossController : MonoBehaviour
             bullet.ForceReturn();
 
         _UIShipUpgrade.SetActive(true);
-        BasicEnemy.TriggerBossDefeated();
+        
     }
 
     public void ResetBoss()

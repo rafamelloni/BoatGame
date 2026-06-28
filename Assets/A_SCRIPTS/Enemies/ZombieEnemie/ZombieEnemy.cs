@@ -22,6 +22,9 @@ public class ZombieEnemy : Enemy
     [SerializeField] private Renderer _meshRenderer;
     [SerializeField] private GameObject[] _localModels;
 
+    public static event Action OnZombieBossDefeated;
+    public static int _zombieTier = 0;
+
     private Transform _player;
     private bool _stopped;
     private FakeWaveMovement _wave;
@@ -42,45 +45,53 @@ public class ZombieEnemy : Enemy
 
     private void OnEnable()
     {
-        BasicEnemy.OnBossDefeated += ApplyTier;
-        if (BasicEnemy._tier > 0)
-            ApplyTier();
+        OnZombieBossDefeated -= ApplyTier;
+        OnZombieBossDefeated += ApplyTier;
+        ApplyUpgradedModel();
     }
 
     private void OnDisable()
     {
-        BasicEnemy.OnBossDefeated -= ApplyTier;
+        OnZombieBossDefeated -= ApplyTier;
+    }
+
+    public static void TriggerZombieBossDefeated()
+    {
+        Debug.Log($"[ZombieEnemy] TriggerZombieBossDefeated llamado, tier actual: {_zombieTier}");
+        if (_zombieTier >= 2) return;
+        _zombieTier++;
+        OnZombieBossDefeated?.Invoke();
+        Debug.Log($"[ZombieEnemy] Nuevo tier: {_zombieTier}");
+    }
+
+    public static void ResetZombieTier()
+    {
+        _zombieTier = 0;
     }
 
     private void ApplyTier()
     {
-        ApplyUpgradedMaterial();
         ApplyUpgradedModel();
-    }
-
-    private void ApplyUpgradedMaterial()
-    {
-        if (_meshRenderer == null || baseData?.tieredMaterials == null) return;
-        int idx = BasicEnemy._tier - 1;
-        if (idx >= 0 && idx < baseData.tieredMaterials.Length)
-            _meshRenderer.material = baseData.tieredMaterials[idx];
     }
 
     private void ApplyUpgradedModel()
     {
         if (_localModels == null || _localModels.Length == 0) return;
-        int idx = BasicEnemy._tier - 1;
+        int clampedTier = Mathf.Clamp(_zombieTier, 0, _localModels.Length - 1);
         for (int i = 0; i < _localModels.Length; i++)
-        {
             if (_localModels[i] != null)
-                _localModels[i].SetActive(i == idx);
-        }
+                _localModels[i].SetActive(i == clampedTier);
 
-        if (idx >= 0 && idx < _localModels.Length && _localModels[idx] != null)
+        if (_localModels[clampedTier] != null)
         {
-            Renderer r = _localModels[idx].GetComponentInChildren<Renderer>();
+            Renderer r = _localModels[clampedTier].GetComponentInChildren<Renderer>();
             if (r != null) _meshRenderer = r;
         }
+    }
+
+    public void ForceApplyModel()
+    {
+        ApplyUpgradedModel();
     }
 
     public void SetPlayer(Transform player)

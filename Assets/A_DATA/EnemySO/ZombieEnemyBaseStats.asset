@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90e00291d32278e4e8a219a2537c8b47, type: 3}
   m_Name: ZombieEnemyBaseStats
   m_EditorClassIdentifier: Assembly-CSharp::SO_EnemyData
-  maxHealth: 100
+  maxHealth: 50
   fireRate: 0
   woodExplosionVFX: {fileID: 3707281584461059747, guid: bf734a92b8bf4e041a2ac01e5c9b65bd, type: 3}
   bulletSpeed: 11
@@ -25,3 +25,4 @@ MonoBehaviour:
   tieredMaterials:
   - {fileID: 2100000, guid: eca475621e8ac3747a3838df53cc2bf4, type: 2}
   - {fileID: 2100000, guid: 7f4396c84d2fd1146a0bbb578b821695, type: 2}
+  tieredModels: []

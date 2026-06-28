@@ -49,9 +49,11 @@ public class ZombieGroup : MonoBehaviour
             member.OnDeath -= OnMemberDied;
             member.Revive();
 
+            
             var zombie = member.GetComponent<ZombieEnemy>();
             if (zombie != null)
             {
+                zombie.ForceApplyModel();
                 member.transform.localPosition = zombie.OriginalLocalPosition;
                 member.transform.localRotation = zombie.OriginalLocalRotation;
             }

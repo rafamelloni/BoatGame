@@ -76,6 +76,10 @@ public class BossSequenceManager : MonoBehaviour
         Debug.Log($"Boss {_currentBossIndex} murio, resumiendo timer y spawner");
         CleanupBoss(_currentBossIndex);
         _enemySpawner?.ResumeSpawning();
+
+        BasicEnemy.TriggerBossDefeated();
+        ZombieEnemy.TriggerZombieBossDefeated();
+
         _islandSpawner?.StartSpawning();
         _timerBoss.ResumeTimer();
     }

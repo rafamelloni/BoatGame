@@ -64,7 +64,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     public void SetMaxHealth(float newHealth)
     {
-
+        if (_rtData == null) return;
+        _rtData.maxHealth = newHealth;
+        _rtData.currentHealth = newHealth;
     }
 
     public float GetHealthNormalized()
