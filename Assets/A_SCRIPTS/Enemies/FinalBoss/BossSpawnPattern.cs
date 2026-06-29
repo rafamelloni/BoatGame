@@ -203,62 +203,80 @@ public class BossSpawnPattern : MonoBehaviour
         }
     }
 
+    public void ResetAll()
+    {
+        StopAllCoroutines();
+
+        foreach (var group in _activeGroups.ToArray())
+        {
+            if (group == null) continue;
+            group.GetComponent<EnemyEmerge>()?.Reset();
+            group.Cleanup();
+            group.gameObject.SetActive(false);
+        }
+        _activeGroups.Clear();
+
+        var dashEnemies = FindObjectsByType<DashBossEnemy>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (var e in dashEnemies)
+            Destroy(e.gameObject);
+    }
+
     // ═════════════════════════════════════════════════════════════════════
     //  GIZMOS
     // ═════════════════════════════════════════════════════════════════════
 
-    private void OnDrawGizmos()
-    {
-        if (player == null) return;
-        Vector3 center = player.position;
+    //private void OnDrawGizmos()
+    //{
+    //    if (player == null) return;
+    //    Vector3 center = player.position;
 
-        float[] xOffsets = { -columnSpacing, 0f, columnSpacing };
-        Gizmos.color = Color.cyan;
-        foreach (float x in xOffsets)
-        {
-            Vector3 pos = center + new Vector3(x, 0f, spawnDistance);
-            Gizmos.DrawSphere(pos, 0.3f);
-            Gizmos.DrawLine(pos, pos + Vector3.back * 2f);
-        }
-        Gizmos.color = Color.red;
-        foreach (float x in xOffsets)
-        {
-            Vector3 pos = center + new Vector3(x, 0f, -spawnDistance);
-            Gizmos.DrawSphere(pos, 0.3f);
-            Gizmos.DrawLine(pos, pos + Vector3.forward * 2f);
-        }
+    //    float[] xOffsets = { -columnSpacing, 0f, columnSpacing };
+    //    Gizmos.color = Color.cyan;
+    //    foreach (float x in xOffsets)
+    //    {
+    //        Vector3 pos = center + new Vector3(x, 0f, spawnDistance);
+    //        Gizmos.DrawSphere(pos, 0.3f);
+    //        Gizmos.DrawLine(pos, pos + Vector3.back * 2f);
+    //    }
+    //    Gizmos.color = Color.red;
+    //    foreach (float x in xOffsets)
+    //    {
+    //        Vector3 pos = center + new Vector3(x, 0f, -spawnDistance);
+    //        Gizmos.DrawSphere(pos, 0.3f);
+    //        Gizmos.DrawLine(pos, pos + Vector3.forward * 2f);
+    //    }
 
-        float angleStep = 360f / _cercoGroupCount;
-        Gizmos.color = new Color(1f, 0.5f, 0f);
-        for (int i = 0; i < _cercoGroupCount; i++)
-        {
-            float angle = i * angleStep * Mathf.Deg2Rad;
-            Vector3 pos = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * _cercoRadiusInicial;
-            Gizmos.DrawSphere(pos, 0.4f);
-            Gizmos.DrawLine(pos, center);
-        }
-        Gizmos.color = Color.magenta;
-        for (int i = 0; i < _cercoGroupCount; i++)
-        {
-            float angle = i * angleStep * Mathf.Deg2Rad;
-            Vector3 pos = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * _cercoRadiusFinal;
-            Gizmos.DrawSphere(pos, 0.4f);
-            Gizmos.DrawLine(pos, center);
-        }
+    //    float angleStep = 360f / _cercoGroupCount;
+    //    Gizmos.color = new Color(1f, 0.5f, 0f);
+    //    for (int i = 0; i < _cercoGroupCount; i++)
+    //    {
+    //        float angle = i * angleStep * Mathf.Deg2Rad;
+    //        Vector3 pos = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * _cercoRadiusInicial;
+    //        Gizmos.DrawSphere(pos, 0.4f);
+    //        Gizmos.DrawLine(pos, center);
+    //    }
+    //    Gizmos.color = Color.magenta;
+    //    for (int i = 0; i < _cercoGroupCount; i++)
+    //    {
+    //        float angle = i * angleStep * Mathf.Deg2Rad;
+    //        Vector3 pos = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * _cercoRadiusFinal;
+    //        Gizmos.DrawSphere(pos, 0.4f);
+    //        Gizmos.DrawLine(pos, center);
+    //    }
 
-        Gizmos.color = Color.green;
-        for (int i = 0; i < _lineaGroupCount; i++)
-        {
-            float zOffset = (i - (_lineaGroupCount - 1) / 2f) * _lineaSpacing;
-            Vector3 posL = center + new Vector3(-_lineaSpawnDistance, 0f, zOffset);
-            Vector3 posR = center + new Vector3(_lineaSpawnDistance, 0f, zOffset);
-            Gizmos.DrawSphere(posL, 0.4f);
-            Gizmos.DrawLine(posL, posL + Vector3.right * 2f);
-            Gizmos.DrawSphere(posR, 0.4f);
-            Gizmos.DrawLine(posR, posR + Vector3.left * 2f);
-        }
+    //    Gizmos.color = Color.green;
+    //    for (int i = 0; i < _lineaGroupCount; i++)
+    //    {
+    //        float zOffset = (i - (_lineaGroupCount - 1) / 2f) * _lineaSpacing;
+    //        Vector3 posL = center + new Vector3(-_lineaSpawnDistance, 0f, zOffset);
+    //        Vector3 posR = center + new Vector3(_lineaSpawnDistance, 0f, zOffset);
+    //        Gizmos.DrawSphere(posL, 0.4f);
+    //        Gizmos.DrawLine(posL, posL + Vector3.right * 2f);
+    //        Gizmos.DrawSphere(posR, 0.4f);
+    //        Gizmos.DrawLine(posR, posR + Vector3.left * 2f);
+    //    }
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(center, 0.25f);
-    }
+    //    Gizmos.color = Color.yellow;
+    //    Gizmos.DrawSphere(center, 0.25f);
+    //}
 }

@@ -462,6 +462,7 @@ public class EnemySpawner : MonoBehaviour
         var active = FindObjectsByType<ZombieGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (var group in active)
         {
+            if (group.gameObject.name.Contains("EnemyZombieGHOST")) continue;
             group.OnGroupDead -= ReturnZombieGroup;
             group.OnGroupAlmostDead -= ReleaseZombieGroupSlot;
             _factory.ReturnZombieGroup(group);

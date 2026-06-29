@@ -37,7 +37,7 @@ public class UpgradeShipBOSS : MonoBehaviour
     {
         AnimateShip();
         _canvasShipUpgrades.SetActive(false);
-        _playerHealth.moveSpeed = 11;
+        _playerHealth.moveSpeed =+ 5;
 
     }
 

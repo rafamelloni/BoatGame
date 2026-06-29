@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BossSequenceManager : MonoBehaviour
 {
@@ -72,6 +72,10 @@ public class BossSequenceManager : MonoBehaviour
     {
         Debug.Log($"Boss {_currentBossIndex} murio, resumiendo timer y spawner");
         CleanupBoss(_currentBossIndex);
+
+        var bossPattern = _bosses[_currentBossIndex]?.GetComponent<BossSpawnPattern>();
+        if (bossPattern != null) bossPattern.ResetAll();
+
         _enemySpawner?.ResumeSpawning();
         BasicEnemy.TriggerBossDefeated();
         ZombieEnemy.TriggerZombieBossDefeated();
@@ -103,16 +107,12 @@ public class BossSequenceManager : MonoBehaviour
         foreach (GameObject bossGO in _bosses)
         {
             if (bossGO == null) continue;
-
+            bossGO.GetComponent<BossSpawnPattern>()?.ResetAll(); // ← agregás
             bossGO.GetComponent<BossSpawnPositioner>()?.Cleanup();
-
             var dashBoss = bossGO.GetComponent<DashBossController>();
             if (dashBoss != null) dashBoss.ResetBoss();
-
             var mortarBoss = bossGO.GetComponent<MortarBossController>();
             if (mortarBoss != null) mortarBoss.ResetBoss();
-
-            // FinalBoss se limpia solo con OnDisable al hacer SetActive(false)
             bossGO.SetActive(false);
         }
 
