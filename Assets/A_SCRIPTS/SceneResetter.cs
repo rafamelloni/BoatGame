@@ -26,6 +26,7 @@ public class SceneResetter : MonoBehaviour
     [SerializeField] private UpgradeShipBOSS _bossShip;
     [SerializeField] private LifeBoxSpawner _lifeBoxSpawner;
     [SerializeField] private CoinManager _coinManager;
+    [SerializeField] private PlayerPoison _playerPoison;
 
     [Header("Player")]
     [SerializeField] private Transform _playerTransform;
@@ -85,6 +86,8 @@ public class SceneResetter : MonoBehaviour
 
     private void ResetAll()
     {
+        DeleteBullets();
+
         // Player
         var rb = _playerTransform.GetComponent<Rigidbody>();
         rb.linearVelocity = Vector3.zero;
@@ -92,6 +95,7 @@ public class SceneResetter : MonoBehaviour
         rb.MovePosition(_playerStartPosition);
         rb.MoveRotation(_playerStartRotation);
         _playerTransform.GetComponent<RT_PlayerStats>().ResetToBase();
+        _playerPoison.ResetPoison();
         _playerHealth.ResetHealth();
         _bossShip.ResetShip();
 
@@ -224,5 +228,11 @@ public class SceneResetter : MonoBehaviour
             _mainCamera.fieldOfView = Mathf.Lerp(from, to, elapsed / realDuration);
             yield return null;
         }
+    }
+
+    void DeleteBullets()
+    {
+        foreach (var bullet in FindObjectsByType<BossBullet>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            Object.Destroy(bullet.gameObject);
     }
 }
