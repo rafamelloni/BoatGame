@@ -62,8 +62,18 @@ public class MolotovStrategy : IAbilityStrategy
                 TryLaunchBurst();
         }
     }
+
     private float _launchTimer = 0f;
     public float LaunchProgress => _rtData.launchInterval > 0f ? Mathf.Clamp01(_launchTimer / _rtData.launchInterval) : 0f;
+
+    private bool IsEmerging(Collider col)
+    {
+        IDamageable damageable = col.GetComponentInParent<IDamageable>();
+        if (damageable == null) return true;
+        MonoBehaviour mb = damageable as MonoBehaviour;
+        return mb != null && !mb.enabled;
+    }
+
     private void TryLaunch()
     {
         Collider[] nearby = Physics.OverlapSphere(_launchPoint.position, _rtData.detectionRadius, _enemyLayers);
@@ -74,6 +84,7 @@ public class MolotovStrategy : IAbilityStrategy
 
         for (int i = 0; i < nearby.Length; i++)
         {
+            if (IsEmerging(nearby[i])) continue;
             float dist = Vector3.Distance(_launchPoint.position, nearby[i].transform.position);
             if (dist < bestDist)
             {
@@ -91,13 +102,16 @@ public class MolotovStrategy : IAbilityStrategy
         Collider[] nearby = Physics.OverlapSphere(_launchPoint.position, _rtData.detectionRadius, _enemyLayers);
         if (nearby.Length == 0) return;
 
-        System.Array.Sort(nearby, (a, b) =>
+        var validTargets = System.Array.FindAll(nearby, col => !IsEmerging(col));
+        if (validTargets.Length == 0) return;
+
+        System.Array.Sort(validTargets, (a, b) =>
             Vector3.Distance(_launchPoint.position, a.transform.position)
             .CompareTo(Vector3.Distance(_launchPoint.position, b.transform.position)));
 
         for (int i = 0; i < _rtData.burstCount; i++)
         {
-            Collider target = nearby[i % nearby.Length];
+            Collider target = validTargets[i % validTargets.Length];
             SpawnMolotov(target.transform.position);
         }
     }

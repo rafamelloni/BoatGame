@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: SO_MolotovData
   m_EditorClassIdentifier: Assembly-CSharp::SO_MolotovData
   molotovPrefab: {fileID: 2471218036930397840, guid: 5ef2a1fd173215b4d9442dcfce22727f, type: 3}
-  arcHeight: 5
-  projectileSpeed: 8
-  damage: 20
-  launchInterval: 5
+  arcHeight: 3
+  projectileSpeed: 15
+  damage: 10
+  launchInterval: 3
   detectionRadius: 20
   explosionRadius: 3
   explosionVFX: {fileID: 4489588693831894998, guid: b56ad77957dbb3d47a30dff590e5b8fb, type: 3}
@@ -25,7 +25,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   fireDuration: 4
-  fireDamagePerSecond: 5
+  fireDamagePerSecond: 20
   fireRadius: 2
-  burstInterval: 10
-  burstCount: 6
+  burstInterval: 15
+  burstCount: 8

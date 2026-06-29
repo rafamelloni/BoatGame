@@ -33,7 +33,7 @@ public class UpgradeDebug : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha4)) MaxPath(3);
         if (Input.GetKeyDown(KeyCode.Alpha5)) MaxPath(4);
         if (Input.GetKeyDown(KeyCode.Alpha6)) MaxPath(5);
-        if (Input.GetKeyDown(KeyCode.Alpha8)) MaxPath(6);
+        if (Input.GetKeyDown(KeyCode.Alpha7)) MaxPath(6);
 
         if (Input.GetKeyDown(KeyCode.R)) ResetUpgrades();
         if (Input.GetKeyDown(KeyCode.F1)) _bossSequenceManager.ActivateBoss(_mortarBossIndex);

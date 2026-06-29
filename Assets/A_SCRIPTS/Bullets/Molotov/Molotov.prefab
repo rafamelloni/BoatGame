@@ -127,6 +127,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39fff486eabfe4d45bd32f3c1c0e77f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MolotovProjectile
+  _fireYOffset: 0.5
 --- !u!96 &1472945239617659820
 TrailRenderer:
   serializedVersion: 4

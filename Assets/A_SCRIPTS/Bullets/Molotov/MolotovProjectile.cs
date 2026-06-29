@@ -20,6 +20,8 @@ public class MolotovProjectile : MonoBehaviour
     private bool _launched = false;
     private float _spinAngle = 0f;
 
+    [SerializeField] private float _fireYOffset = 0f;
+
     public void Launch(Vector3 from, Vector3 to, RT_MolotovData data, Collider shipCollider)
     {
         Physics.IgnoreCollision(GetComponent<Collider>(), shipCollider, true);
@@ -68,7 +70,6 @@ public class MolotovProjectile : MonoBehaviour
     private void Impact()
     {
         _launched = false;
-
         Collider[] hits = Physics.OverlapSphere(_targetPos, _explosionRadius, _damageLayers);
         for (int i = 0; i < hits.Length; i++)
         {
@@ -76,14 +77,12 @@ public class MolotovProjectile : MonoBehaviour
             if (damageable != null)
                 damageable.TakeDamage(_damage);
         }
-
         if (_explosionVFX != null)
             Instantiate(_explosionVFX, _targetPos, Quaternion.identity);
-
-        FireZone fireZone = Instantiate(_fireZonePrefab, _targetPos, Quaternion.identity).GetComponent<FireZone>();
+        Vector3 spawnPos = new Vector3(_targetPos.x, _targetPos.y + _fireYOffset, _targetPos.z);
+        FireZone fireZone = Instantiate(_fireZonePrefab, spawnPos, Quaternion.identity).GetComponent<FireZone>();
         if (fireZone != null)
             fireZone.Init(_fireDuration, _fireDamagePerSecond, _fireRadius, _damageLayers);
-
         Destroy(gameObject);
     }
 }

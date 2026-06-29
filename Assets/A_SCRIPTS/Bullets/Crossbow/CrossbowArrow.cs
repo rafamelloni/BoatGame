@@ -33,6 +33,11 @@ public class CrossbowArrow : MonoBehaviour
             other.CompareTag("DashBoss") || other.CompareTag("MortarBoss"))
         {
             EnemyHealth enemy = other.GetComponent<EnemyHealth>();
+            MortarBossHealth Mortar = other.GetComponent<MortarBossHealth>();
+
+            if (Mortar != null)
+                Mortar.TakeDamage(_damage);
+
             if (enemy != null)
                 enemy.TakeDamage(_damage);
 

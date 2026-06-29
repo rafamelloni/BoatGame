@@ -15,6 +15,7 @@ public class SpecialAbilityHUD : MonoBehaviour
     public void UnlockNext(Sprite sprite, Func<float> progressGetter = null)
     {
         if (_unlockedCount >= abilitySlots.Length) return;
+        if (sprite == null) return;
 
         abilitySlots[_unlockedCount].sprite = sprite;
         abilitySlots[_unlockedCount].gameObject.SetActive(true);

@@ -124,7 +124,7 @@ public class UpgradeSystem : MonoBehaviour
                 abilityHUD.UnlockNext(spriteUnlockCrossbow);
                 break;
             case SpecialAbilityType.CrossbowBurst:
-                abilityHUD.UnlockNext(spriteCrossbowBurst);
+               // abilityHUD.UnlockNext(spriteCrossbowBurst);
                 break;
             case SpecialAbilityType.UnlockBlades:
                 abilityController.BladesAvailable();
@@ -134,9 +134,7 @@ public class UpgradeSystem : MonoBehaviour
                 break;
             case SpecialAbilityType.BladesBurst:
                 abilityHUD.AddProgressToIndex(_bladesSlotIndex, () => abilityController.BladesAbility.BurstProgress);
-                Debug.Log($"[UpgradeSystem] BladesBurst usando index: {_bladesSlotIndex}");
-
-                Debug.Log("[UpgradeSystem] BladesBurst desbloqueado");
+                
                 break;
         }
     }
