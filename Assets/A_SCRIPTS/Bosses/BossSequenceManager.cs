@@ -29,11 +29,8 @@ public class BossSequenceManager : MonoBehaviour
             Debug.LogWarning($"[BossSequenceManager] Index {index} fuera de rango.");
             return;
         }
-
-        // Limpiar el boss actual si hay uno activo
         if (_currentBossIndex >= 0 && _currentBossIndex < _bosses.Length)
             CleanupBoss(_currentBossIndex);
-
         _currentBossIndex = index;
         ActivateBossInternal(_currentBossIndex);
     }
@@ -49,9 +46,9 @@ public class BossSequenceManager : MonoBehaviour
         var mortarBoss = bossGO.GetComponent<MortarBossController>();
         if (mortarBoss != null) mortarBoss.ResetBoss();
 
+        // FinalBoss no necesita ResetBoss(), OnEnable se encarga
         bossGO.SetActive(true);
         _bossArrivalText?.Play();
-
         bossGO.GetComponent<BossSpawnPositioner>()?.PositionAndInit();
 
         EnemyHealth enemyHealth = bossGO.GetComponent<EnemyHealth>();
@@ -76,10 +73,8 @@ public class BossSequenceManager : MonoBehaviour
         Debug.Log($"Boss {_currentBossIndex} murio, resumiendo timer y spawner");
         CleanupBoss(_currentBossIndex);
         _enemySpawner?.ResumeSpawning();
-
         BasicEnemy.TriggerBossDefeated();
         ZombieEnemy.TriggerZombieBossDefeated();
-
         _islandSpawner?.StartSpawning();
         _timerBoss.ResumeTimer();
     }
@@ -108,11 +103,16 @@ public class BossSequenceManager : MonoBehaviour
         foreach (GameObject bossGO in _bosses)
         {
             if (bossGO == null) continue;
+
             bossGO.GetComponent<BossSpawnPositioner>()?.Cleanup();
+
             var dashBoss = bossGO.GetComponent<DashBossController>();
             if (dashBoss != null) dashBoss.ResetBoss();
+
             var mortarBoss = bossGO.GetComponent<MortarBossController>();
             if (mortarBoss != null) mortarBoss.ResetBoss();
+
+            // FinalBoss se limpia solo con OnDisable al hacer SetActive(false)
             bossGO.SetActive(false);
         }
 

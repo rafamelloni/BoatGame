@@ -120,10 +120,14 @@ public class FinalBossDash : MonoBehaviour
         indicator.Play(duration, onComplete);
         return indicator;
     }
-
-    private void Update()
+    public void ResetBoss()
     {
-        if (Input.GetKeyDown(KeyCode.F))
-            DoDash();
+        StopAllCoroutines();
+        _isDashing = false;
+        if (_dashParticles != null) _dashParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (_dashParticlesSmoke != null) _dashParticlesSmoke.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (_dashParticlesFire != null) _dashParticlesFire.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
+
+
 }

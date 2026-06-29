@@ -15,22 +15,23 @@ public class FinalBossController : MonoBehaviour
     [SerializeField] private GameObject finalcanvas;
 
     [Header("Cooldowns")]
-    [SerializeField] private float _cooldownMax = 3f;    // cooldown al 100% HP
-    [SerializeField] private float _cooldownMin = 1f;    // cooldown al 0% HP
+    [SerializeField] private float _cooldownMax = 3f;
+    [SerializeField] private float _cooldownMin = 1f;
 
     [Header("Orbita Base")]
     [SerializeField] private float _baseOrbitRadius = 14f;
-    [SerializeField] private float _baseOrbitSpeed = 15f; // grados por segundo
+    [SerializeField] private float _baseOrbitSpeed = 15f;
 
     private float _orbitAngle = 0f;
     private bool _isBusy = false;
     private int _attackIndex = 0;
 
-    private void Start()
+    private void OnEnable()
     {
+        _attackIndex = 0;
+        _isBusy = false;
         _health.OnDeath += HandleDeath;
 
-        // Calcular angulo inicial desde posicion actual
         Vector3 dir = transform.position - _player.position;
         dir.y = 0f;
         _orbitAngle = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
@@ -38,10 +39,11 @@ public class FinalBossController : MonoBehaviour
         StartCoroutine(BossLoop());
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
-        if (_health != null)
-            _health.OnDeath -= HandleDeath;
+        StopAllCoroutines();
+        _isBusy = false;
+        if (_health != null) _health.OnDeath -= HandleDeath;
     }
 
     private void Update()
@@ -71,7 +73,7 @@ public class FinalBossController : MonoBehaviour
 
     private IEnumerator BossLoop()
     {
-        yield return new WaitForSeconds(2f); // intro delay
+        yield return new WaitForSeconds(2f);
 
         while (!_health.IsDead)
         {
@@ -88,57 +90,46 @@ public class FinalBossController : MonoBehaviour
     private IEnumerator ExecuteNextAttack()
     {
         int attack = _attackIndex % 7;
+        Debug.Log($"[FinalBoss] Ataque {attack} START");
+
 
         switch (attack)
         {
             case 0:
-                // Orbita agresiva
                 _orbitAttack.DoOrbitAttack();
                 yield return new WaitUntil(() => !_orbitAttack.IsOrbiting);
                 break;
-
             case 1:
-                // Dash agresivo
                 _dash.DoDash();
                 yield return new WaitUntil(() => !_dash.IsDashing);
                 break;
-
             case 2:
-                // Espiral doble
                 _spinAttack.DoSpinAttack();
                 yield return new WaitUntil(() => !_spinAttack.IsSpinning);
                 break;
-
             case 3:
-                // Cerco progresivo
                 _spawnPattern.ExecuteCercoProgresivo();
                 yield return new WaitForSeconds(5f);
                 break;
-
             case 4:
-                // Espiral con gap
                 _curtainAttack.DoSpinGapAttack();
                 yield return new WaitUntil(() => !_curtainAttack.IsSpinning);
                 break;
-
             case 5:
-                // Linea de fuego
                 _spawnPattern.ExecuteLineaFuegoGroups();
                 yield return new WaitForSeconds(4f);
                 break;
-
-            
-
             case 6:
                 _spawnPattern.ExecutePattern();
                 yield return new WaitForSeconds(4f);
                 break;
         }
+        Debug.Log($"[FinalBoss] Ataque {attack} END");
+
     }
 
     private float GetCooldown()
     {
-        // Cooldown se reduce a medida que pierde vida
         float hp = _health.HealthPercent;
         return Mathf.Lerp(_cooldownMin, _cooldownMax, hp);
     }

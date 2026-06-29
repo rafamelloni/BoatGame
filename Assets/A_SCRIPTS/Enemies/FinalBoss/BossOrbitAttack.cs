@@ -22,7 +22,11 @@ public class BossOrbitAttack : MonoBehaviour
 
     private float _poisonTimer = 0f;
 
-
+    public void Reset()
+    {
+        StopAllCoroutines();
+        _isOrbiting = false;
+    }
 
     private bool _isOrbiting = false;
     public bool IsOrbiting => _isOrbiting;
@@ -110,39 +114,15 @@ public class BossOrbitAttack : MonoBehaviour
         return u * u * p0 + 2f * u * t * p1 + t * t * p2;
     }
 
-    private void Update()
+
+
+    public void ResetBoss()
     {
-        if (Input.GetKeyDown(KeyCode.O))
-            DoOrbitAttack();
+        StopAllCoroutines();
+        _isOrbiting = false;
+        _poisonTimer = 0f;
+        if (Poison != null) Poison.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
-    private void OnDrawGizmos()
-    {
-        if (_player == null) return;
 
-        // Dibujar el arco que va a recorrer
-        Vector3 dirFromPlayer = (transform.position - _player.position);
-        dirFromPlayer.y = 0f;
-        float startAngle = Mathf.Atan2(dirFromPlayer.x, dirFromPlayer.z) * Mathf.Rad2Deg;
-
-        Gizmos.color = Color.cyan;
-        int steps = 30;
-        for (int i = 0; i <= steps; i++)
-        {
-            float angle = (startAngle + (i / (float)steps) * _arcDegrees) * Mathf.Deg2Rad;
-            Vector3 pos = _player.position + new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle)) * _orbitRadius;
-            pos.y = transform.position.y;
-            if (i > 0)
-            {
-                float prevAngle = (startAngle + ((i - 1) / (float)steps) * _arcDegrees) * Mathf.Deg2Rad;
-                Vector3 prevPos = _player.position + new Vector3(Mathf.Sin(prevAngle), 0f, Mathf.Cos(prevAngle)) * _orbitRadius;
-                prevPos.y = transform.position.y;
-                Gizmos.DrawLine(prevPos, pos);
-            }
-            Gizmos.DrawSphere(pos, 0.2f);
-        }
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(_player.position, 0.3f);
-    }
 }

@@ -30,6 +30,8 @@ public class BossSpinAttack : MonoBehaviour
 
     private float _currentAngle = 0f;
     private bool _isSpinning = false;
+    private float _particleTimer = 0f;
+    private bool _particlesActive = false;
     private MaterialPropertyBlock _propertyBlock;
 
     public bool IsSpinning => _isSpinning;
@@ -57,6 +59,8 @@ public class BossSpinAttack : MonoBehaviour
 
         float elapsed = 0f;
         float nextFireTime = 0f;
+        _particlesActive = false;
+        _particleTimer = 0f;
 
         while (elapsed < _spinDuration)
         {
@@ -72,10 +76,26 @@ public class BossSpinAttack : MonoBehaviour
                 FireSpiral(_currentAngle);
                 FireSpiral(_currentAngle + 180f);
                 nextFireTime = elapsed + _fireRate;
+
+                SetFireParticles(true);
+                _particleTimer = 0f;
+                _particlesActive = true;
+            }
+
+            if (_particlesActive)
+            {
+                _particleTimer += delta;
+                if (_particleTimer >= _particleDuration)
+                {
+                    SetFireParticles(false);
+                    _particlesActive = false;
+                }
             }
 
             yield return null;
         }
+
+        SetFireParticles(false);
 
         if (_mesh != null)
             _mesh.localRotation = Quaternion.identity;
@@ -111,6 +131,7 @@ public class BossSpinAttack : MonoBehaviour
     private void SetMaterialValue(float value)
     {
         if (_materialRenderers == null) return;
+        if (_propertyBlock == null) _propertyBlock = new MaterialPropertyBlock();
 
         for (int i = 0; i < _materialRenderers.Length; i++)
         {
@@ -123,8 +144,6 @@ public class BossSpinAttack : MonoBehaviour
 
     private void FireSpiral(float angleDeg)
     {
-        TriggerFireParticles();
-
         float rad = angleDeg * Mathf.Deg2Rad;
         Vector3 dir = new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad));
         Vector3 spawnPos = transform.position + dir * _bulletSpawnOffset;
@@ -135,20 +154,19 @@ public class BossSpinAttack : MonoBehaviour
         go.GetComponent<BossBullet>()?.Launch(dir);
     }
 
-    private void TriggerFireParticles()
+    private void SetFireParticles(bool active)
     {
-        StopCoroutine(nameof(FireParticlesRoutine));
-        StartCoroutine(nameof(FireParticlesRoutine));
+        foreach (var p in _fireParticles)
+            if (p != null) p.SetActive(active);
     }
 
-    private IEnumerator FireParticlesRoutine()
+    public void ResetBoss()
     {
-        foreach (var p in _fireParticles)
-            if (p != null) p.SetActive(true);
-
-        yield return new WaitForSeconds(_particleDuration);
-
-        foreach (var p in _fireParticles)
-            if (p != null) p.SetActive(false);
+        StopAllCoroutines();
+        _isSpinning = false;
+        _particlesActive = false;
+        SetFireParticles(false);
+        if (canons != null) canons.SetActive(false);
+        SetMaterialValue(0f);
     }
 }

@@ -11,6 +11,8 @@ public class PlayerPoison : MonoBehaviour
     [Header("VFX")]
     [SerializeField] GameObject poisonParticles;
     [SerializeField] GameObject poisonIcon;
+    [SerializeField] float maxPoisonDuration = 5f; // tope absoluto
+    float totalPoisonTime = 0f;
     float poisonTimer;
     float cooldownTimer;
     float tickTimer;
@@ -27,17 +29,26 @@ public class PlayerPoison : MonoBehaviour
         tickTimer += Time.deltaTime;
         if (IsPoisoned)
         {
+            totalPoisonTime += Time.deltaTime;
+
             if (tickTimer >= tickRate)
             {
                 tickTimer = 0f;
                 _playerHealth.TakeDamage(damage);
             }
-            if (zonesOverlapping <= 0)
+
+            if (zonesOverlapping <= 0 || totalPoisonTime >= maxPoisonDuration)
             {
                 enterAccum = 0f;
                 poisonTimer -= Time.deltaTime;
+
                 if (poisonTimer <= 0f)
+                {
+                    poisonTimer = 0f;
+                    totalPoisonTime = 0f;
+                    cooldownTimer = cooldownTime;
                     SetPoisonActive(false);
+                }
             }
         }
         else if (InCooldown)

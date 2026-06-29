@@ -26,7 +26,7 @@ public class BossChargeAttack : MonoBehaviour
     private BossMovement _movement;
     [SerializeField] private float _rotationOffset = 0f;
 
-    private void Start()
+    private void Awake()
     {
         _rtCannonData = new RT_CannonData(_cannonData);
         _movement = GetComponent<BossMovement>();
@@ -101,18 +101,10 @@ public class BossChargeAttack : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
+    public void ResetBoss()
     {
-        Gizmos.color = new Color(1f, 0f, 0f, 0.4f);
-        Gizmos.DrawWireSphere(transform.position, _bulletShootRange);
-
-        if (_shootPoints == null) return;
-        Gizmos.color = Color.yellow;
-        foreach (var p in _shootPoints)
-        {
-            if (p == null) continue;
-            Gizmos.DrawWireSphere(p.position, 0.2f);
-            Gizmos.DrawRay(p.position, p.right * 1.5f);
-        }
+        StopAllCoroutines();
+        IsCharging = false;
+        if (_movement != null) _movement.Paused = false;
     }
 }

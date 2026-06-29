@@ -126,8 +126,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 595a9531429057e49b025e0025942159, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossBullet
-  speed: 15
-  lifetime: 5
+  speed: 10
+  lifetime: 13
   _healthPlayer: {fileID: 0}
 --- !u!96 &2224255544684577084
 TrailRenderer:

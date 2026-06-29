@@ -1,12 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class MortarBossController : MonoBehaviour
 {
-    // ─── Fases ───────────────────────────────────────────────────────────────
-    // Fase 1: 100-30% HP → Cross / Random alternando, Charge cada 3
-    // Fase 2:  30-0%  HP → Cross + Random simultáneos, Charge cada 2
-
     [Header("Patrones")]
     [SerializeField] private BossCrossPattern _crossPattern;
     [SerializeField] private BossRandomPattern _randomPattern;
@@ -23,6 +20,7 @@ public class MortarBossController : MonoBehaviour
     [SerializeField] private GameObject _UIShipUpgrade;
 
     private MortarBossHealth _health;
+    private BossMovement _movement;
 
     private enum State { Idle, Attacking, Cooldown, Dead }
     private State _state = State.Idle;
@@ -32,15 +30,27 @@ public class MortarBossController : MonoBehaviour
 
     private void Awake()
     {
-        
         _health = GetComponent<MortarBossHealth>();
+        _movement = GetComponent<BossMovement>();
     }
 
-    private void Start()
+    private void OnEnable()
     {
+        if (_health == null) return;
+
+        _health.OnHealthChanged -= HandleHealthChanged;
+        _health.OnDeath -= HandleDeath;
         _health.OnHealthChanged += HandleHealthChanged;
         _health.OnDeath += HandleDeath;
+
+        if (_movement != null) _movement.Paused = false;
         StartCoroutine(BossLoop());
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+        if (_movement != null) _movement.Paused = true;
     }
 
     private void OnDestroy()
@@ -114,13 +124,11 @@ public class MortarBossController : MonoBehaviour
         _state = State.Dead;
         StopAllCoroutines();
 
-        // Limpiar balas activas
         var activeBullets = FindObjectsByType<BarrelExplosion>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (var bullet in activeBullets)
             bullet.ForceReturn();
 
         _UIShipUpgrade.SetActive(true);
-        
     }
 
     public void ResetBoss()
@@ -131,24 +139,12 @@ public class MortarBossController : MonoBehaviour
         _fase = 1;
         _attackIndex = 0;
 
+        _chargeAttack.ResetBoss();
+        if (_movement != null) _movement.Paused = true;
+
         _UIShipUpgrade.SetActive(false);
         if (_health == null) return;
 
-        _health.ResetHealth();        // asegurate que MortarBossHealth tenga este método
-
-        // Limpiar suscripciones y resuscribir limpio
-        _health.OnHealthChanged -= HandleHealthChanged;
-        _health.OnDeath -= HandleDeath;
-        _health.OnHealthChanged += HandleHealthChanged;
-        _health.OnDeath += HandleDeath;
-        StartCoroutine(BossLoop());
-    }
-
-    private void OnGUI()
-    {
-#if UNITY_EDITOR
-        GUI.Label(new UnityEngine.Rect(10, 10, 200, 20),
-            $"Boss — Fase {_fase} | HP: {_health.HealthPercent:P0} | {_state}");
-#endif
+        _health.ResetHealth();
     }
 }

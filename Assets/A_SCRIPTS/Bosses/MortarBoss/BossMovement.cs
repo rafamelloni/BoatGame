@@ -22,4 +22,9 @@ public class BossMovement : MonoBehaviour
         Quaternion lookRot = Quaternion.LookRotation(dir.normalized);
         transform.rotation = lookRot * Quaternion.Euler(0f, _rotationOffset, 0f);
     }
+
+    public void ResetBoss()
+    {
+        Paused = true;
+    }
 }
