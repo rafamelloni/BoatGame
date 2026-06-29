@@ -43,7 +43,7 @@ public class FinalBossDash : MonoBehaviour
 
         // Calcular destino
         Vector3 dir = (_player.position - transform.position);
-        dir.y = 0f;
+        dir.y = 6f;
         Vector3 destination = _player.position - dir.normalized * _stopDistanceFromPlayer;
         destination.y = transform.position.y;
 

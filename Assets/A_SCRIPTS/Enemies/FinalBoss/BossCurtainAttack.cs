@@ -29,10 +29,13 @@ public class BossCurtainAttack : MonoBehaviour
     [SerializeField, Range(10f, 90f)] private float _gapAngle = 40f;
     [SerializeField] private float _gapRotateSpeed = 20f;
 
+    [Header("Particulas")]
+    [SerializeField] private GameObject[] _fireParticles;
+    [SerializeField] private float _particleDuration = 0.1f;
+
     private float _currentAngle = 0f;
     private float _gapCenter = 0f;
     private bool _isSpinning = false;
-
     private MaterialPropertyBlock _propertyBlock;
 
     public bool IsSpinning => _isSpinning;
@@ -106,15 +109,11 @@ public class BossCurtainAttack : MonoBehaviour
         }
 
         float t = 0f;
-
         while (t < duration)
         {
             t += Time.deltaTime;
             float normalized = Mathf.Clamp01(t / duration);
-            float value = Mathf.Lerp(from, to, normalized);
-
-            SetMaterialValue(value);
-
+            SetMaterialValue(Mathf.Lerp(from, to, normalized));
             yield return null;
         }
 
@@ -128,7 +127,6 @@ public class BossCurtainAttack : MonoBehaviour
         for (int i = 0; i < _materialRenderers.Length; i++)
         {
             if (_materialRenderers[i] == null) continue;
-
             _materialRenderers[i].GetPropertyBlock(_propertyBlock);
             _propertyBlock.SetFloat(_materialProperty, value);
             _materialRenderers[i].SetPropertyBlock(_propertyBlock);
@@ -146,9 +144,10 @@ public class BossCurtainAttack : MonoBehaviour
         float diff = Mathf.Abs(Mathf.DeltaAngle(normalized, gapNormalized));
         if (diff < _gapAngle / 2f) return;
 
+        TriggerFireParticles();
+
         float rad = angleDeg * Mathf.Deg2Rad;
         Vector3 dir = new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad));
-
         Vector3 spawnPos = transform.position + dir * _bulletSpawnOffset;
         spawnPos.y = transform.position.y + _bulletYOffset;
 
@@ -157,4 +156,20 @@ public class BossCurtainAttack : MonoBehaviour
         go.GetComponent<BossBullet>()?.Launch(dir);
     }
 
+    private void TriggerFireParticles()
+    {
+        StopCoroutine(nameof(FireParticlesRoutine));
+        StartCoroutine(nameof(FireParticlesRoutine));
+    }
+
+    private IEnumerator FireParticlesRoutine()
+    {
+        foreach (var p in _fireParticles)
+            if (p != null) p.SetActive(true);
+
+        yield return new WaitForSeconds(_particleDuration);
+
+        foreach (var p in _fireParticles)
+            if (p != null) p.SetActive(false);
+    }
 }

@@ -17,6 +17,7 @@ public class MortarBossHealth : MonoBehaviour, IDamageable, IBoss
     [SerializeField] private float _maxGrietaStrength = 1f;
     [SerializeField] private float _maxEmissionStrength = 2f;
     [SerializeField] private float _maxNormalStrength = 1f;
+    [SerializeField] private FinalBossController FinalBossController;
 
     [Header("Partículas por daño")]
     [SerializeField] private GameObject[] _damageParticleObjects;
@@ -69,8 +70,17 @@ public class MortarBossHealth : MonoBehaviour, IDamageable, IBoss
 
         if (_currentHealth <= 0f)
         {
-            OnDeath?.Invoke();
-            gameObject.SetActive(false);
+            if(FinalBossController != null)
+            {
+                FinalBossController.EndCanvas();
+            }
+            else
+            {
+                OnDeath?.Invoke();
+                gameObject.SetActive(false);
+            }
+
+                
         }
     }
 

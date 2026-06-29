@@ -12,6 +12,7 @@ public class FinalBossController : MonoBehaviour
     [SerializeField] private BossOrbitAttack _orbitAttack;
     [SerializeField] private MortarBossHealth _health;
     [SerializeField] private GameObject _cannons;
+    [SerializeField] private GameObject finalcanvas;
 
     [Header("Cooldowns")]
     [SerializeField] private float _cooldownMax = 3f;    // cooldown al 100% HP
@@ -146,5 +147,11 @@ public class FinalBossController : MonoBehaviour
     {
         StopAllCoroutines();
         Debug.Log("[FinalBoss] Muerto.");
+    }
+
+    public void EndCanvas()
+    {
+        finalcanvas.SetActive(true);
+        Time.timeScale = 0f;
     }
 }

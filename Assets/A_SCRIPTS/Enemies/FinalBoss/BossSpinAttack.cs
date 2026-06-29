@@ -24,6 +24,10 @@ public class BossSpinAttack : MonoBehaviour
     [SerializeField] private float _bulletSpawnOffset = 2f;
     [SerializeField] private float _bulletYOffset = 1f;
 
+    [Header("Particulas")]
+    [SerializeField] private GameObject[] _fireParticles;
+    [SerializeField] private float _particleDuration = 0.1f;
+
     private float _currentAngle = 0f;
     private bool _isSpinning = false;
     private MaterialPropertyBlock _propertyBlock;
@@ -58,8 +62,8 @@ public class BossSpinAttack : MonoBehaviour
         {
             float delta = Time.deltaTime;
             elapsed += delta;
-
             _currentAngle += _spinSpeed * delta;
+
             if (_mesh != null)
                 _mesh.localRotation = Quaternion.Euler(0f, _currentAngle, 0f);
 
@@ -100,12 +104,14 @@ public class BossSpinAttack : MonoBehaviour
             SetMaterialValue(Mathf.Lerp(from, to, normalized));
             yield return null;
         }
+
         SetMaterialValue(to);
     }
 
     private void SetMaterialValue(float value)
     {
         if (_materialRenderers == null) return;
+
         for (int i = 0; i < _materialRenderers.Length; i++)
         {
             if (_materialRenderers[i] == null) continue;
@@ -117,6 +123,8 @@ public class BossSpinAttack : MonoBehaviour
 
     private void FireSpiral(float angleDeg)
     {
+        TriggerFireParticles();
+
         float rad = angleDeg * Mathf.Deg2Rad;
         Vector3 dir = new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad));
         Vector3 spawnPos = transform.position + dir * _bulletSpawnOffset;
@@ -125,5 +133,22 @@ public class BossSpinAttack : MonoBehaviour
         var go = Instantiate(_bulletPrefab, spawnPos, Quaternion.identity);
         go.GetComponent<BossBullet>()?.setup(_healthPlayer);
         go.GetComponent<BossBullet>()?.Launch(dir);
+    }
+
+    private void TriggerFireParticles()
+    {
+        StopCoroutine(nameof(FireParticlesRoutine));
+        StartCoroutine(nameof(FireParticlesRoutine));
+    }
+
+    private IEnumerator FireParticlesRoutine()
+    {
+        foreach (var p in _fireParticles)
+            if (p != null) p.SetActive(true);
+
+        yield return new WaitForSeconds(_particleDuration);
+
+        foreach (var p in _fireParticles)
+            if (p != null) p.SetActive(false);
     }
 }
