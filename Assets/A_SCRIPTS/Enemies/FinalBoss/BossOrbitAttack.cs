@@ -15,6 +15,13 @@ public class BossOrbitAttack : MonoBehaviour
     [SerializeField] private float _meshRotationOffset = -90f;
     [SerializeField] private ParticleSystem Poison;
 
+    [Header("Poison Zone")]
+    [SerializeField] private GameObject _poisonZonePrefab;
+    [SerializeField] private float _poisonSpawnInterval = 0.15f;
+    [SerializeField] private Transform _poisonSpawnPoint; // ← agregás
+
+    private float _poisonTimer = 0f;
+
 
 
     private bool _isOrbiting = false;
@@ -60,11 +67,21 @@ public class BossOrbitAttack : MonoBehaviour
         while (elapsed < _duration)
         {
             elapsed += Time.deltaTime;
+            _poisonTimer += Time.deltaTime; // ← agregás
+
             float t = Mathf.Clamp01(elapsed / _duration);
 
             // Bezier cuadratica
             Vector3 newPos = QuadraticBezier(startPos, controlPoint, endPos, t);
             newPos.y = transform.position.y;
+
+            if (_poisonTimer >= _poisonSpawnInterval)
+            {
+                _poisonTimer = 0f;
+                
+                Vector3 spawnPos = _poisonSpawnPoint != null ? _poisonSpawnPoint.position : transform.position;
+                Instantiate(_poisonZonePrefab, spawnPos, Quaternion.identity);
+            }
 
             // Rotar hacia la direccion de movimiento
             Vector3 moveDir = (newPos - prevPos);

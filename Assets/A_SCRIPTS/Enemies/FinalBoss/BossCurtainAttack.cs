@@ -8,6 +8,7 @@ public class BossCurtainAttack : MonoBehaviour
     [SerializeField] private Transform _mesh;
     [SerializeField] private Transform _player;
     [SerializeField] private GameObject canons;
+    [SerializeField] RT_PlayerHealth _healthPlayer;
 
     [Header("Material / Shader")]
     [SerializeField] private Renderer[] _materialRenderers;
@@ -152,12 +153,8 @@ public class BossCurtainAttack : MonoBehaviour
         spawnPos.y = transform.position.y + _bulletYOffset;
 
         GameObject go = Instantiate(_bulletPrefab, spawnPos, Quaternion.identity);
+        go.GetComponent<BossBullet>()?.setup(_healthPlayer);
         go.GetComponent<BossBullet>()?.Launch(dir);
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.G))
-            DoSpinGapAttack();
-    }
 }

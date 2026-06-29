@@ -11,6 +11,7 @@ public class FinalBossController : MonoBehaviour
     [SerializeField] private BossSpawnPattern _spawnPattern;
     [SerializeField] private BossOrbitAttack _orbitAttack;
     [SerializeField] private MortarBossHealth _health;
+    [SerializeField] private GameObject _cannons;
 
     [Header("Cooldowns")]
     [SerializeField] private float _cooldownMax = 3f;    // cooldown al 100% HP

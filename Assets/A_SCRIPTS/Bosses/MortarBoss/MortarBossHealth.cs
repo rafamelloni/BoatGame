@@ -57,19 +57,6 @@ public class MortarBossHealth : MonoBehaviour, IDamageable, IBoss
                 if (p != null) p.SetActive(false);
     }
 
-    private void OnEnable()
-    {
-        _enemySpawner.StopSpawning();
-        _islandSpawner.ResetIslands();
-    }
-
-    private void OnDisable()
-    {
-        _enemySpawner.StartSpawning();
-        _islandSpawner.StartSpawning();
-
-    }
-
     public void TakeDamage(float amount)
     {
         if (IsDead) return;

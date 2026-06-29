@@ -4,6 +4,7 @@ public class BossBullet : MonoBehaviour
 {
     [SerializeField] private float speed = 15f;
     [SerializeField] private float lifetime = 5f;
+    [SerializeField] RT_PlayerHealth _healthPlayer;
 
     private Vector3 _direction;
 
@@ -17,5 +18,17 @@ public class BossBullet : MonoBehaviour
     private void Update()
     {
         transform.position += _direction * speed * Time.deltaTime;
+    }
+
+    public void setup(RT_PlayerHealth healthPlayer)
+    {
+        _healthPlayer = healthPlayer;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.gameObject.CompareTag("Player")) return;
+
+        _healthPlayer.TakeDamage(20f);
     }
 }
