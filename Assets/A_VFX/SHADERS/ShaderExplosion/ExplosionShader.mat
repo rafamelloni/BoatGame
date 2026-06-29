@@ -22,54 +22,24 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: ExplosionShader
   m_Shader: {fileID: -6465566751694194690, guid: 459c7684bacfeda478fe0b5c13d0010d, type: 3}
-  m_Parent: {fileID: 0}
+  m_Parent: {fileID: 2100000, guid: 659a1fff3cbc610489e70b4acef58b2f, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3050
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs:
-    - _SampleTexture2D_1fd43b999cd34291830e34abd0d38a42_Texture_1_Texture2D:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _SampleTexture2D_821168e4df6e42448b906f53ecd9a079_Texture_1_Texture2D:
-        m_Texture: {fileID: 2800000, guid: b2b8559c4b2c2aa41afd4541a60aeffd, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _SampleTexture2D_e4c95b0b6a4a428395932c7914ff375f_Texture_1_Texture2D:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_Lightmaps:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_LightmapsInd:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - unity_ShadowMasks:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+    m_TexEnvs: []
     m_Ints: []
-    m_Floats:
-    - _Dissolve1: 0.141
-    - _Dissolve2: 0.218
-    - _QueueControl: 0
-    - _QueueOffset: 50
-    - _Smoothstep: 0
+    m_Floats: []
     m_Colors:
-    - _DarkColor: {r: 0.41509432, g: 0.41509432, b: 0.41509432, a: 1}
     - _FireColor: {r: 11.984313, g: 3.2149687, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

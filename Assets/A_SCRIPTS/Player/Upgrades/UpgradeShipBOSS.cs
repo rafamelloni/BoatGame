@@ -69,6 +69,7 @@ public class UpgradeShipBOSS : MonoBehaviour
             yield return null;
         }
         _particulasPuff.SetActive(true);
+        StartCoroutine(resetP());
         _abilityController.ShipUpgraded();
         _barcoViejoTest.SetActive(false);
 
@@ -101,5 +102,12 @@ public class UpgradeShipBOSS : MonoBehaviour
         _barcoNew.SetActive(false);
         _particulasPuff.SetActive(false);
         _canvasShipUpgrades.SetActive(false);
+    }
+
+    IEnumerator resetP()
+    {
+        yield return new WaitForSeconds(2f);
+        _particulasPuff.SetActive(false);
+
     }
 }

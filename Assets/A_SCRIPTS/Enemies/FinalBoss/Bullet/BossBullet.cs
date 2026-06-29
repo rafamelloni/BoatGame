@@ -5,6 +5,7 @@ public class BossBullet : MonoBehaviour
     [SerializeField] private float speed = 15f;
     [SerializeField] private float lifetime = 5f;
     [SerializeField] RT_PlayerHealth _healthPlayer;
+    [SerializeField] GameObject explosionVFX;
 
     private Vector3 _direction;
 
@@ -28,7 +29,11 @@ public class BossBullet : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!other.gameObject.CompareTag("Player")) return;
+        Vector3 explosionPoint = other.ClosestPoint(transform.position);
 
         _healthPlayer.TakeDamage(20f);
+        ParticlePool.Instance.GetParticle(explosionVFX, explosionPoint);
+
+        Destroy(gameObject);
     }
-}
+} 

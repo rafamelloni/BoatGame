@@ -79,6 +79,7 @@ public class LastStand : MonoBehaviour
 
         foreach (var e in enemies)
         {
+            if (e.gameObject.CompareTag("DashBoss")) continue; 
             EnemyHealth health = e.GetComponent<EnemyHealth>();
 
             if (health != null)

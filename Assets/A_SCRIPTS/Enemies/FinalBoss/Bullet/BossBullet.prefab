@@ -129,6 +129,7 @@ MonoBehaviour:
   speed: 10
   lifetime: 13
   _healthPlayer: {fileID: 0}
+  explosionVFX: {fileID: 358855861909473628, guid: 4cc7893aa04f3464cbd954b30290b57a, type: 3}
 --- !u!96 &2224255544684577084
 TrailRenderer:
   serializedVersion: 4

@@ -38,9 +38,8 @@ public class UpgradeDebug : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R)) ResetUpgrades();
         if (Input.GetKeyDown(KeyCode.F1)) _bossSequenceManager.ActivateBoss(_mortarBossIndex);
         if (Input.GetKeyDown(KeyCode.F2)) _bossSequenceManager.ActivateBoss(_dashBossIndex);
-        if (Input.GetKeyDown(KeyCode.F5)) _bossSequenceManager.ActivateBoss(_finalBossIndex);
-        if (Input.GetKeyDown(KeyCode.F3)) _bossSequenceManager.ResetAll();
-        if (Input.GetKeyDown(KeyCode.I)) ToggleInfiniteHealth();
+        if (Input.GetKeyDown(KeyCode.F3)) _bossSequenceManager.ActivateBoss(_finalBossIndex);
+        if (Input.GetKeyDown(KeyCode.F5)) _bossSequenceManager.ResetAll();
         if (Input.GetKeyDown(KeyCode.F9)) ReloadScene();
     }
 
@@ -63,16 +62,6 @@ public class UpgradeDebug : MonoBehaviour
         Debug.Log("[Debug] Todas las upgrades reseteadas");
     }
 
-    private void ToggleInfiniteHealth()
-    {
-        if (_playerHealth == null)
-        {
-            Debug.LogWarning("[Debug] PlayerHealth no asignado.");
-            return;
-        }
-        _infiniteHealth = !_infiniteHealth;
-        Debug.Log($"[Debug] Vida infinita: {(_infiniteHealth ? "ON" : "OFF")}");
-    }
 
     private void ReloadScene()
     {
@@ -84,14 +73,13 @@ public class UpgradeDebug : MonoBehaviour
     {
         if (!_showDebug) return;
 
-        GUI.Box(new Rect(10, 10, 280, 200), "DEBUG - Controles");
+        GUI.Box(new Rect(10, 10, 280, 210), "DEBUG - Controles");
         GUI.Label(new Rect(20, 35, 260, 20), "1-6, 8  → Maxear upgrade path");
         GUI.Label(new Rect(20, 55, 260, 20), "R       → Reset upgrades");
         GUI.Label(new Rect(20, 75, 260, 20), "F1      → Spawn Mortar Boss");
         GUI.Label(new Rect(20, 95, 260, 20), "F2      → Spawn Dash Boss");
-        GUI.Label(new Rect(20, 115, 260, 20), "F5      → Spawn Final Boss");
-        GUI.Label(new Rect(20, 135, 260, 20), "F3      → Reset Bosses");
-        GUI.Label(new Rect(20, 155, 260, 20), "I       → Vida infinita toggle");
+        GUI.Label(new Rect(20, 115, 260, 20), "F3     → Spawn Final Boss");
+        GUI.Label(new Rect(20, 135, 260, 20), "F5      → Reset Bosses");
         GUI.Label(new Rect(20, 175, 260, 20), "F9      → Reload escena");
         GUI.Label(new Rect(20, 195, 260, 20), "Tab     → Toggle este menu");
     }
