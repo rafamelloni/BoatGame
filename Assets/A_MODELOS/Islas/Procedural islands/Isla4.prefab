@@ -556,9 +556,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IslandManager
   _totalDefenses: 0
   _canvasExample: {fileID: 0}
-  _sinkDepth: 5
+  _sinkDepth: 9
   _shakeIntensity: 0.1
-  _tiempoDesactivarIslas: 15
+  _tiempoDesactivarIslas: 10
 --- !u!135 &-128659617295121785
 SphereCollider:
   m_ObjectHideFlags: 0
