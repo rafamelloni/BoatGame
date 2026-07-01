@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class LifeBox : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class LifeBox : MonoBehaviour
     [SerializeField] float _maxDistance = 500f;
     [SerializeField] float _minScale = 0.3f;
     [SerializeField] float _maxScale = 1f;
+
+    [Header("Pickup Shrink")]
+    [SerializeField] float _shrinkDuration = 0.15f;
 
     RectTransform _indicator;
     RectTransform _indicatorImage;
@@ -110,6 +114,23 @@ public class LifeBox : MonoBehaviour
         }
         _indicatorActive = false;
 
+        StartCoroutine(ShrinkAndDestroy());
+    }
+
+    private IEnumerator ShrinkAndDestroy()
+    {
+        Vector3 startScale = transform.localScale;
+        float elapsed = 0f;
+
+        while (elapsed < _shrinkDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / _shrinkDuration);
+            transform.localScale = Vector3.Lerp(startScale, Vector3.zero, t);
+            yield return null;
+        }
+
+        transform.localScale = Vector3.zero;
         Destroy(gameObject);
     }
 
@@ -123,4 +144,7 @@ public class LifeBox : MonoBehaviour
         _indicatorActive = false;
         Destroy(gameObject);
     }
+
+
+
 }
