@@ -5,6 +5,7 @@ public class LifeBox : MonoBehaviour
 {
     
     [SerializeField] private ParticleSystem _lifeParticlesPrefab;
+    [SerializeField] private ParticleSystem WoodParticles;
     [SerializeField] private float _amount = 25f;
 
     [Header("Indicator")]
@@ -98,6 +99,18 @@ public class LifeBox : MonoBehaviour
         {
             ParticleSystem particles = Instantiate(
                 _lifeParticlesPrefab,
+                other.transform.position,
+                Quaternion.identity
+            );
+            particles.Play();
+            Destroy(particles.gameObject,
+                particles.main.duration + particles.main.startLifetime.constantMax);
+        }
+       
+        if (WoodParticles != null)
+        {
+            ParticleSystem particles = Instantiate(
+                WoodParticles,
                 other.transform.position,
                 Quaternion.identity
             );

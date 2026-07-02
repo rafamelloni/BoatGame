@@ -126,8 +126,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1fac1d2c476de74ea7e0650d793d6b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LifeBox
-  _particleSystem: {fileID: 0}
   _lifeParticlesPrefab: {fileID: 5626490166564971900, guid: 4c465819c6b5349468fda53e1f24e244, type: 3}
+  WoodParticles: {fileID: 1178841164698851949, guid: bf734a92b8bf4e041a2ac01e5c9b65bd, type: 3}
   _amount: 25
   _edgePadding: 60
   _hideDistance: 20
@@ -135,6 +135,7 @@ MonoBehaviour:
   _maxDistance: 500
   _minScale: 0.3
   _maxScale: 1
+  _shrinkDuration: 0.15
 --- !u!1001 &7538975438665802337
 PrefabInstance:
   m_ObjectHideFlags: 0

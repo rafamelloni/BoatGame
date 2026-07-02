@@ -3,7 +3,9 @@ using UnityEngine;
 public class PauseManager : MonoBehaviour
 {
     [SerializeField] private GameObject _pausePanel;
+    [SerializeField] private GameObject Options;
     [SerializeField] private GameObject _ExitPanel;
+    [SerializeField] private GameObject panelImage;
     [SerializeField] private GameObject[] _objectsToDeactivate;
 
     private bool _paused = false;
@@ -20,6 +22,8 @@ public class PauseManager : MonoBehaviour
         Time.timeScale = _paused ? 0f : 1f;
 
         _pausePanel.SetActive(_paused);
+        Options.SetActive(_paused);
+        panelImage.SetActive(_paused);
         _ExitPanel.SetActive(_paused);
 
         foreach (var go in _objectsToDeactivate) 
