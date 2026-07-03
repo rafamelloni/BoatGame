@@ -82,12 +82,17 @@ public class ChestAnimation : MonoBehaviour
 
     private IEnumerator DoJump()
     {
-        yield return StartCoroutine(Scale(_originalScale, Vector3.Scale(_originalScale, new Vector3(1.2f, 0.8f, 1.2f)), 0.08f));
+        Vector3 squashScale = Vector3.Scale(_originalScale, new Vector3(1.2f, 0.8f, 1.2f));
+        Vector3 stretchScale = Vector3.Scale(_originalScale, new Vector3(0.9f, 1.2f, 0.9f));
+
+        // Squash inicial (suave)
+        yield return StartCoroutine(Scale(_originalScale, squashScale, 0.08f));
 
         float t = 0f;
         float randomRotZ = Random.Range(-_maxRotAngle, _maxRotAngle);
         float randomRotX = Random.Range(-_maxRotAngle * 0.5f, _maxRotAngle * 0.5f);
-        transform.localScale = Vector3.Scale(_originalScale, new Vector3(0.9f, 1.2f, 0.9f));
+
+        Vector3 scaleAtJumpStart = transform.localScale;
 
         while (t < _jumpDuration)
         {
@@ -95,18 +100,29 @@ public class ChestAnimation : MonoBehaviour
             float progress = t / _jumpDuration;
             float height = Mathf.Sin(progress * Mathf.PI) * _jumpHeight;
             transform.localPosition = _originalPos + Vector3.up * height;
+
             float rotProgress = Mathf.Sin(progress * Mathf.PI);
             transform.localRotation = _originalRot * Quaternion.Euler(
                 rotProgress * randomRotX,
                 0f,
                 rotProgress * randomRotZ
             );
+
+            // Escala interpolada suavemente: squash -> stretch -> original,
+            // siguiendo la misma curva temporal que la altura del salto
+            float scaleT = Mathf.SmoothStep(0f, 1f, progress);
+            Vector3 targetScale = progress < 0.5f
+                ? Vector3.Lerp(scaleAtJumpStart, stretchScale, scaleT * 2f)
+                : Vector3.Lerp(stretchScale, _originalScale, (scaleT - 0.5f) * 2f);
+
+            transform.localScale = targetScale;
+
             yield return null;
         }
 
         transform.localPosition = _originalPos;
         transform.localRotation = _originalRot;
-        yield return StartCoroutine(Scale(Vector3.Scale(_originalScale, new Vector3(1.2f, 0.8f, 1.2f)), _originalScale, 0.1f));
+        transform.localScale = _originalScale;
     }
 
     private IEnumerator DoOpen(Transform lid, float duration)
@@ -132,7 +148,8 @@ public class ChestAnimation : MonoBehaviour
         while (t < duration)
         {
             t += Time.deltaTime;
-            transform.localScale = Vector3.Lerp(from, to, t / duration);
+            float eased = Mathf.SmoothStep(0f, 1f, t / duration);
+            transform.localScale = Vector3.Lerp(from, to, eased);
             yield return null;
         }
         transform.localScale = to;
