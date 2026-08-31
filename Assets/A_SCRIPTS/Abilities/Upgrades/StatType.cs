@@ -14,4 +14,7 @@ public enum StatType
     HealthRegen,
     CrossbowDamage,
     CrossbowCooldown,
+    TimeBetweenShots,
+    ShotsPerBurst,
+    ExplosionRadius,
 }

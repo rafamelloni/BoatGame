@@ -15,6 +15,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
     CannonRecoil _recoilRight;
     private RT_PlayerUpgrades _playerUpgrades;
     private PlayerUpgrades _islandUpgrades;
+    private int _shotsSinceCharge = 0;
 
     public event Action<float> OnCooldownStarted;
     public float CooldownDuration => _rtData.cooldown;
@@ -22,7 +23,6 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
     public bool IsOnCooldown => Time.time < nextFireTime;
     public bool IsUnlocked { get; private set; } = false;
     public void SetUnlocked(bool unlocked) => IsUnlocked = unlocked;
-    public RT_CannonData RuntimeData => _rtData;
 
     public CannonStrategy(SO_CannonData data, ShipHardpoints hardpoints, CoroutineRunner runner,
         BulletFactory cannonBullet, followPlayer camera, CannonRecoil recoilR, CannonRecoil recoilL, RT_PlayerUpgrades playerUpgrades, PlayerUpgrades islandUpgrades)
@@ -54,7 +54,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         Vector3 toTarget = targetPoint - shipPos;
         Vector3 mirroredTarget = shipPos + Vector3.Reflect(toTarget, hardpoints.transform.right);
 
-        // Detectar de qu� lado est� el target
+        // Detectar de qué lado está el target
         float side = Vector3.Dot(toTarget, hardpoints.transform.right);
 
         Vector3 rightTarget = side >= 0f ? targetPoint : mirroredTarget;
@@ -62,9 +62,11 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
 
         for (int i = 0; i < _rtData.shotsPerBurst; i++)
         {
+            bool isCharged = DetermineIfCharged();
+
             foreach (Transform p in hardpoints.rightShootPoints)
             {
-                FireFromPoint(p, 1f, rightTarget);
+                FireFromPoint(p, 1f, rightTarget, isCharged);
                 _camera.ApplyCannonImpact();
                 _recoilRight.Fire(_rtData.timeBetweenShots);
                 _recoilLeft.Fire(_rtData.timeBetweenShots);
@@ -72,12 +74,29 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
             }
             foreach (Transform p in hardpoints.leftShootPoints)
             {
-                FireFromPoint(p, -1f, leftTarget);
+                FireFromPoint(p, -1f, leftTarget, isCharged);
                 hardpoints._cannonSmokeShootL.Play();
             }
             if (i < _rtData.shotsPerBurst - 1)
                 yield return new WaitForSeconds(_rtData.timeBetweenShots);
         }
+    }
+
+    // Decide UNA vez por ráfaga si este disparo es el cargado - así los dos
+    // cañones (derecho e izquierdo) tiran la bala grande en el mismo volley,
+    // en vez de que el contador se reparta entre ambos por separado.
+    private bool DetermineIfCharged()
+    {
+        bool hasChargedShot = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.ChargedShot);
+        if (!hasChargedShot || _rtData.chargedShotInterval <= 0) return false;
+
+        _shotsSinceCharge++;
+        if (_shotsSinceCharge >= _rtData.chargedShotInterval)
+        {
+            _shotsSinceCharge = 0;
+            return true;
+        }
+        return false;
     }
 
     private Vector3 GetMouseWorldPoint()
@@ -88,7 +107,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
             return ray.GetPoint(distance);
         return Vector3.zero;
     }
-    private void FireFromPoint(Transform point, float side, Vector3 targetPoint)
+    private void FireFromPoint(Transform point, float side, Vector3 targetPoint, bool isCharged)
     {
         var b = _cannonBullet.Create();
         var cb = b.GetComponent<CannonBullet>();
@@ -96,11 +115,11 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         {
             cb.OnSplit -= SpawnSplitBullet;
             cb.OnSplit += SpawnSplitBullet;
-            cb.Setup(point, _rtData, side, _playerUpgrades, _islandUpgrades, targetPoint);
+            cb.Setup(point, _rtData, side, _playerUpgrades, _islandUpgrades, targetPoint, isCharged);
         }
     }
 
-    private void SpawnSplitBullet(Vector3 position, Vector3 direction, float damageMultiplier)
+    private void SpawnSplitBullet(Vector3 position, Vector3 direction, float damageMultiplier, bool isCharged)
     {
         var b = _cannonBullet.Create();
         var cb = b.GetComponent<CannonBullet>();
@@ -108,7 +127,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         {
             float originalDamage = _rtData.damage;
             _rtData.damage *= damageMultiplier;
-            cb.SetupSplit(position, direction, _rtData, _playerUpgrades);
+            cb.SetupSplit(position, direction, _rtData, _playerUpgrades, isCharged);
             _rtData.damage = originalDamage;
         }
     }
@@ -119,6 +138,8 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         _rtData.cooldown = _baseData.cooldown;
         _rtData.timeBetweenShots = _baseData.timeBetweenShots;
         _rtData.shotsPerBurst = _baseData.shotsPerBurst;
+        _rtData.explosionRadius = _baseData.explosionRadius;
+        _shotsSinceCharge = 0;
         nextFireTime = 0f;
     }
 }

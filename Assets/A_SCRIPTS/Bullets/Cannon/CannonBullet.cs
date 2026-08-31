@@ -11,8 +11,10 @@ public class CannonBullet : BulletsBase
     float _side;
     private CannonBulletImpactIndicator _impactIndicator;
 
+    [Header("Visual")]
+    [SerializeField] private Transform _visualTransform;
+
     [Header("Explosion")]
-    [SerializeField] private float _explosionRadius = 2f;
     [SerializeField] private LayerMask _damageLayers;
     [SerializeField] Collider _collider;
     [SerializeField] private LayerMask _enemyLayers;
@@ -31,11 +33,13 @@ public class CannonBullet : BulletsBase
     public bool debugSplit = false;
 
     private bool _isSplitBullet = false;
+    private bool _isCharged = false;
     private RT_PlayerUpgrades _playerUpgrades;
     private PlayerUpgrades _islandUpgrades;
     private Collider _ignoredCollider;
+    private Vector3 _visualBaseScale = Vector3.one;
 
-    public event Action<Vector3, Vector3, float> OnSplit;
+    public event Action<Vector3, Vector3, float, bool> OnSplit;
 
     private Vector3 _targetPoint;
 
@@ -44,7 +48,8 @@ public class CannonBullet : BulletsBase
         _rb = GetComponent<Rigidbody>();
         _trail = GetComponent<TrailRenderer>();
         _impactIndicator = GetComponent<CannonBulletImpactIndicator>();
-        transform.localScale = Vector3.one;
+        if (_visualTransform != null)
+            _visualBaseScale = _visualTransform.localScale;
     }
 
     public override void TurnOff()
@@ -60,11 +65,13 @@ public class CannonBullet : BulletsBase
         _ricochetCount = 0;
         _ignoredCollider = null;
         _isSplitBullet = false;
+        _isCharged = false;
+        if (_visualTransform != null) _visualTransform.localScale = _visualBaseScale;
         OnSplit = null;
         gameObject.SetActive(false);
     }
 
-    public void Setup(Transform point, RT_CannonData rtData, float side, RT_PlayerUpgrades playerUpgrades, PlayerUpgrades islandUpgrades, Vector3 targetPoint)
+    public void Setup(Transform point, RT_CannonData rtData, float side, RT_PlayerUpgrades playerUpgrades, PlayerUpgrades islandUpgrades, Vector3 targetPoint, bool isCharged = false)
     {
         _pointShoot = point;
         _rtData = rtData;
@@ -72,15 +79,19 @@ public class CannonBullet : BulletsBase
         _playerUpgrades = playerUpgrades;
         _islandUpgrades = islandUpgrades;
         _isSplitBullet = false;
+        _isCharged = isCharged;
         _targetPoint = targetPoint;
         Launch();
     }
 
-    public void SetupSplit(Vector3 position, Vector3 direction, RT_CannonData rtData, RT_PlayerUpgrades playerUpgrades)
+    public void SetupSplit(Vector3 position, Vector3 direction, RT_CannonData rtData, RT_PlayerUpgrades playerUpgrades, bool isCharged = false)
     {
         _rtData = rtData;
         _playerUpgrades = playerUpgrades;
         _isSplitBullet = true;
+        _isCharged = isCharged;
+        if (_visualTransform != null)
+            _visualTransform.localScale = _isCharged ? _visualBaseScale * _rtData.chargedBulletScale : _visualBaseScale;
 
         transform.position = position;
         transform.rotation = Quaternion.LookRotation(direction);
@@ -98,6 +109,8 @@ public class CannonBullet : BulletsBase
     {
         transform.position = _pointShoot.position;
         transform.rotation = _pointShoot.rotation;
+        if (_visualTransform != null)
+            _visualTransform.localScale = _isCharged ? _visualBaseScale * _rtData.chargedBulletScale : _visualBaseScale;
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
         _rb.position = _pointShoot.position;
@@ -158,6 +171,7 @@ public class CannonBullet : BulletsBase
         currentDir.Normalize();
 
         Vector3 splitPos = transform.position;
+        bool wasCharged = _isCharged;
         var cachedOnSplit = OnSplit;
         OnSplit = null;
         Pool.Return(this);
@@ -166,7 +180,7 @@ public class CannonBullet : BulletsBase
         foreach (float angle in angles)
         {
             Vector3 splitDir = Quaternion.Euler(0f, angle, 0f) * currentDir;
-            cachedOnSplit?.Invoke(splitPos, splitDir, _splitDamageMultiplier);
+            cachedOnSplit?.Invoke(splitPos, splitDir, _splitDamageMultiplier, wasCharged);
         }
     }
 
@@ -188,7 +202,7 @@ public class CannonBullet : BulletsBase
             }
 
             Explode(explosionPoint);
-            ParticlePool.Instance.GetParticle(_rtData.explosionVFX, explosionPoint);
+            SpawnExplosionVFX(explosionPoint);
             Pool.Return(this);
         }
 
@@ -217,7 +231,7 @@ public class CannonBullet : BulletsBase
         }
 
         Explode(hitCollider.ClosestPoint(transform.position));
-        ParticlePool.Instance.GetParticle(_rtData.explosionVFX, hitCollider.ClosestPoint(transform.position));
+        SpawnExplosionVFX(hitCollider.ClosestPoint(transform.position));
 
         if (bestTarget != null)
         {
@@ -235,13 +249,22 @@ public class CannonBullet : BulletsBase
         }
     }
 
+    private void SpawnExplosionVFX(Vector3 position)
+    {
+        GameObject vfx = ParticlePool.Instance.GetParticle(_rtData.explosionVFX, position);
+        if (vfx != null)
+            vfx.transform.localScale = _isCharged ? Vector3.one * _rtData.chargedVfxScale : Vector3.one;
+    }
+
     private void Explode(Vector3 center)
     {
         float baseDamage = _rtData.damage;
+        if (_isCharged) baseDamage *= _rtData.chargedDamageMultiplier;
         bool isCrit = _islandUpgrades != null && UnityEngine.Random.value < _islandUpgrades.Stats.critChance;
         float damage = isCrit ? baseDamage * _islandUpgrades.Stats.critMultiplier : baseDamage;
 
-        Collider[] hits = Physics.OverlapSphere(center, _explosionRadius, _damageLayers);
+        float radius = _isCharged ? _rtData.explosionRadius * _rtData.chargedExplosionMultiplier : _rtData.explosionRadius;
+        Collider[] hits = Physics.OverlapSphere(center, radius, _damageLayers);
         for (int i = 0; i < hits.Length; i++)
         {
             IDamageable damageable = hits[i].GetComponentInParent<IDamageable>();

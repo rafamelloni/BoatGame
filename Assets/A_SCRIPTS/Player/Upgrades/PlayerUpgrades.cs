@@ -29,7 +29,7 @@ public class PlayerUpgrades : MonoBehaviour
     public void Setup(RT_PlayerStats statsPlayer)
     {
         _rtData = statsPlayer;
-        _cannonData = _abilityController.CannonAbility.RuntimeData;
+        _cannonData = _abilityController.CannonAbility._rtData;
         _bladesData = _abilityController.BladesAbility._rtData;
         _molotovData = _abilityController.MolotovAbility._rtData;
     }

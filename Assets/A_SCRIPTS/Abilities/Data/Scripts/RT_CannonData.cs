@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RT_CannonData 
+public class RT_CannonData
 {
 
     public GameObject bulletPrefab;
@@ -12,6 +12,12 @@ public class RT_CannonData
     public float damage;
     public float dropDelay;
     public float launchSpeed;
+    public float explosionRadius;
+    public int chargedShotInterval;
+    public float chargedBulletScale;
+    public float chargedDamageMultiplier;
+    public float chargedExplosionMultiplier;
+    public float chargedVfxScale;
 
     public GameObject waterSplashVFX;
     public GameObject explosionVFX;
@@ -25,6 +31,12 @@ public class RT_CannonData
         cooldown = so.cooldown;
         damage = so.damage;
         dropDelay = so.dropDelay;
+        explosionRadius = so.explosionRadius;
+        chargedShotInterval = so.chargedShotInterval;
+        chargedBulletScale = so.chargedBulletScale;
+        chargedDamageMultiplier = so.chargedDamageMultiplier;
+        chargedExplosionMultiplier = so.chargedExplosionMultiplier;
+        chargedVfxScale = so.chargedVfxScale;
 
         waterSplashVFX = so.waterSplash;
         explosionVFX = so.explosionVfx;

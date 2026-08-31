@@ -20,6 +20,7 @@ public class UpgradeSystem : MonoBehaviour
     [SerializeField] private Sprite spriteBladesBurst;
     [SerializeField] private Sprite spriteUnlockCrossbow;
     [SerializeField] private Sprite spriteCrossbowBurst;
+    [SerializeField] private Sprite spriteChargedShot;
 
     [SerializeField] private DashMovement dashMovement;
     [SerializeField] private LastStand lastStand;
@@ -84,6 +85,15 @@ public class UpgradeSystem : MonoBehaviour
             case StatType.BladeSpeed:
                 abilityController.BladesAbility._rtData.orbitSpeed += step.statValue;
                 break;
+            case StatType.TimeBetweenShots:
+                abilityController.CannonAbility._rtData.timeBetweenShots *= 1f - step.statValue / 100f;
+                break;
+            case StatType.ShotsPerBurst:
+                abilityController.CannonAbility._rtData.shotsPerBurst += Mathf.RoundToInt(step.statValue);
+                break;
+            case StatType.ExplosionRadius:
+                abilityController.CannonAbility._rtData.explosionRadius *= 1f + step.statValue / 100f;
+                break;
             case StatType.None:
                 break;
         }
@@ -100,7 +110,7 @@ public class UpgradeSystem : MonoBehaviour
                 abilityHUD.UnlockNext(spriteRicochet);
                 break;
             case SpecialAbilityType.DoubleShot:
-                
+
                 abilityHUD.UnlockNext(spriteDoubleShot);
                 break;
             case SpecialAbilityType.Dashes:
@@ -124,7 +134,7 @@ public class UpgradeSystem : MonoBehaviour
                 abilityHUD.UnlockNext(spriteUnlockCrossbow);
                 break;
             case SpecialAbilityType.CrossbowBurst:
-               // abilityHUD.UnlockNext(spriteCrossbowBurst);
+                // abilityHUD.UnlockNext(spriteCrossbowBurst);
                 break;
             case SpecialAbilityType.UnlockBlades:
                 abilityController.BladesAvailable();
@@ -134,7 +144,10 @@ public class UpgradeSystem : MonoBehaviour
                 break;
             case SpecialAbilityType.BladesBurst:
                 abilityHUD.AddProgressToIndex(_bladesSlotIndex, () => abilityController.BladesAbility.BurstProgress);
-                
+
+                break;
+            case SpecialAbilityType.ChargedShot:
+                abilityHUD.UnlockNext(spriteChargedShot);
                 break;
         }
     }

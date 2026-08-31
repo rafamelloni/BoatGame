@@ -13,6 +13,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public event Action<float> OnDamage; // para UI o feedback
     private HitFlash _hitFlash;
     public static event Action<Vector3> OnAnyEnemyDied;
+    public static event Action<Vector3, float> OnAnyEnemyDamaged; // posicion + daño real, para damage numbers
 
     public bool IsDying { get; private set; }
 
@@ -36,6 +37,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         
         _rtData.currentHealth -= damage;
         OnDamage?.Invoke(_rtData.currentHealth);
+        OnAnyEnemyDamaged?.Invoke(transform.position, damage);
         _hitFlash?.Flash();
         if (_rtData.currentHealth <= 0)
         {

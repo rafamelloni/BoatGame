@@ -17,14 +17,22 @@ public class SO_CannonData : ScriptableObject
     [Header("Cooldown")]
     public float cooldown = 1.5f;
 
+    [Header("Explosion")]
+    public float explosionRadius = 2f;
+
+    [Header("Bala Cargada (ChargedShot)")]
+    public int chargedShotInterval = 6;
+    public float chargedBulletScale = 2.2f;
+    public float chargedDamageMultiplier = 2f;
+    public float chargedExplosionMultiplier = 1.5f;
+    public float chargedVfxScale = 1.8f;
+
     [Header("VFX BULLET")]
     public GameObject explosionVfx;
-    public  GameObject waterSplash;
+    public GameObject waterSplash;
     public TrailRenderer trasilRederer;
 
     [Header("Parábola")]
     public float launchSpeed = 25f;
-
-
 
 }
