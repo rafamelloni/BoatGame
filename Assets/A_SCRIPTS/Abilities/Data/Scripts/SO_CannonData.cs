@@ -27,6 +27,19 @@ public class SO_CannonData : ScriptableObject
     public float chargedExplosionMultiplier = 1.5f;
     public float chargedVfxScale = 1.8f;
 
+    [Header("Munición Incendiaria (BurnShot)")]
+    public float burnDamagePerTick = 5f;
+    public float burnTickInterval = 0.5f;
+    public float burnDuration = 3f;
+    public GameObject burnVfxPrefab;
+    public Vector3 burnVfxOffset = new Vector3(0f, 1f, 0f);
+
+    [Header("Fuego en el Piso (GroundFire)")]
+    public GameObject groundFireZonePrefab;
+    public float groundFireRadius = 3f;
+    public float groundFireDuration = 4f;
+    public float groundFireDamagePerSecond = 10f;
+
     [Header("VFX BULLET")]
     public GameObject explosionVfx;
     public GameObject waterSplash;

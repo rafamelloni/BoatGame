@@ -11,5 +11,7 @@ public enum SpecialAbilityType
     BladesBurst,
     UnlockCrossbow,
     CrossbowBurst,
-    ChargedShot
+    ChargedShot,
+    BurnShot,
+    GroundFire
 }

@@ -44,24 +44,27 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         if (Time.time < nextFireTime) return;
         nextFireTime = Time.time + _rtData.cooldown;
         OnCooldownStarted?.Invoke(_rtData.cooldown);
-        Vector3 targetPoint = GetMouseWorldPoint();
-        runner.StartCoroutine(FireBurst(targetPoint));
+        runner.StartCoroutine(FireBurst());
     }
 
-    private IEnumerator FireBurst(Vector3 targetPoint)
+    private IEnumerator FireBurst()
     {
-        Vector3 shipPos = hardpoints.transform.position;
-        Vector3 toTarget = targetPoint - shipPos;
-        Vector3 mirroredTarget = shipPos + Vector3.Reflect(toTarget, hardpoints.transform.right);
-
-        // Detectar de qué lado está el target
-        float side = Vector3.Dot(toTarget, hardpoints.transform.right);
-
-        Vector3 rightTarget = side >= 0f ? targetPoint : mirroredTarget;
-        Vector3 leftTarget = side >= 0f ? mirroredTarget : targetPoint;
-
         for (int i = 0; i < _rtData.shotsPerBurst; i++)
         {
+            // Recalculado en CADA disparo de la ráfaga, así cada bala sale
+            // hacia donde está el mouse en ese instante y no hacia el punto
+            // original del click que arrancó la ráfaga.
+            Vector3 targetPoint = GetMouseWorldPoint();
+            Vector3 shipPos = hardpoints.transform.position;
+            Vector3 toTarget = targetPoint - shipPos;
+            Vector3 mirroredTarget = shipPos + Vector3.Reflect(toTarget, hardpoints.transform.right);
+
+            // Detectar de qué lado está el target
+            float side = Vector3.Dot(toTarget, hardpoints.transform.right);
+
+            Vector3 rightTarget = side >= 0f ? targetPoint : mirroredTarget;
+            Vector3 leftTarget = side >= 0f ? mirroredTarget : targetPoint;
+
             bool isCharged = DetermineIfCharged();
 
             foreach (Transform p in hardpoints.rightShootPoints)
@@ -139,6 +142,8 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         _rtData.timeBetweenShots = _baseData.timeBetweenShots;
         _rtData.shotsPerBurst = _baseData.shotsPerBurst;
         _rtData.explosionRadius = _baseData.explosionRadius;
+        _rtData.burnDamagePerTick = _baseData.burnDamagePerTick;
+        _rtData.burnDuration = _baseData.burnDuration;
         _shotsSinceCharge = 0;
         nextFireTime = 0f;
     }

@@ -264,13 +264,48 @@ public class CannonBullet : BulletsBase
         float damage = isCrit ? baseDamage * _islandUpgrades.Stats.critMultiplier : baseDamage;
 
         float radius = _isCharged ? _rtData.explosionRadius * _rtData.chargedExplosionMultiplier : _rtData.explosionRadius;
+        bool hasBurn = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.BurnShot);
+
         Collider[] hits = Physics.OverlapSphere(center, radius, _damageLayers);
         for (int i = 0; i < hits.Length; i++)
         {
             IDamageable damageable = hits[i].GetComponentInParent<IDamageable>();
             if (damageable != null)
+            {
                 damageable.TakeDamage(damage); // <-- damage, no _rtData.damage
+                if (hasBurn)
+                    ApplyBurn(damageable);
+            }
         }
+
+        bool hasGroundFire = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.GroundFire);
+        if (hasGroundFire)
+            SpawnGroundFire(center);
+    }
+
+    private void ApplyBurn(IDamageable damageable)
+    {
+        Component targetComponent = damageable as Component;
+        if (targetComponent == null) return;
+
+        // Si el mismo golpe que aplicó el burn ya mató/desactivó al enemigo
+        // (pool, animación de muerte, etc.), no tiene sentido prenderlo fuego.
+        if (!targetComponent.gameObject.activeInHierarchy) return;
+
+        BurnStatus burn = targetComponent.GetComponent<BurnStatus>();
+        if (burn == null)
+            burn = targetComponent.gameObject.AddComponent<BurnStatus>();
+
+        burn.ApplyBurn(damageable, _rtData.burnDamagePerTick, _rtData.burnTickInterval, _rtData.burnDuration, _rtData.burnVfxPrefab, _rtData.burnVfxOffset);
+    }
+
+    private void SpawnGroundFire(Vector3 center)
+    {
+        if (_rtData.groundFireZonePrefab == null) return;
+
+        FireZone fireZone = Instantiate(_rtData.groundFireZonePrefab, center, Quaternion.identity).GetComponent<FireZone>();
+        if (fireZone != null)
+            fireZone.Init(_rtData.groundFireDuration, _rtData.groundFireDamagePerSecond, _rtData.groundFireRadius, _damageLayers);
     }
 
     private IEnumerator ActivateColliderBulelt()

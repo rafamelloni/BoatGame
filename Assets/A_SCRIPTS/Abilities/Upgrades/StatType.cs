@@ -17,4 +17,6 @@ public enum StatType
     TimeBetweenShots,
     ShotsPerBurst,
     ExplosionRadius,
+    BurnDamage,
+    BurnDuration,
 }

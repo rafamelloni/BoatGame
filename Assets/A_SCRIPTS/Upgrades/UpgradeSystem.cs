@@ -21,6 +21,8 @@ public class UpgradeSystem : MonoBehaviour
     [SerializeField] private Sprite spriteUnlockCrossbow;
     [SerializeField] private Sprite spriteCrossbowBurst;
     [SerializeField] private Sprite spriteChargedShot;
+    [SerializeField] private Sprite spriteBurnShot;
+    [SerializeField] private Sprite spriteGroundFire;
 
     [SerializeField] private DashMovement dashMovement;
     [SerializeField] private LastStand lastStand;
@@ -94,6 +96,12 @@ public class UpgradeSystem : MonoBehaviour
             case StatType.ExplosionRadius:
                 abilityController.CannonAbility._rtData.explosionRadius *= 1f + step.statValue / 100f;
                 break;
+            case StatType.BurnDamage:
+                abilityController.CannonAbility._rtData.burnDamagePerTick *= 1f + step.statValue / 100f;
+                break;
+            case StatType.BurnDuration:
+                abilityController.CannonAbility._rtData.burnDuration *= 1f + step.statValue / 100f;
+                break;
             case StatType.None:
                 break;
         }
@@ -148,6 +156,12 @@ public class UpgradeSystem : MonoBehaviour
                 break;
             case SpecialAbilityType.ChargedShot:
                 abilityHUD.UnlockNext(spriteChargedShot);
+                break;
+            case SpecialAbilityType.BurnShot:
+                abilityHUD.UnlockNext(spriteBurnShot);
+                break;
+            case SpecialAbilityType.GroundFire:
+                abilityHUD.UnlockNext(spriteGroundFire);
                 break;
         }
     }

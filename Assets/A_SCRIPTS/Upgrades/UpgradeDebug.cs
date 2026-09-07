@@ -29,8 +29,7 @@ public class UpgradeDebug : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha3)) { if (shift) MaxPath(2); else StepPath(2); }
         if (Input.GetKeyDown(KeyCode.Alpha4)) { if (shift) MaxPath(3); else StepPath(3); }
         if (Input.GetKeyDown(KeyCode.Alpha5)) { if (shift) MaxPath(4); else StepPath(4); }
-        if (Input.GetKeyDown(KeyCode.Alpha6)) { if (shift) MaxPath(5); else StepPath(5); }
-        if (Input.GetKeyDown(KeyCode.Alpha7)) { if (shift) MaxPath(6); else StepPath(6); }
+
         if (Input.GetKeyDown(KeyCode.R)) ResetUpgrades();
         if (Input.GetKeyDown(KeyCode.F1)) _bossSequenceManager.ActivateBoss(_mortarBossIndex);
         if (Input.GetKeyDown(KeyCode.F2)) _bossSequenceManager.ActivateBoss(_dashBossIndex);
@@ -74,8 +73,8 @@ public class UpgradeDebug : MonoBehaviour
     {
         if (!_showDebug) return;
         GUI.Box(new Rect(10, 10, 280, 460), "DEBUG - Controles");
-        GUI.Label(new Rect(20, 35, 260, 20), "1-7     → +1 tier al path");
-        GUI.Label(new Rect(20, 55, 260, 20), "Shift+1-7 → Maxear path");
+        GUI.Label(new Rect(20, 35, 260, 20), "1-5     → +1 tier al path");
+        GUI.Label(new Rect(20, 55, 260, 20), "Shift+1-5 → Maxear path");
         GUI.Label(new Rect(20, 75, 260, 20), "R       → Reset upgrades");
         GUI.Label(new Rect(20, 95, 260, 20), "F1      → Spawn Mortar Boss");
         GUI.Label(new Rect(20, 115, 260, 20), "F2      → Spawn Dash Boss");
@@ -83,13 +82,13 @@ public class UpgradeDebug : MonoBehaviour
         GUI.Label(new Rect(20, 155, 260, 20), "F5      → Reset Bosses");
         GUI.Label(new Rect(20, 175, 260, 20), "F9      → Reload escena");
         GUI.Label(new Rect(20, 195, 260, 20), "Tab     → Toggle este menu");
-
         if (_abilityController != null && _abilityController.CannonAbility != null)
         {
             var data = _abilityController.CannonAbility._rtData;
             bool hasChargedShot = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.ChargedShot);
-
-            GUI.Box(new Rect(20, 220, 260, 230), "");
+            bool hasBurnShot = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.BurnShot);
+            bool hasGroundFire = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.GroundFire);
+            GUI.Box(new Rect(20, 220, 260, 350), "");
             GUI.Label(new Rect(30, 225, 260, 20), "Cannon stats en vivo:");
             GUI.Label(new Rect(30, 245, 260, 20), $"Damage: {data.damage:F2}");
             GUI.Label(new Rect(30, 265, 260, 20), $"Cooldown: {data.cooldown:F2}");
@@ -101,8 +100,12 @@ public class UpgradeDebug : MonoBehaviour
             GUI.Label(new Rect(30, 385, 260, 20), $"  Escala bala: x{data.chargedBulletScale:F2}");
             GUI.Label(new Rect(30, 405, 260, 20), $"  Mult. daño: x{data.chargedDamageMultiplier:F2}");
             GUI.Label(new Rect(30, 425, 260, 20), $"  Mult. explosión: x{data.chargedExplosionMultiplier:F2}");
+            GUI.Label(new Rect(30, 445, 260, 20), $"BurnShot: {(hasBurnShot ? "Unlocked" : "Locked")}");
+            GUI.Label(new Rect(30, 465, 260, 20), $"  Daño/tick: {data.burnDamagePerTick:F2} cada {data.burnTickInterval:F2}s");
+            GUI.Label(new Rect(30, 485, 260, 20), $"  Duración: {data.burnDuration:F2}s");
+            GUI.Label(new Rect(30, 505, 260, 20), $"GroundFire: {(hasGroundFire ? "Unlocked" : "Locked")}");
+            GUI.Label(new Rect(30, 525, 260, 20), $"  Radio: {data.groundFireRadius:F2} / Dur: {data.groundFireDuration:F2}s / Dps: {data.groundFireDamagePerSecond:F2}");
         }
-
         if (_playerUpgrades != null && _paths != null)
         {
             GUI.Box(new Rect(300, 10, 220, 20 + _paths.Length * 20), "");
