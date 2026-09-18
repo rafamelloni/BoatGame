@@ -5,6 +5,13 @@ using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
+    [Serializable]
+    private struct WaveComposition
+    {
+        public TumultoSpawnType type;
+        [Range(0f, 1f)] public float weight;
+    }
+
     [Header("References")]
     [SerializeField] private EnemyFactory _factory;
     [SerializeField] private PhaseManager _phaseManager;
@@ -54,6 +61,24 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float _maxGroupDistanceFromPlayer = 80f;
     [SerializeField] private float _distanceCheckInterval = 5f;
 
+    [Header("Wave Incoming")]
+    [Tooltip("Activa el evento de oleada masiva.")]
+    [SerializeField] private bool _waveEnabled = false;
+    [Tooltip("Cada cuántos segundos se dispara una nueva oleada (si está activada).")]
+    [SerializeField] private float _waveInterval = 45f;
+    [Tooltip("Cantidad de enemigos por línea del anillo. La wave genera DOS líneas concéntricas (una cerca tuyo y otra más atrás), así que el total spawneado es el doble de este número.")]
+    [SerializeField] private int _waveEnemyCount = 60;
+    [Tooltip("Radio alrededor del player donde NO puede spawnear nada durante la oleada.")]
+    [SerializeField] private float _waveSafeRadius = 20f;
+    [Tooltip("Distancia mínima entre dos enemigos de la misma oleada (para que no se pisen entre sí).")]
+    [SerializeField] private float _waveMinSpacing = 4f;
+    [Tooltip("Intentos máximos para encontrar posición válida por cada enemigo de la oleada.")]
+    [SerializeField] private int _waveMaxAttemptsPerEnemy = 25;
+    [Tooltip("Mezcla de tipos de enemigo que puede traer la oleada, con pesos relativos.")]
+    [SerializeField] private WaveComposition[] _waveComposition;
+    [Tooltip("Tecla para forzar una wave manualmente en Play mode (debug).")]
+    [SerializeField] private KeyCode _waveDebugKey = KeyCode.T;
+
     // Posiciones activas
     private readonly Dictionary<EnemyGroup, Vector3> _activeGroupPositions = new();
     private readonly Dictionary<ZombieGroup, Vector3> _activeZombieGroupPositions = new();
@@ -91,6 +116,7 @@ public class EnemySpawner : MonoBehaviour
     private float _tumultoActiveUntil;
     private bool _tumultoActive;
     private float _lastDistanceCheck;
+    private float _nextWaveAt;
 
     private void Awake()
     {
@@ -104,6 +130,11 @@ public class EnemySpawner : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(_waveDebugKey))
+        {
+            TriggerWave();
+        }
+
         if (!_isRunning) return;
 
         if (Time.time >= _lastDistanceCheck + _distanceCheckInterval)
@@ -141,6 +172,12 @@ public class EnemySpawner : MonoBehaviour
                 }
             }
         }
+
+        if (_waveEnabled && Time.time >= _nextWaveAt)
+        {
+            _nextWaveAt = Time.time + _waveInterval;
+            TriggerWave();
+        }
     }
 
     // ——— Control externo ———
@@ -151,6 +188,7 @@ public class EnemySpawner : MonoBehaviour
         StopAllLoops();
         _isRunning = true;
         _phaseManager.StartSession();
+        _nextWaveAt = Time.time + _waveInterval;
     }
 
     public void StopSpawning()
@@ -167,6 +205,7 @@ public class EnemySpawner : MonoBehaviour
         _isRunning = true;
         _phaseManager.ResumeSession();
         RestartLoops();
+        _nextWaveAt = Time.time + _waveInterval;
     }
 
     public void DespawnAll()
@@ -307,6 +346,126 @@ public class EnemySpawner : MonoBehaviour
         var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
         if (pos == null) return;
         RegisterZombieGroup(_factory.GetZombieGroup(pos.Value, _spawnYOffset, _currentZombieGroupPrefabIndex));
+    }
+
+    // ——— Wave Incoming ———
+
+    [ContextMenu("Trigger Wave (Debug)")]
+    public void TriggerWave()
+    {
+        if (_waveComposition == null || _waveComposition.Length == 0)
+        {
+            Debug.LogWarning("[EnemySpawner] Wave sin composición configurada.");
+            return;
+        }
+        StartCoroutine(WaveRoutine());
+    }
+
+    private IEnumerator WaveRoutine()
+    {
+        var usedPositions = new List<Vector3>();
+        int spawned = 0;
+        int totalToSpawn = _waveEnemyCount * 2;
+
+        // Línea de adelante: de _waveSafeRadius hasta la mitad del rango.
+        // Línea de atrás: de esa mitad hasta _maxDistanceFromPlayer.
+        float ringBoundary = _waveSafeRadius + (_maxDistanceFromPlayer - _waveSafeRadius) * 0.5f;
+
+        for (int i = 0; i < totalToSpawn; i++)
+        {
+            // Alternamos entre las dos líneas para que aparezcan juntas,
+            // no primero toda la de adelante y después toda la de atrás.
+            bool frontLine = i % 2 == 0;
+            float minDist = frontLine ? _waveSafeRadius : ringBoundary;
+            float maxDist = frontLine ? ringBoundary : _maxDistanceFromPlayer;
+
+            Vector3? pos = TryGetWavePosition(usedPositions, minDist, maxDist);
+            if (pos != null)
+            {
+                SpawnWaveEnemy(pos.Value);
+                usedPositions.Add(pos.Value);
+                spawned++;
+            }
+            yield return null;
+        }
+        Debug.Log($"[EnemySpawner] Wave terminada: {spawned}/{totalToSpawn} enemigos spawneados.");
+    }
+
+    private Vector3? TryGetWavePosition(List<Vector3> usedPositions, float minDist, float maxDist)
+    {
+        // Mismos límites que usa el spawner normal: nunca más lejos de
+        // _maxDistanceFromPlayer, nunca más cerca que _waveSafeRadius,
+        // y siempre clampeado dentro del área de spawn general.
+        // minDist/maxDist acotan además a qué línea (adelante o atrás)
+        // pertenece este punto en particular.
+        float halfX = _spawnAreaSize.x * 0.5f;
+        float halfZ = _spawnAreaSize.y * 0.5f;
+
+        for (int i = 0; i < _waveMaxAttemptsPerEnemy; i++)
+        {
+            float angle = UnityEngine.Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            float distance = UnityEngine.Random.Range(minDist, maxDist);
+            Vector3 candidate = _player.position + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * distance;
+            candidate.y = _spawnHeight;
+
+            candidate.x = Mathf.Clamp(candidate.x, _spawnCenter.position.x - halfX, _spawnCenter.position.x + halfX);
+            candidate.z = Mathf.Clamp(candidate.z, _spawnCenter.position.z - halfZ, _spawnCenter.position.z + halfZ);
+
+            // El clamp de arriba puede haber empujado el punto de nuevo
+            // adentro del radio seguro si el player está cerca del borde del mapa.
+            if (Vector3.Distance(candidate, _player.position) < minDist) continue;
+            if (IsOverlappingSomething(candidate)) continue;
+
+            bool tooCloseToOther = false;
+            foreach (var used in usedPositions)
+            {
+                if (Vector3.Distance(candidate, used) < _waveMinSpacing)
+                {
+                    tooCloseToOther = true;
+                    break;
+                }
+            }
+            if (tooCloseToOther) continue;
+
+            return candidate;
+        }
+        return null;
+    }
+
+    private void SpawnWaveEnemy(Vector3 pos)
+    {
+        switch (PickWaveType())
+        {
+            case TumultoSpawnType.Group:
+                RegisterGroup(_factory.GetGroup(pos, _spawnYOffset));
+                break;
+            case TumultoSpawnType.Ship:
+                var ship = _factory.Get<ShipEnemy>(pos, _spawnYOffset);
+                _activeShipPositions.Add(ship.transform.position);
+                ship.OnDead += OnShipReturned;
+                break;
+            case TumultoSpawnType.Rafa:
+                RegisterRafa(_factory.Get<RafaEnemy>(pos, _spawnYOffset));
+                break;
+            case TumultoSpawnType.ZombieGroup:
+                RegisterZombieGroup(_factory.GetZombieGroup(pos, _spawnYOffset));
+                break;
+        }
+    }
+
+    private TumultoSpawnType PickWaveType()
+    {
+        float total = 0f;
+        foreach (var c in _waveComposition) total += c.weight;
+
+        float roll = UnityEngine.Random.Range(0f, total);
+        float acc = 0f;
+        foreach (var c in _waveComposition)
+        {
+            acc += c.weight;
+            if (roll <= acc) return c.type;
+        }
+        return _waveComposition[_waveComposition.Length - 1].type;
     }
 
     // ——— Loops de spawn ———
@@ -696,6 +855,13 @@ public class EnemySpawner : MonoBehaviour
             Gizmos.color = Color.cyan;
             Gizmos.DrawLine(_player.position, _player.position + smartDir * 15f);
             Gizmos.DrawWireSphere(_player.position + smartDir * 15f, 1.5f);
+        }
+
+        if (_waveEnabled && _spawnCenter != null)
+        {
+            Gizmos.color = new Color(1f, 0.5f, 0f);
+            if (_player != null)
+                Gizmos.DrawWireSphere(_player.position, _waveSafeRadius);
         }
     }
 }

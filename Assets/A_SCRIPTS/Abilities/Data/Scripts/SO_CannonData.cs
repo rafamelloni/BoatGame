@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "SO_CannonsData", menuName = "Scriptable Objects/Abilities/Cannons Data")]
 public class SO_CannonData : ScriptableObject
@@ -6,6 +6,8 @@ public class SO_CannonData : ScriptableObject
     [Header("Bullet")]
     public GameObject bulletPrefab;
     public float bulletSpeed = 20f;
+    [Tooltip("Escala el ángulo de la parábola. 1 = arco normal, menos de 1 = tiro más derecho y más rápido, más de 1 = lob más alto.")]
+    [Range(0f, 2f)]
     public float verticalArc = 0.25f;
     public float damage = 15f;
     public float dropDelay = 0.5f;
@@ -27,7 +29,7 @@ public class SO_CannonData : ScriptableObject
     public float chargedExplosionMultiplier = 1.5f;
     public float chargedVfxScale = 1.8f;
 
-    [Header("Munici�n Incendiaria (BurnShot)")]
+    [Header("Munici�n Incendiaria (BurnShot)")]
     public float burnDamagePerTick = 5f;
     public float burnTickInterval = 0.5f;
     public float burnDuration = 3f;
@@ -45,7 +47,7 @@ public class SO_CannonData : ScriptableObject
     public GameObject waterSplash;
     public TrailRenderer trasilRederer;
 
-    [Header("Par�bola")]
+    [Header("Par�bola")]
     public float launchSpeed = 25f;
 
 }

@@ -69,7 +69,7 @@ Material:
     - _QueueOffset: 50
     - _Smoothstep: 0
     m_Colors:
-    - _DarkColor: {r: 0.5660378, g: 0.5660378, b: 0.5660378, a: 1}
+    - _DarkColor: {r: 0.6415094, g: 0.6415094, b: 0.6415094, a: 0.34117648}
     - _FireColor: {r: 0.41509432, g: 0.41509432, b: 0.41509432, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

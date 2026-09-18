@@ -16,13 +16,7 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private LayerMask _molotovEnemyLayers;
     public MolotovStrategy MolotovAbility => _molotovStrategy;
 
-    [Header("Crossbow")]
-    [SerializeField] private SO_CrossbowData _crossbowData;
-    [SerializeField] private Transform _crossbowLaunchPoint;
-    [SerializeField] private Transform _crossbowLaunchPointNewShip;
-    [SerializeField] private LayerMask _crossbowEnemyLayers;
-    [SerializeField] private GameObject _crossbowGO;
-    [SerializeField] private GameObject _crossbowGOT2;
+
     public CrossbowStrategy CrossbowAbility => _crossbowStrategy;
 
     [Header("Blades")]
@@ -78,7 +72,6 @@ public class AbilityController : MonoBehaviour
 
         SetupCannon(hardpoints, runner);
         SetupMolotov(runner);
-        SetupCrossbow(runner);
         SetupBlades(runner);
     }
 
@@ -86,10 +79,7 @@ public class AbilityController : MonoBehaviour
     {
         _originalCannonRPos = _cannonR.transform.localPosition;
         _originalCannonLPos = _cannonL.transform.localPosition;
-        _originalMortarPos = _mortar.transform.localPosition;
-        _originalCrossbowLaunchPos = _crossbowLaunchPoint.localPosition;
-        _originalCrossbowGOPos = _crossbowGO.transform.localPosition;
-        _originalCrossbowGOPos = _crossbowGO.transform.localPosition;
+
         _originalTreasureChest = _treasureChest.transform.localPosition;
     }
 
@@ -106,11 +96,6 @@ public class AbilityController : MonoBehaviour
             _molotovEnemyLayers, _playerUpgrades, GetComponent<Collider>());
     }
 
-    private void SetupCrossbow(CoroutineRunner runner)
-    {
-        _crossbowStrategy = new CrossbowStrategy(_crossbowData, _crossbowLaunchPoint,
-            runner, _crossbowEnemyLayers, _playerUpgrades, _crossbowGO);
-    }
 
     private void SetupBlades(CoroutineRunner runner)
     {
@@ -149,16 +134,14 @@ public class AbilityController : MonoBehaviour
         _wasUCannon = false;
         _cannonCooldownUI.TurnOff();
         _abilityE.ResetUpgrades();
-        _molotovStrategy.ResetUpgrades();
-        _crossbowStrategy.ResetUpgrades();
-        _abilityBlades.ResetUpgrades();
+        //_molotovStrategy.ResetUpgrades();
+        //_crossbowStrategy.ResetUpgrades();
+        //_abilityBlades.ResetUpgrades();
         cannonMesh.SetActive(false);
         cooldownC.SetActive(false);
 
         _cannonR.transform.localPosition = _originalCannonRPos;
         _cannonL.transform.localPosition = _originalCannonLPos;
-        _crossbowLaunchPoint.localPosition = _originalCrossbowLaunchPos;
-        _crossbowGO.transform.localPosition = _originalCrossbowGOPos;
         _treasureChest.transform.localPosition = _originalTreasureChest;
 
 
@@ -170,9 +153,6 @@ public class AbilityController : MonoBehaviour
     {
         _cannonR.transform.localPosition = _newCannonPosR.localPosition;
         _cannonL.transform.localPosition = _newCannonPosL.localPosition;
-        _mortar.transform.localPosition = _newMortarPos.localPosition;
-        _crossbowLaunchPoint.localPosition = _crossbowLaunchPointNewShip.localPosition;
-        _crossbowGO.transform.localPosition = _crossbowGOT2.transform.localPosition;
         _treasureChest.transform.localPosition = _newTreasureChestPos.transform.localPosition;
 
         _recoilCannonR.UpdateLocalOrgin();

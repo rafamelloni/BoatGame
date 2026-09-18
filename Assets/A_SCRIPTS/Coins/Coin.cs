@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 
 public class Coin : MonoBehaviour
@@ -23,12 +23,17 @@ public class Coin : MonoBehaviour
     [SerializeField] private float _descendSpeed = 4f;       // velocidad de bajada final
     [SerializeField] private float _scaleDownDistance = 3f;  // distancia al cofre para empezar a achicarse
 
+    [Header("Launch (cofre)")]
+    [SerializeField] private float _launchGravity = 14f;
+    private Vector3 _launchVelocity;
+    private float _launchGravityMultiplier = 1f;
+
     private float _baseY;
     private Transform _target;
     private Transform _player;
     private Vector3 _velocity;
 
-    private enum State { Float, Pull, Arrive }
+    private enum State { Launch, Float, Pull, Arrive }
     private State _state = State.Float;
 
     public event System.Action<Coin> OnCollected;
@@ -43,6 +48,8 @@ public class Coin : MonoBehaviour
         if (_trail != null)
             _trail.Clear();
         transform.localScale = Vector3.one;
+        _launchVelocity = Vector3.zero;
+        _launchGravityMultiplier = 1f;
         StopAllCoroutines();
     }
 
@@ -55,6 +62,20 @@ public class Coin : MonoBehaviour
         _state = State.Float;
         _magnetRadius = pickupRange;
         _velocity = Vector3.zero;
+        transform.localScale = Vector3.one;
+    }
+
+    public void InitLaunched(Transform target, Transform player, Vector3 spawnPos, float pickupRange, Vector3 launchVelocity, float powerMultiplier = 1f)
+    {
+        _target = target;
+        _player = player;
+        transform.position = spawnPos;
+        _baseY = spawnPos.y;
+        _magnetRadius = pickupRange;
+        _velocity = Vector3.zero;
+        _launchVelocity = launchVelocity * powerMultiplier;
+        _launchGravityMultiplier = powerMultiplier * powerMultiplier;
+        _state = State.Launch;
         transform.localScale = Vector3.one;
     }
 
@@ -74,6 +95,10 @@ public class Coin : MonoBehaviour
 
         switch (_state)
         {
+            case State.Launch:
+                DoLaunch();
+                break;
+
             case State.Float:
                 DoFloat();
                 if (distToTarget <= _magnetRadius)
@@ -84,15 +109,29 @@ public class Coin : MonoBehaviour
                 DoPull();
                 if (distToTarget <= _arrivalRadius)
                 {
-                    OnCoinArriving?.Invoke(); // agregá esto
+                    OnCoinArriving?.Invoke(); // agregï¿½ esto
                     _state = State.Arrive;
                 }
-                   
+
                 break;
 
             case State.Arrive:
                 DoArrive();
                 break;
+        }
+    }
+
+    private void DoLaunch()
+    {
+        _launchVelocity.y -= _launchGravity * _launchGravityMultiplier * Time.deltaTime;
+        transform.position += _launchVelocity * Time.deltaTime;
+        transform.Rotate(Vector3.up, _rotationSpeed * Time.deltaTime, Space.World);
+
+        if (transform.position.y <= _baseY && _launchVelocity.y <= 0f)
+        {
+            transform.position = new Vector3(transform.position.x, _baseY, transform.position.z);
+            _launchVelocity = Vector3.zero;
+            _state = State.Float;
         }
     }
 
@@ -147,7 +186,7 @@ public class Coin : MonoBehaviour
             transform.position = Vector3.MoveTowards(transform.position, stopPos, _descendSpeed * Time.deltaTime);
             if (Vector3.Distance(transform.position, stopPos) <= _orbitRadius)
             {
-                OnCoinCollected?.Invoke(); // agregá esto
+                OnCoinCollected?.Invoke(); // agregï¿½ esto
                 OnCollected?.Invoke(this);
                 gameObject.SetActive(false);
                 CoinManager.Instance.AddCoin();

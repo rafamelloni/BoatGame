@@ -11,6 +11,7 @@ TagManager:
   - ShipEnemy
   - Islas
   - DashBoss
+  - Chest
   - MortarBoss
   layers:
   - Default

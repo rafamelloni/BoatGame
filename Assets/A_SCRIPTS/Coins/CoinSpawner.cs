@@ -1,4 +1,4 @@
-// CoinSpawner.cs
+ï»¿// CoinSpawner.cs
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -13,7 +13,7 @@ public class CoinSpawner : MonoBehaviour
     [Header("Drop config")]
     [SerializeField] private int _coinsPerKill = 1;
     [SerializeField] private float _spawnRadius = 1.5f;
-    [SerializeField] private float _spawnHeight = 0.5f;   // altura fija de flotación
+    [SerializeField] private float _spawnHeight = 0.5f;   // altura fija de flotaciï¿½n
     [SerializeField] private PhaseManager _phaseManager;
 
     private ObjectPool<Coin> _pool;
@@ -66,6 +66,22 @@ public class CoinSpawner : MonoBehaviour
 
             Coin coin = _pool.Get();
             coin.Init(_chest, _player, spawnPos, _stats.pickUpRange);
+        }
+    }
+
+    public void SpawnFromChest(Vector3 chestPosition, int count, float minHorizontalSpeed, float maxHorizontalSpeed, float minVerticalSpeed, float maxVerticalSpeed, float launchPower = 1f)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 dir2D = Random.insideUnitCircle.normalized;
+            float horizontalSpeed = Random.Range(minHorizontalSpeed, maxHorizontalSpeed);
+            float verticalSpeed = Random.Range(minVerticalSpeed, maxVerticalSpeed);
+
+            Vector3 launchVelocity = new Vector3(dir2D.x, 0f, dir2D.y) * horizontalSpeed + Vector3.up * verticalSpeed;
+            Vector3 spawnPos = new Vector3(chestPosition.x, _spawnHeight, chestPosition.z);
+
+            Coin coin = _pool.Get();
+            coin.InitLaunched(_chest, _player, spawnPos, _stats.pickUpRange, launchVelocity, launchPower);
         }
     }
 

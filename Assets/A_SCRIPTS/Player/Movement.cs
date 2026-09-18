@@ -36,6 +36,18 @@ public class Movement : MonoBehaviour
 
     public float GetCurrentBankZ() => _currentBankZ;
 
+    /// <summary>
+    /// Qué tan rápido vas en relación a tu velocidad máxima (0 = parado, 1 = sprint a full).
+    /// </summary>
+    public float SpeedRatio
+    {
+        get
+        {
+            float maxSpeed = _stats != null ? _stats.moveSpeed * Mathf.Max(sprintSpeedMultiplier, 1f) : 1f;
+            return maxSpeed > 0f ? Mathf.Clamp01(Mathf.Abs(_currentSpeed) / maxSpeed) : 0f;
+        }
+    }
+
     private void Awake()
     {
         _stats = GetComponent<RT_PlayerStats>();

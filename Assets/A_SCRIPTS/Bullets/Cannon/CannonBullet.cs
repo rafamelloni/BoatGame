@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using UnityEngine;
 
@@ -137,12 +137,45 @@ public class CannonBullet : BulletsBase
         Vector3 toTargetXZ = new Vector3(toTarget.x, 0f, toTarget.z);
         float distance = toTargetXZ.magnitude;
         float yOffset = toTarget.y;
-        float v = _rtData.launchSpeed;
+        float maxSpeed = _rtData.launchSpeed;
 
         if (distance < 0.1f)
-            return Vector3.up * v;
+            return Vector3.up * maxSpeed;
 
-        float angle = Mathf.Clamp(distance * 1.5f, 30f, 65f) * Mathf.Deg2Rad;
+        // Ángulo "deseado": lo más derecho posible, escalado por verticalArc
+        // igual que antes (1 = arco normal, menos = más derecho y rápido).
+        float baseAngleDeg = Mathf.Clamp(distance * 1.5f, 30f, 65f);
+        float desiredAngleDeg = Mathf.Clamp(baseAngleDeg * Mathf.Max(0f, _rtData.verticalArc), 3f, 80f);
+        float desiredAngle = desiredAngleDeg * Mathf.Deg2Rad;
+
+        // Ángulo MÍNIMO necesario para que, con la velocidad máxima disponible
+        // (_rtData.launchSpeed), la bala llegue exactamente al punto clickeado.
+        // Si el ángulo "derecho" ya alcanza, se usa tal cual (sale bien recta).
+        // Si el click está muy lejos y con ese ángulo no llegaría, se sube
+        // automáticamente lo justo y necesario para que sí llegue.
+        float angle = desiredAngle;
+        if (maxSpeed > 0.01f)
+        {
+            float A = (gravity * distance * distance) / (2f * maxSpeed * maxSpeed);
+            float discriminant = distance * distance - 4f * A * (yOffset + A);
+
+            if (discriminant < 0f)
+            {
+                // Ni siquiera al ángulo de máximo alcance (45°) llega con esta
+                // velocidad: el click está directamente fuera de rango. Tiramos
+                // al ángulo de máximo alcance para acercarnos lo más posible
+                // (si necesitás que llegue de verdad, subí launchSpeed).
+                angle = Mathf.Max(desiredAngle, 45f * Mathf.Deg2Rad);
+            }
+            else
+            {
+                float sqrtD = Mathf.Sqrt(discriminant);
+                float tLow = (distance - sqrtD) / (2f * A);
+                float minRequiredAngle = Mathf.Max(0.01f, Mathf.Atan(tLow));
+                angle = Mathf.Max(desiredAngle, minRequiredAngle);
+            }
+        }
+
         float cosAngle = Mathf.Cos(angle);
         float sinAngle = Mathf.Sin(angle);
 
@@ -151,11 +184,11 @@ public class CannonBullet : BulletsBase
         {
             float fallbackAngle = 45f * Mathf.Deg2Rad;
             Vector3 fallbackDir = toTargetXZ.normalized * Mathf.Cos(fallbackAngle) + Vector3.up * Mathf.Sin(fallbackAngle);
-            return fallbackDir * v;
+            return fallbackDir * maxSpeed;
         }
 
-        v = Mathf.Sqrt((gravity * distance * distance) / denom);
-        v = Mathf.Clamp(v, 5f, _rtData.launchSpeed);
+        float v = Mathf.Sqrt((gravity * distance * distance) / denom);
+        v = Mathf.Clamp(v, 5f, maxSpeed);
 
         return toTargetXZ.normalized * v * cosAngle + Vector3.up * v * sinAngle;
     }
@@ -190,7 +223,7 @@ public class CannonBullet : BulletsBase
 
         Vector3 explosionPoint = other.ClosestPoint(transform.position);
 
-        if (other.CompareTag("Enemy") || other.CompareTag("ShipEnemy") || other.CompareTag("DashBoss") || other.CompareTag("MortarBoss"))
+        if (other.CompareTag("Enemy") || other.CompareTag("ShipEnemy") || other.CompareTag("DashBoss") || other.CompareTag("MortarBoss") || other.CompareTag("Chest")) // agregado "Chest"
         {
             bool hasRicochet = debugRicochet || (_playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.Ricochet));
 
@@ -288,8 +321,8 @@ public class CannonBullet : BulletsBase
         Component targetComponent = damageable as Component;
         if (targetComponent == null) return;
 
-        // Si el mismo golpe que aplic� el burn ya mat�/desactiv� al enemigo
-        // (pool, animaci�n de muerte, etc.), no tiene sentido prenderlo fuego.
+        // Si el mismo golpe que aplic� el burn ya mat�/desactiv� al enemigo
+        // (pool, animaci�n de muerte, etc.), no tiene sentido prenderlo fuego.
         if (!targetComponent.gameObject.activeInHierarchy) return;
 
         BurnStatus burn = targetComponent.GetComponent<BurnStatus>();

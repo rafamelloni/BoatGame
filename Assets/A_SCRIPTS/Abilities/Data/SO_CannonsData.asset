@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SO_CannonData
   bulletPrefab: {fileID: 8034590942499124795, guid: 03d3d9e452ce62340962d353c7a01990, type: 3}
   bulletSpeed: 20
-  verticalArc: 3
+  verticalArc: 0.5
   damage: 50
-  dropDelay: 0.25
+  dropDelay: 0
   shotsPerBurst: 1
   timeBetweenShots: 0.5
   cooldown: 1.5
