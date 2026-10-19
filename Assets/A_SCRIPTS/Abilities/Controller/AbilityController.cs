@@ -34,10 +34,6 @@ public class AbilityController : MonoBehaviour
     [SerializeField] private GameObject _cannonL;
     [SerializeField] private GameObject _mortar;
     [SerializeField] private Transform _treasureChest;
-
-    [SerializeField] private Transform _newTreasureChestPos;
-    [SerializeField] private Transform _newCannonPosR;
-    [SerializeField] private Transform _newCannonPosL;
     [SerializeField] private Transform _newMortarPos;
 
     [Header("Mortar VFX")]
@@ -149,11 +145,11 @@ public class AbilityController : MonoBehaviour
         _recoilCannonL.UpdateLocalOrgin();
     }
 
-    public void ShipUpgraded()
+    public void ShipUpgraded(Transform cannonPosR, Transform cannonPosL, Transform chestPos)
     {
-        _cannonR.transform.localPosition = _newCannonPosR.localPosition;
-        _cannonL.transform.localPosition = _newCannonPosL.localPosition;
-        _treasureChest.transform.localPosition = _newTreasureChestPos.transform.localPosition;
+        if (cannonPosR != null) _cannonR.transform.localPosition = cannonPosR.localPosition;
+        if (cannonPosL != null) _cannonL.transform.localPosition = cannonPosL.localPosition;
+        if (chestPos != null) _treasureChest.transform.localPosition = chestPos.localPosition;
 
         _recoilCannonR.UpdateLocalOrgin();
         _recoilCannonL.UpdateLocalOrgin();

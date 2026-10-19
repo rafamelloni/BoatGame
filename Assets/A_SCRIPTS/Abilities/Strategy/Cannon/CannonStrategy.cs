@@ -74,15 +74,25 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
                 _recoilRight.Fire(_rtData.timeBetweenShots);
                 _recoilLeft.Fire(_rtData.timeBetweenShots);
                 hardpoints._cannonSmokeShootR.Play();
+                FireMuzzle(p);
             }
             foreach (Transform p in hardpoints.leftShootPoints)
             {
                 FireFromPoint(p, -1f, leftTarget, isCharged);
                 hardpoints._cannonSmokeShootL.Play();
+                FireMuzzle(p);
             }
             if (i < _rtData.shotsPerBurst - 1)
                 yield return new WaitForSeconds(_rtData.timeBetweenShots);
         }
+    }
+
+    // Cañones extra (tier 2+): cada uno tiene su propio CannonMuzzle con humo y recoil.
+    // Los cañones originales no tienen CannonMuzzle, así que acá no hacen nada.
+    private void FireMuzzle(Transform point)
+    {
+        var muzzle = point.GetComponentInParent<CannonMuzzle>();
+        if (muzzle != null) muzzle.Fire(_rtData.timeBetweenShots);
     }
 
     // Decide UNA vez por ráfaga si este disparo es el cargado - así los dos
@@ -110,6 +120,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
             return ray.GetPoint(distance);
         return Vector3.zero;
     }
+
     private void FireFromPoint(Transform point, float side, Vector3 targetPoint, bool isCharged)
     {
         var b = _cannonBullet.Create();

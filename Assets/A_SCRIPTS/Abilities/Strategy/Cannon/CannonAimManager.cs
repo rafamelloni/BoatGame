@@ -3,6 +3,13 @@ public class CannonAimManager : MonoBehaviour
 {
     [SerializeField] private Transform _cannonRight;
     [SerializeField] private Transform _cannonLeft;
+
+    [Header("Cañones extra (tier 2+)")]
+    [Tooltip("Rotan igual que _cannonRight. Si están apagados no pasa nada.")]
+    [SerializeField] private Transform[] _extraRight;
+    [Tooltip("Rotan igual que _cannonLeft. Si están apagados no pasa nada.")]
+    [SerializeField] private Transform[] _extraLeft;
+
     [SerializeField] private float _rotationSpeed = 10f;
     [SerializeField] private Camera cam;
     [SerializeField] private float _offsetRight = -90f;
@@ -20,21 +27,26 @@ public class CannonAimManager : MonoBehaviour
         Vector3 localDir = transform.InverseTransformDirection(leaderDir);
         localDir.x = -localDir.x;
         Vector3 mirrorDir = transform.TransformDirection(localDir);
-        if (side >= 0f)
-        {
-            ApplyRotation(_cannonRight, leaderDir);
-            ApplyRotation(_cannonLeft, mirrorDir);
-        }
-        else
-        {
-            ApplyRotation(_cannonLeft, leaderDir);
-            ApplyRotation(_cannonRight, mirrorDir);
-        }
+
+        Vector3 rightDir = side >= 0f ? leaderDir : mirrorDir;
+        Vector3 leftDir = side >= 0f ? mirrorDir : leaderDir;
+
+        ApplyRotation(_cannonRight, rightDir, _offsetRight);
+        ApplyRotation(_cannonLeft, leftDir, _offsetLeft);
+
+        if (_extraRight != null)
+            foreach (var c in _extraRight)
+                if (c != null && c.gameObject.activeInHierarchy)
+                    ApplyRotation(c, rightDir, _offsetRight);
+
+        if (_extraLeft != null)
+            foreach (var c in _extraLeft)
+                if (c != null && c.gameObject.activeInHierarchy)
+                    ApplyRotation(c, leftDir, _offsetLeft);
     }
-    private void ApplyRotation(Transform cannon, Vector3 dir)
+
+    private void ApplyRotation(Transform cannon, Vector3 dir, float offset)
     {
-        bool isRightCannon = cannon == _cannonRight;
-        float offset = isRightCannon ? _offsetRight : _offsetLeft;
         Quaternion targetRot = Quaternion.LookRotation(dir, Vector3.up) * Quaternion.Euler(0f, offset, 0f);
         cannon.rotation = Quaternion.Lerp(cannon.rotation, targetRot, Time.deltaTime * _rotationSpeed);
     }
@@ -63,8 +75,6 @@ public class CannonAimManager : MonoBehaviour
             Vector3 to = _cannonRight.position + Quaternion.Euler(0f, (i + 10), 0f) * transform.right * 3f;
             Gizmos.DrawLine(from, to);
         }
-        //UnityEditor.Handles.Label(_cannonRight.position + Vector3.up * 0.5f,
-        //    $"R: {_cannonRight.localEulerAngles.y:F1}°");
         Gizmos.color = Color.blue;
         Gizmos.DrawRay(_cannonLeft.position, -transform.right * 3f);
         for (int i = -90; i < 90; i += 10)
@@ -73,7 +83,5 @@ public class CannonAimManager : MonoBehaviour
             Vector3 to = _cannonLeft.position + Quaternion.Euler(0f, (i + 10), 0f) * (-transform.right) * 3f;
             Gizmos.DrawLine(from, to);
         }
-        //UnityEditor.Handles.Label(_cannonLeft.position + Vector3.up * 0.5f,
-        //    $"L: {_cannonLeft.localEulerAngles.y:F1}°");
     }
 }
