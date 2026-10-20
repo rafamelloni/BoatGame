@@ -63,6 +63,10 @@ public class UpgradeShipBOSS : MonoBehaviour
     private Transform[] _originalLeftPoints;
     private readonly Dictionary<GameObject, Vector3> _extraOriginalPos = new();
 
+    private bool _isAnimating;
+    private Vector3 _animOriginalScale;
+    private Quaternion _animOriginalRot;
+
     public bool HasNextTier => _currentTier + 1 < _tiers.Length;
     public int CurrentTier => _currentTier;
     public int TierCount => _tiers.Length;
@@ -111,9 +115,12 @@ public class UpgradeShipBOSS : MonoBehaviour
 
     private IEnumerator ShipUpgradeAnim(int nextTier)
     {
+        _isAnimating = true;
         Transform ship = _movement.transform;
         Quaternion originalRot = ship.rotation;
         Vector3 originalScale = ship.localScale;
+        _animOriginalScale = originalScale;
+        _animOriginalRot = originalRot;
         Vector3 bigScale = originalScale * scaleUpAmount;
 
         // Fase 1: girar y agrandarse
@@ -146,6 +153,7 @@ public class UpgradeShipBOSS : MonoBehaviour
         ship.localScale = originalScale;
         ship.rotation = originalRot;
         _movement.SetMovementEnabled(true);
+        _isAnimating = false;
     }
 
     // Aplica todo lo de un tier: modelo, cañones extra, posiciones, meshes y shoot points.
@@ -216,6 +224,12 @@ public class UpgradeShipBOSS : MonoBehaviour
     public void ResetShip()
     {
         StopAllCoroutines();
+        if (_isAnimating)
+        {
+            _movement.transform.localScale = _animOriginalScale;
+            _movement.transform.rotation = _animOriginalRot;
+            _isAnimating = false;
+        }
         _currentTier = 0;
         ApplyModel(0);
         if (_hardpoints != null)
@@ -239,6 +253,12 @@ public class UpgradeShipBOSS : MonoBehaviour
     {
         if (index < 0 || index >= _tiers.Length) return;
         StopAllCoroutines();
+        if (_isAnimating)
+        {
+            _movement.transform.localScale = _animOriginalScale;
+            _movement.transform.rotation = _animOriginalRot;
+            _isAnimating = false;
+        }
         _movement.SetMovementEnabled(true);
 
         if (index == 0)
@@ -249,5 +269,15 @@ public class UpgradeShipBOSS : MonoBehaviour
 
         ApplyTier(index);
         Debug.Log($"[UpgradeShipBOSS] DEBUG → tier {index + 1} ({_tiers[index].name})");
+    }
+
+    public void DebugAnimateToTier(int index)
+    {
+        if (index <= 0 || index >= _tiers.Length) return;
+        if (_isAnimating) return;
+
+        _movement.SetMovementEnabled(false);
+        StartCoroutine(ShipUpgradeAnim(index));
+        Debug.Log($"[UpgradeShipBOSS] DEBUG → animando a tier {index + 1} ({_tiers[index].name})");
     }
 }

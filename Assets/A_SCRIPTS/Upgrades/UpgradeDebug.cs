@@ -52,8 +52,8 @@ public class UpgradeDebug : MonoBehaviour
         if (_upgradeShip != null)
         {
             if (Input.GetKeyDown(KeyCode.F6)) _upgradeShip.DebugSetTier(0);
-            if (Input.GetKeyDown(KeyCode.F7)) _upgradeShip.DebugSetTier(1);
-            if (Input.GetKeyDown(KeyCode.F8)) _upgradeShip.DebugSetTier(2);
+            if (Input.GetKeyDown(KeyCode.F7)) _upgradeShip.DebugAnimateToTier(1);
+            if (Input.GetKeyDown(KeyCode.F8)) _upgradeShip.DebugAnimateToTier(2);
         }
 
         if (Input.GetKeyDown(KeyCode.F9)) ReloadScene();
@@ -108,7 +108,7 @@ public class UpgradeDebug : MonoBehaviour
 
         GUILayout.BeginArea(new Rect(530, 10, 560, 300), GUI.skin.box);
         string tier = _upgradeShip != null ? $"{_upgradeShip.CurrentTier + 1}/{_upgradeShip.TierCount}" : "?";
-        GUILayout.Label($"<b>BARCO TIER {tier}</b>   F6/F7/F8 → tier 1/2/3", _richStyle);
+        GUILayout.Label($"<b>BARCO TIER {tier}</b>   F6 → tier 1 / F7/F8 → animar a tier 2/3", _richStyle);
         GUILayout.Label("<b>DERECHA</b> (side debería ser +)", _richStyle);
         DrawShootPointList(_hardpoints.rightShootPoints, true);
         GUILayout.Label("<b>IZQUIERDA</b> (side debería ser −)", _richStyle);
@@ -168,7 +168,7 @@ public class UpgradeDebug : MonoBehaviour
         GUI.Label(new Rect(20, 115, 260, 20), "F2      → Spawn Dash Boss");
         GUI.Label(new Rect(20, 135, 260, 20), "F3      → Spawn Final Boss");
         GUI.Label(new Rect(20, 155, 260, 20), "F5      → Reset Bosses");
-        GUI.Label(new Rect(20, 175, 260, 20), "F6/F7/F8 → Barco tier 1/2/3");
+        GUI.Label(new Rect(20, 175, 260, 20), "F6/F7/F8 → Barco tier 1/2/3 (anim)");
         GUI.Label(new Rect(20, 195, 260, 20), "F9      → Reload escena");
         GUI.Label(new Rect(20, 215, 260, 20), "Tab     → Toggle este menu");
         if (_abilityController != null && _abilityController.CannonAbility != null)
