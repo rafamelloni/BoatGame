@@ -14,9 +14,15 @@ public class SO_CannonData : ScriptableObject
 
     [Header("Burst")]
     public int shotsPerBurst = 2;
+    [Tooltip("Pausa mínima entre bala y bala del cargador (y entre balas de una ráfaga)")]
     public float timeBetweenShots = 0.25f;
 
+    [Header("Munición")]
+    [Tooltip("Balas en el cargador. Se gasta 1 por disparo; al vaciarse recarga (cooldown).")]
+    public int maxAmmo = 2;
+
     [Header("Cooldown")]
+    [Tooltip("Tiempo de recarga del cargador completo")]
     public float cooldown = 1.5f;
 
     [Header("Explosion")]

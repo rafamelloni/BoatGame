@@ -73,6 +73,7 @@ public class HeavyIslandBullet : BulletsBase
         {
             Vector3 explosionPoint0 = other.ClosestPoint(transform.position);
             ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint0);
+            WaterImpacts.Spawn(explosionPoint0, 1.3f);
 
         }
 

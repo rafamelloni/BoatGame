@@ -93,6 +93,9 @@ public class UpgradeSystem : MonoBehaviour
             case StatType.ShotsPerBurst:
                 abilityController.CannonAbility._rtData.shotsPerBurst += Mathf.RoundToInt(step.statValue);
                 break;
+            case StatType.MaxAmmo:
+                abilityController.CannonAbility.AddAmmo(Mathf.RoundToInt(step.statValue));
+                break;
             case StatType.ExplosionRadius:
                 abilityController.CannonAbility._rtData.explosionRadius *= 1f + step.statValue / 100f;
                 break;

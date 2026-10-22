@@ -100,6 +100,7 @@ public class BasicEnemyBullet : BulletsBase
         if (other.CompareTag("Floor"))
         {
             ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint);
+            WaterImpacts.Spawn(explosionPoint, 0.7f);
             Pool.Return(this);
             return;
         }

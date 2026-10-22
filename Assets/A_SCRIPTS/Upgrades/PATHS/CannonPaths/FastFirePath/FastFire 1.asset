@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: FastFire 1
   m_EditorClassIdentifier: Assembly-CSharp::SO_UpgradeStep
   displayName: 
-  description: +1 bullet per fire
+  description: +1 ammo
   icon: {fileID: 0}
-  statType: 15
+  statType: 19
   statValue: 1
   specialAbility: 0

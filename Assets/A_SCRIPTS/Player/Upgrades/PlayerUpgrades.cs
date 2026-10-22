@@ -36,7 +36,7 @@ public class PlayerUpgrades : MonoBehaviour
     //CANNON
     public void CannonCharge() {
 
-        ability.CannonAbility._rtData.shotsPerBurst += 1;
+        ability.CannonAbility.AddAmmo(1); // antes: +1 disparo por ráfaga
     }
 
 

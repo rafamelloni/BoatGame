@@ -7,6 +7,7 @@ public class RT_CannonData
     public float bulletSpeed;
     public float verticalArc;
     public int shotsPerBurst;
+    public int maxAmmo;
     public float timeBetweenShots;
     public float cooldown;
     public float damage;
@@ -38,6 +39,7 @@ public class RT_CannonData
         bulletSpeed = so.bulletSpeed;
         verticalArc = so.verticalArc;
         shotsPerBurst = so.shotsPerBurst;
+        maxAmmo = so.maxAmmo;
         timeBetweenShots = so.timeBetweenShots;
         cooldown = so.cooldown;
         damage = so.damage;

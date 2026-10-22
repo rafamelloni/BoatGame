@@ -182,7 +182,7 @@ public class UpgradeDebug : MonoBehaviour
             GUI.Label(new Rect(30, 265, 260, 20), $"Damage: {data.damage:F2}");
             GUI.Label(new Rect(30, 285, 260, 20), $"Cooldown: {data.cooldown:F2}");
             GUI.Label(new Rect(30, 305, 260, 20), $"TimeBetweenShots: {data.timeBetweenShots:F2}");
-            GUI.Label(new Rect(30, 325, 260, 20), $"ShotsPerBurst: {data.shotsPerBurst}");
+            GUI.Label(new Rect(30, 325, 260, 20), $"Ammo: {_abilityController.CannonAbility.CurrentAmmo}/{data.maxAmmo}{(_abilityController.CannonAbility.IsReloading ? " (recargando)" : "")}");
             GUI.Label(new Rect(30, 345, 260, 20), $"ExplosionRadius: {data.explosionRadius:F2}");
             GUI.Label(new Rect(30, 365, 260, 20), $"ChargedShot: {(hasChargedShot ? "Unlocked" : "Locked")}");
             GUI.Label(new Rect(30, 385, 260, 20), $"  Intervalo: cada {data.chargedShotInterval} disparos");

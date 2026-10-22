@@ -13,6 +13,13 @@ public class CannonBullet : BulletsBase
 
     [Header("Visual")]
     [SerializeField] private Transform _visualTransform;
+    [Tooltip("TEMPORAL: destildar para probar sin el indicador de impacto")]
+    [SerializeField] private bool _showImpactIndicator = true;
+
+    [Header("Fuego (meteorito)")]
+    [Tooltip("Sistema de partículas raíz del fuego (los hijos se manejan solos)")]
+    [SerializeField] private ParticleSystem _fireVfx;
+    private Vector3 _fireBaseScale = Vector3.one;
 
     [Header("Explosion")]
     [SerializeField] private LayerMask _damageLayers;
@@ -50,6 +57,8 @@ public class CannonBullet : BulletsBase
         _impactIndicator = GetComponent<CannonBulletImpactIndicator>();
         if (_visualTransform != null)
             _visualBaseScale = _visualTransform.localScale;
+        if (_fireVfx != null)
+            _fireBaseScale = _fireVfx.transform.localScale;
     }
 
     public override void TurnOff()
@@ -59,6 +68,7 @@ public class CannonBullet : BulletsBase
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
         _collider.enabled = false;
+        StopFire();
         if (_impactIndicator != null)
             _impactIndicator.ResetIndicator();
         _trail.Clear();
@@ -100,6 +110,7 @@ public class CannonBullet : BulletsBase
         _rb.position = position;
         _rb.useGravity = false;
         _rb.linearVelocity = direction * rtData.bulletSpeed;
+        StartFire();
 
         StartCoroutine(ActivateColliderBulelt());
         StartCoroutine(DropBullet());
@@ -119,8 +130,9 @@ public class CannonBullet : BulletsBase
 
         Vector3 startVelocity = CalculateLaunchVelocity(_pointShoot.position, _targetPoint);
         _rb.linearVelocity = startVelocity;
+        StartFire();
 
-        if (_impactIndicator != null)
+        if (_impactIndicator != null && _showImpactIndicator)
             _impactIndicator.SetPosition(_targetPoint);
 
         StartCoroutine(ActivateColliderBulelt());
@@ -242,6 +254,7 @@ public class CannonBullet : BulletsBase
         if (other.CompareTag("Floor"))
         {
             ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint);
+            WaterImpacts.Spawn(explosionPoint, _isCharged ? 1.6f : 1f);
             Pool.Return(this);
         }
     }
@@ -339,6 +352,23 @@ public class CannonBullet : BulletsBase
         FireZone fireZone = Instantiate(_rtData.groundFireZonePrefab, center, Quaternion.identity).GetComponent<FireZone>();
         if (fireZone != null)
             fireZone.Init(_rtData.groundFireDuration, _rtData.groundFireDamagePerSecond, _rtData.groundFireRadius, _damageLayers);
+    }
+
+    // Se limpia y reinicia en cada disparo: como la bala viene del pool, si no
+    // se limpia aparece una línea de fuego desde donde murió hasta el cañón.
+    private void StartFire()
+    {
+        if (_fireVfx == null) return;
+        float scale = (_isCharged && _rtData != null) ? _rtData.chargedBulletScale : 1f;
+        _fireVfx.transform.localScale = _fireBaseScale * scale;
+        _fireVfx.Clear(true);
+        _fireVfx.Play(true);
+    }
+
+    private void StopFire()
+    {
+        if (_fireVfx == null) return;
+        _fireVfx.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
     private IEnumerator ActivateColliderBulelt()

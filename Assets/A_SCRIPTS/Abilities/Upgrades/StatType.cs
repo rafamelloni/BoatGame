@@ -19,4 +19,5 @@ public enum StatType
     ExplosionRadius,
     BurnDamage,
     BurnDuration,
+    MaxAmmo,
 }

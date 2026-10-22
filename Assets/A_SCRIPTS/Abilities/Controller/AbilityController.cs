@@ -100,6 +100,7 @@ public class AbilityController : MonoBehaviour
 
     private void Update()
     {
+        _abilityE?.Tick();
         if (Input.GetMouseButton(1) && _wasUCannon)
             _abilityE.TryExecute();
 

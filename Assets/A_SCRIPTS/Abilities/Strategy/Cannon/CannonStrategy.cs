@@ -9,7 +9,11 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
     private BulletFactory _cannonBullet;
     private readonly ShipHardpoints hardpoints;
     private readonly CoroutineRunner runner;
-    private float nextFireTime = 0f;
+    // Cargador: cada disparo gasta 1 bala; al vaciarse recarga durante _rtData.cooldown
+    private int _currentAmmo;
+    private bool _reloading = false;
+    private float _reloadEndTime = 0f;
+    private float _nextShotTime = 0f;
     followPlayer _camera;
     CannonRecoil _recoilLeft;
     CannonRecoil _recoilRight;
@@ -17,10 +21,14 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
     private PlayerUpgrades _islandUpgrades;
     private int _shotsSinceCharge = 0;
 
-    public event Action<float> OnCooldownStarted;
+    public event Action<float> OnCooldownStarted;      // arranca la recarga (la UI radial la muestra)
+    public event Action<int, int> OnAmmoChanged;       // (actual, máximo)
     public float CooldownDuration => _rtData.cooldown;
-    public float RemainingCooldown => Mathf.Max(0f, nextFireTime - Time.time);
-    public bool IsOnCooldown => Time.time < nextFireTime;
+    public float RemainingCooldown => _reloading ? Mathf.Max(0f, _reloadEndTime - Time.time) : 0f;
+    public bool IsOnCooldown => _reloading;
+    public bool IsReloading => _reloading;
+    public int CurrentAmmo => _currentAmmo;
+    public int MaxAmmo => _rtData.maxAmmo;
     public bool IsUnlocked { get; private set; } = false;
     public void SetUnlocked(bool unlocked) => IsUnlocked = unlocked;
 
@@ -37,14 +45,49 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         _recoilLeft = recoilL;
         _recoilRight = recoilR;
         _islandUpgrades = islandUpgrades;
+        _currentAmmo = _rtData.maxAmmo;
+    }
+
+    // Llamar todos los frames (AbilityController.Update) para que la recarga termine sola
+    public void Tick()
+    {
+        if (_reloading && Time.time >= _reloadEndTime)
+        {
+            _reloading = false;
+            _currentAmmo = _rtData.maxAmmo;
+            OnAmmoChanged?.Invoke(_currentAmmo, _rtData.maxAmmo);
+        }
     }
 
     public void TryExecute()
     {
-        if (Time.time < nextFireTime) return;
-        nextFireTime = Time.time + _rtData.cooldown;
-        OnCooldownStarted?.Invoke(_rtData.cooldown);
+        Tick();
+        if (_reloading) return;
+        if (Time.time < _nextShotTime) return;
+        if (_currentAmmo <= 0) { StartReload(); return; }
+
+        _currentAmmo--;
+        _nextShotTime = Time.time + _rtData.timeBetweenShots;
+        OnAmmoChanged?.Invoke(_currentAmmo, _rtData.maxAmmo);
         runner.StartCoroutine(FireBurst());
+
+        if (_currentAmmo <= 0) StartReload();
+    }
+
+    private void StartReload()
+    {
+        _reloading = true;
+        _reloadEndTime = Time.time + _rtData.cooldown;
+        OnCooldownStarted?.Invoke(_rtData.cooldown);
+    }
+
+    // Mejoras de munición: suben el máximo y, si no está recargando, también la actual
+    public void AddAmmo(int amount)
+    {
+        if (amount == 0) return;
+        _rtData.maxAmmo = Mathf.Max(1, _rtData.maxAmmo + amount);
+        if (!_reloading) _currentAmmo = Mathf.Clamp(_currentAmmo + amount, 0, _rtData.maxAmmo);
+        OnAmmoChanged?.Invoke(_currentAmmo, _rtData.maxAmmo);
     }
 
     private IEnumerator FireBurst()
@@ -155,7 +198,12 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         _rtData.explosionRadius = _baseData.explosionRadius;
         _rtData.burnDamagePerTick = _baseData.burnDamagePerTick;
         _rtData.burnDuration = _baseData.burnDuration;
+        _rtData.maxAmmo = _baseData.maxAmmo;
         _shotsSinceCharge = 0;
-        nextFireTime = 0f;
+        _currentAmmo = _rtData.maxAmmo;
+        _reloading = false;
+        _reloadEndTime = 0f;
+        _nextShotTime = 0f;
+        OnAmmoChanged?.Invoke(_currentAmmo, _rtData.maxAmmo);
     }
 }

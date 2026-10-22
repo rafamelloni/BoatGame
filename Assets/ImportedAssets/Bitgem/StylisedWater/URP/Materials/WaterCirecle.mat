@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: WaterCirecle
-  m_Shader: {fileID: -6465566751694194690, guid: be7c29c132d0b814d8da966306a3999e, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 0460ef8c51dfa9044baeabb95dfe157f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -57,8 +57,19 @@ Material:
     - _AlphaClipT: 0.5
     - _ClipRadius: 78.6
     - _EdgeFoamWidth: 3.83
+    - _ImpactLifetime: 1.2
+    - _ImpactNormal: 0.6
+    - _ImpactRadius: 2.5
+    - _ImpactRingWidth: 0.5
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _TurbulenceFoam: 0.85
+    - _TurbulenceHeight: 0.25
+    - _TurbulenceNoiseScale: 1.2
+    - _TurbulenceNormal: 1
+    - _TurbulenceRingFrequency: 3
+    - _TurbulenceSpeed: 1.5
+    - _TurbulenceTint: 0.5
     - _WaveFrequency: 0.05
     - _WaveScale: 0
     - _WaveSpeed: 1.81
@@ -67,6 +78,7 @@ Material:
     - Color_F01C36BF: {r: 0.001004219, g: 0, b: 1, a: 1}
     - Vector2_37B21477: {r: 0.3, g: 0.3, b: 0, a: 0}
     - _ClipCenterXZ: {r: 98.2, g: 71.5, b: 0, a: 0}
+    - _TurbulenceColor: {r: 0.54999995, g: 0.85, b: 0.9, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &319428671041606764
