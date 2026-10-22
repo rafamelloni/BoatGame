@@ -43,7 +43,11 @@ public class FireZone : MonoBehaviour
         {
             IDamageable damageable = hits[i].GetComponentInParent<IDamageable>();
             if (damageable != null)
+            {
+                DamageContext.Set(false, DamageKind.Fire);
                 damageable.TakeDamage(_damagePerSecond * _damageTickInterval);
+                DamageContext.Clear();
+            }
         }
     }
 

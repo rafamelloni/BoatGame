@@ -14,8 +14,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private HitFlash _hitFlash;
     public static event Action<Vector3> OnAnyEnemyDied;
     public static event Action<Vector3, float> OnAnyEnemyDamaged; // posicion + daño real, para damage numbers
+    public static event Action<DamageInfo> OnAnyEnemyDamagedInfo;  // igual pero con enemigo, crit, tipo y si lo mató
 
     public bool IsDying { get; private set; }
+    public bool IsInitialized => _rtData != null;
 
     private void Awake()
     {
@@ -38,6 +40,15 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         _rtData.currentHealth -= damage;
         OnDamage?.Invoke(_rtData.currentHealth);
         OnAnyEnemyDamaged?.Invoke(transform.position, damage);
+        OnAnyEnemyDamagedInfo?.Invoke(new DamageInfo
+        {
+            target = this,
+            position = transform.position,
+            damage = damage,
+            isCrit = DamageContext.IsCrit,
+            kind = DamageContext.Kind,
+            killed = _rtData.currentHealth <= 0
+        });
         _hitFlash?.Flash();
         if (_rtData.currentHealth <= 0)
         {

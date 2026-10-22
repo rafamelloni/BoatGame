@@ -35,6 +35,7 @@ public class Movement : MonoBehaviour
     private float _smoothTurn = 0f;
 
     public float GetCurrentBankZ() => _currentBankZ;
+    public bool IsSprinting => _isSprinting && _sprintEnabled;
 
     /// <summary>
     /// Qué tan rápido vas en relación a tu velocidad máxima (0 = parado, 1 = sprint a full).

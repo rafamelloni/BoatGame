@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public enum TumultoSpawnType { Group, Ship, Rafa, ZombieGroup }
+public enum TumultoSpawnType { Group, Ship, Rafa, ZombieGroup, Spike, Heavy }
 
 [Serializable]
 public struct SpawnPhase
@@ -50,6 +50,24 @@ public struct SpawnPhase
     public int maxActiveZombies;
     [Tooltip("Health de cada zombie. 0 = usar valor del prefab.")]
     public float zombieHealth;
+
+    [Space(6)]
+    [Header("--- Spikes ---")]
+    [Tooltip("Cada cuantos segundos intenta spawnear un nuevo Spike. 0 = no spawnea.")]
+    public float spikeSpawnInterval;
+    [Tooltip("Maximo de Spikes activos en pantalla al mismo tiempo.")]
+    public int maxActiveSpikes;
+    [Tooltip("Health del Spike. 0 = usar valor del prefab (SO_SpikeEnemy).")]
+    public float spikeHealth;
+
+    [Space(6)]
+    [Header("--- Heavy (ranged) ---")]
+    [Tooltip("Cada cuantos segundos intenta spawnear un Heavy Ranged. 0 = no spawnea.")]
+    public float heavySpawnInterval;
+    [Tooltip("Maximo de Heavy Ranged activos al mismo tiempo.")]
+    public int maxActiveHeavies;
+    [Tooltip("Health del Heavy Ranged. 0 = usar valor del prefab (SO_HeavyEnemy).")]
+    public float heavyHealth;
 
     [Space(6)]
     [Header("——— Tumulto ———")]

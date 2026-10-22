@@ -49,6 +49,8 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float _minDistanceBetweenShips = 20f;
     [SerializeField] private float _minDistanceBetweenRafas = 15f;
     [SerializeField] private float _minDistanceBetweenZombies = 15f;
+    [SerializeField] private float _minDistanceBetweenSpikes = 15f;
+    [SerializeField] private float _minDistanceBetweenHeavies = 25f;
 
     [Header("Tumulto")]
     [SerializeField] private float _tumultoRadius = 20f;
@@ -84,6 +86,8 @@ public class EnemySpawner : MonoBehaviour
     private readonly Dictionary<ZombieGroup, Vector3> _activeZombieGroupPositions = new();
     private readonly List<Vector3> _activeShipPositions = new();
     private readonly List<Vector3> _activeRafaPositions = new();
+    private readonly List<SpikeBallEnemy> _activeSpikes = new();
+    private readonly List<HeavyRangedEnemy> _activeHeavies = new();
 
     private int _activeGroupCount = 0;
     private int _activeZombieGroupCount = 0;
@@ -96,6 +100,10 @@ public class EnemySpawner : MonoBehaviour
     private int _maxShips;
     private float _rafaInterval;
     private int _maxRafas;
+    private float _spikeInterval;
+    private int _maxSpikes;
+    private float _heavyInterval;
+    private int _maxHeavies;
     private float _zombieInterval;
     private int _maxZombies;
     private int _currentZombieGroupPrefabIndex;
@@ -109,6 +117,8 @@ public class EnemySpawner : MonoBehaviour
     private Coroutine _groupLoop;
     private Coroutine _shipLoop;
     private Coroutine _rafaLoop;
+    private Coroutine _spikeLoop;
+    private Coroutine _heavyLoop;
     private Coroutine _zombieLoop;
 
     private float _lastTumultoCheck;
@@ -215,8 +225,16 @@ public class EnemySpawner : MonoBehaviour
         DespawnZombieGroups();
         _factory.DespawnAll<ShipEnemy>();
         _factory.DespawnAll<RafaEnemy>();
+        foreach (var s in _activeSpikes)
+            if (s != null) s.OnDead -= OnSpikeReturned;
+        if (_factory.HasPool<SpikeBallEnemy>()) _factory.DespawnAll<SpikeBallEnemy>();
         _activeShipPositions.Clear();
         _activeRafaPositions.Clear();
+        _activeSpikes.Clear();
+        foreach (var h in _activeHeavies)
+            if (h != null) h.OnDead -= OnHeavyReturned;
+        if (_factory.HasPool<HeavyRangedEnemy>()) _factory.DespawnAll<HeavyRangedEnemy>();
+        _activeHeavies.Clear();
     }
 
 
@@ -240,6 +258,10 @@ public class EnemySpawner : MonoBehaviour
         _maxShips = phase.maxActiveShips;
         _rafaInterval = phase.rafaSpawnInterval;
         _maxRafas = phase.maxActiveRafas;
+        _spikeInterval = phase.spikeSpawnInterval;
+        _maxSpikes = phase.maxActiveSpikes;
+        _heavyInterval = phase.heavySpawnInterval;
+        _maxHeavies = phase.maxActiveHeavies;
         _zombieInterval = phase.zombieSpawnInterval;
         _maxZombies = phase.maxActiveZombies;
         _currentZombieGroupPrefabIndex = phase.zombieGroupPrefabIndex;
@@ -315,6 +337,12 @@ public class EnemySpawner : MonoBehaviour
             case TumultoSpawnType.ZombieGroup:
                 SpawnZombieGroupAroundPlayer(spawnDir);
                 break;
+            case TumultoSpawnType.Spike:
+                SpawnSpikeAroundPlayer(spawnDir);
+                break;
+            case TumultoSpawnType.Heavy:
+                SpawnHeavyAroundPlayer(spawnDir);
+                break;
         }
     }
 
@@ -339,6 +367,22 @@ public class EnemySpawner : MonoBehaviour
         var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
         if (pos == null) return;
         RegisterRafa(_factory.Get<RafaEnemy>(pos.Value, _spawnYOffset));
+    }
+
+    private void SpawnSpikeAroundPlayer(Vector3 directionBias)
+    {
+        if (!_factory.HasPool<SpikeBallEnemy>()) return;
+        var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
+        if (pos == null) return;
+        RegisterSpike(_factory.Get<SpikeBallEnemy>(pos.Value, _spawnYOffset));
+    }
+
+    private void SpawnHeavyAroundPlayer(Vector3 directionBias)
+    {
+        if (!_factory.HasPool<HeavyRangedEnemy>()) return;
+        var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
+        if (pos == null) return;
+        RegisterHeavy(_factory.Get<HeavyRangedEnemy>(pos.Value, _spawnYOffset));
     }
 
     private void SpawnZombieGroupAroundPlayer(Vector3 directionBias)
@@ -450,6 +494,14 @@ public class EnemySpawner : MonoBehaviour
             case TumultoSpawnType.ZombieGroup:
                 RegisterZombieGroup(_factory.GetZombieGroup(pos, _spawnYOffset));
                 break;
+            case TumultoSpawnType.Spike:
+                if (_factory.HasPool<SpikeBallEnemy>())
+                    RegisterSpike(_factory.Get<SpikeBallEnemy>(pos, _spawnYOffset));
+                break;
+            case TumultoSpawnType.Heavy:
+                if (_factory.HasPool<HeavyRangedEnemy>())
+                    RegisterHeavy(_factory.Get<HeavyRangedEnemy>(pos, _spawnYOffset));
+                break;
         }
     }
 
@@ -477,6 +529,10 @@ public class EnemySpawner : MonoBehaviour
         _shipLoop = StartCoroutine(SpawnLoop(_shipInterval, () => _activeShipPositions.Count < _maxShips, SpawnShip));
         _rafaLoop = StartCoroutine(SpawnLoop(_rafaInterval, () => _activeRafaPositions.Count < _maxRafas, SpawnRafa));
         _zombieLoop = StartCoroutine(SpawnLoop(_zombieInterval, () => _activeZombieGroupCount < _maxZombies, SpawnZombieGroup));
+        if (_maxSpikes > 0 && _spikeInterval > 0f && _factory.HasPool<SpikeBallEnemy>())
+            _spikeLoop = StartCoroutine(SpawnLoop(_spikeInterval, () => _activeSpikes.Count < _maxSpikes, SpawnSpike));
+        if (_maxHeavies > 0 && _heavyInterval > 0f && _factory.HasPool<HeavyRangedEnemy>())
+            _heavyLoop = StartCoroutine(SpawnLoop(_heavyInterval, () => _activeHeavies.Count < _maxHeavies, SpawnHeavy));
     }
 
     private void StopAllLoops()
@@ -485,6 +541,8 @@ public class EnemySpawner : MonoBehaviour
         if (_shipLoop != null) { StopCoroutine(_shipLoop); _shipLoop = null; }
         if (_rafaLoop != null) { StopCoroutine(_rafaLoop); _rafaLoop = null; }
         if (_zombieLoop != null) { StopCoroutine(_zombieLoop); _zombieLoop = null; }
+        if (_spikeLoop != null) { StopCoroutine(_spikeLoop); _spikeLoop = null; }
+        if (_heavyLoop != null) { StopCoroutine(_heavyLoop); _heavyLoop = null; }
     }
 
     private IEnumerator SpawnLoop(float interval, Func<bool> canSpawn, Action spawnAction)
@@ -570,6 +628,60 @@ public class EnemySpawner : MonoBehaviour
         yield return new WaitForSeconds(_rafaLifetime);
         if (rafa != null && rafa.gameObject.activeInHierarchy)
             rafa.GetComponent<EnemyHealth>().TakeDamage(999f);
+    }
+
+    private void SpawnSpike()
+    {
+        var pos = TryGetValidPosition(IsTooCloseToSpike);
+        if (pos == null) return;
+        RegisterSpike(_factory.Get<SpikeBallEnemy>(pos.Value, _spawnYOffset));
+    }
+
+    private void RegisterSpike(SpikeBallEnemy spike)
+    {
+        if (spike == null) return;
+        _activeSpikes.Add(spike);
+        spike.OnDead += OnSpikeReturned;
+    }
+
+    private void OnSpikeReturned(SpikeBallEnemy spike)
+    {
+        spike.OnDead -= OnSpikeReturned;
+        _activeSpikes.Remove(spike);
+    }
+
+    private bool IsTooCloseToSpike(Vector3 c)
+    {
+        foreach (var s in _activeSpikes)
+            if (s != null && Vector3.Distance(c, s.transform.position) < _minDistanceBetweenSpikes) return true;
+        return false;
+    }
+
+    private void SpawnHeavy()
+    {
+        var pos = TryGetValidPosition(IsTooCloseToHeavy);
+        if (pos == null) return;
+        RegisterHeavy(_factory.Get<HeavyRangedEnemy>(pos.Value, _spawnYOffset));
+    }
+
+    private void RegisterHeavy(HeavyRangedEnemy heavy)
+    {
+        if (heavy == null) return;
+        _activeHeavies.Add(heavy);
+        heavy.OnDead += OnHeavyReturned;
+    }
+
+    private void OnHeavyReturned(HeavyRangedEnemy heavy)
+    {
+        heavy.OnDead -= OnHeavyReturned;
+        _activeHeavies.Remove(heavy);
+    }
+
+    private bool IsTooCloseToHeavy(Vector3 c)
+    {
+        foreach (var h in _activeHeavies)
+            if (h != null && Vector3.Distance(c, h.transform.position) < _minDistanceBetweenHeavies) return true;
+        return false;
     }
 
     private void SpawnZombieGroup()
@@ -701,6 +813,8 @@ public class EnemySpawner : MonoBehaviour
         foreach (var pos in _activeZombieGroupPositions.Values) allPositions.Add(pos);
         allPositions.AddRange(_activeShipPositions);
         allPositions.AddRange(_activeRafaPositions);
+        foreach (var s in _activeSpikes) if (s != null) allPositions.Add(s.transform.position);
+        foreach (var h in _activeHeavies) if (h != null) allPositions.Add(h.transform.position);
 
         foreach (var pos in allPositions)
         {

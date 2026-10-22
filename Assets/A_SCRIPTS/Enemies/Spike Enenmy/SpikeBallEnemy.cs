@@ -1,7 +1,12 @@
 using UnityEngine;
 
-public class SpikeBallEnemy : MonoBehaviour
+// Integrado al sistema de enemigos: hereda de Enemy (EnemyHealth + SO_EnemyData),
+// avisa OnDead para que la EnemyFactory lo devuelva al pool, y funciona con
+// EnemyEmerge, las fases, el tumulto y la oleada del EnemySpawner.
+public class SpikeBallEnemy : Enemy
 {
+    public event System.Action<SpikeBallEnemy> OnDead;
+
     private enum State { Chase, WindUp, Dash, Brake, Spin, LongDash, SpinGlide }
     private enum SpinPhase { Loop, Approach, Settle }
     private enum Attack { Dash, LongDash }
@@ -21,6 +26,8 @@ public class SpikeBallEnemy : MonoBehaviour
 
     [Header("WindUp")]
     [SerializeField] private float _windUpTime = 0.5f;
+    [Tooltip("Aviso extra ANTES de la carga: frena y apunta, el indicador ya se ve, pero todavía no se inclina. No hace más lenta la animación de carga.")]
+    [SerializeField] private float _telegraphLeadTime = 0.6f;
     [SerializeField] private float _windUpTurnSpeed = 300f;
     [SerializeField] private float _windUpDecel = 6f;
 
@@ -39,6 +46,8 @@ public class SpikeBallEnemy : MonoBehaviour
     [SerializeField] private float _longDashSpeed = 30f;
     [SerializeField] private float _longDashAccel = 40f;
     [SerializeField] private float _spinTriggerDistance = 8f; // empieza a girar a esta distancia ANTES de llegar
+    [Tooltip("Arranca el giro esta cantidad de segundos antes de pasar al player (a la velocidad actual). Se usa lo que llegue primero entre esto y Spin Trigger Distance.")]
+    [SerializeField] private float _spinLeadTime = 0.45f;
     [SerializeField] private float _longDashOvershoot = 12f;  // metros detrás del player donde queda frenado
     [SerializeField] private float _maxLongDashTime = 3f;
 
@@ -52,6 +61,10 @@ public class SpikeBallEnemy : MonoBehaviour
     [SerializeField] private float _spinAccel = 3000f;
     [SerializeField] private float _spinDecel = 1500f;
     [SerializeField] private bool _spinShortestWay = true;
+    [Tooltip("En el dash normal, empieza a girar mientras todavía frena, cuando la velocidad baja de esto (no espera a quedar quieto)")]
+    [SerializeField] private float _spinStartSpeed = 10f;
+    [Tooltip("Velocidad de giro con la que arranca (fracción del máximo) para que el giro se note de entrada")]
+    [SerializeField, Range(0f, 1f)] private float _spinKickstart = 0.35f;
 
     [Header("Spin - pasarse y corregir")]
     [SerializeField] private float _overshootAngle = 25f;
@@ -71,8 +84,24 @@ public class SpikeBallEnemy : MonoBehaviour
     [SerializeField] private float _tiltLerp = 5f;
     [SerializeField] private bool _invertTilt;
 
+    [Header("Inclinación - game feel")]
+    [Tooltip("Inclinación hacia atrás al cargar el dash (anticipación). Se suma a Wind Up Tilt.")]
+    [SerializeField] private float _windUpLeanBack = -20f;
+    [Tooltip("Cuánto se aplasta el modelo al cargar (0.15 = 15%). Al salir se estira y rebota.")]
+    [SerializeField] private float _windUpSquash = 0.15f;
+    [Tooltip("Estirón al arrancar el dash")]
+    [SerializeField] private float _dashStretch = 0.25f;
+    [SerializeField] private float _squashStiffness = 220f;
+    [SerializeField, Range(0.1f, 1f)] private float _squashDamping = 0.35f;
+    [Tooltip("Golpe hacia adelante extra al arrancar el dash (grados)")]
+    [SerializeField] private float _dashKickTilt = 18f;
+    [Tooltip("Rigidez del resorte de inclinación (más = más rápido)")]
+    [SerializeField] private float _tiltStiffness = 160f;
+    [Tooltip("Amortiguación del resorte (menos = rebota más)")]
+    [SerializeField, Range(0.1f, 1f)] private float _tiltDamping = 0.4f;
+
     [Header("Debug")]
-    [SerializeField] private bool _debugLogs = true;
+    [SerializeField] private bool _debugLogs = false;
 
     private static readonly Quaternion ForwardFix = Quaternion.Euler(0f, 90f, 0f);
 
@@ -80,6 +109,11 @@ public class SpikeBallEnemy : MonoBehaviour
     private float _stateTimer;
     private Vector3 _velocity;
     private float _currentTilt;
+    private float _tiltVel;
+    private float _squash;      // >0 aplastado, <0 estirado
+    private float _squashVel;
+    private Vector3 _pivotBaseScale = Vector3.one;
+    private bool _pivotScaleCached;
     private bool _reversing;
 
     private float _yaw;
@@ -102,11 +136,58 @@ public class SpikeBallEnemy : MonoBehaviour
 
     private bool _warnedNoPlayer;
 
+    [Header("Vida (si falta el SO)")]
+    [Tooltip("Vida que usa si el prefab no tiene Base Data asignado")]
+    [SerializeField] private float _fallbackMaxHealth = 300f;
+
+    protected override void Awake()
+    {
+        if (_enemyHealth == null) _enemyHealth = GetComponent<EnemyHealth>();
+        if (baseData == null)
+        {
+            Debug.LogWarning("[SpikeBallEnemy] El prefab no tiene Base Data (SO_EnemyData): uso vida por defecto. Corré Tools > Botes > Preparar Spike Enemy.", this);
+            baseData = ScriptableObject.CreateInstance<SO_EnemyData>();
+            baseData.maxHealth = _fallbackMaxHealth;
+        }
+        base.Awake();
+        if (_enemyHealth != null) _enemyHealth.OnDeath += HandleDeath;
+        else Debug.LogWarning("[SpikeBallEnemy] Falta EnemyHealth en el prefab.", this);
+    }
+
+    private void OnDestroy()
+    {
+        if (_enemyHealth != null) _enemyHealth.OnDeath -= HandleDeath;
+    }
+
+    private void HandleDeath() => OnDead?.Invoke(this);
+
+    // Lo llama la EnemyFactory al sacarlo del pool
+    public void SetPlayer(Transform player)
+    {
+        _player = player;
+        _warnedNoPlayer = false;
+        if (_enemyHealth != null) _enemyHealth.Revive();
+        ResetState();
+    }
+
     private void OnEnable()
+    {
+        ResetState();
+    }
+
+    private void ResetState()
     {
         _yaw = transform.eulerAngles.y;
         _velocity = Vector3.zero;
         _currentTilt = 0f;
+        _tiltVel = 0f;
+        _squash = 0f;
+        _squashVel = 0f;
+        if (_tiltPivot != null)
+        {
+            if (!_pivotScaleCached) { _pivotBaseScale = _tiltPivot.localScale; _pivotScaleCached = true; }
+            _tiltPivot.localScale = _pivotBaseScale;
+        }
         if (_tiltPivot != null) _tiltPivot.localRotation = Quaternion.identity;
         StopExhaust(true);
         EnterState(State.Chase);
@@ -181,7 +262,7 @@ public class SpikeBallEnemy : MonoBehaviour
         RotateTowardsPlayer(_windUpTurnSpeed);
         ApproachVelocity(Vector3.zero, _windUpDecel, _windUpDecel);
 
-        if (_stateTimer >= _windUpTime)
+        if (_stateTimer >= _telegraphLeadTime + _windUpTime)
             EnterState(_nextAttack == Attack.LongDash ? State.LongDash : State.Dash);
     }
 
@@ -208,7 +289,8 @@ public class SpikeBallEnemy : MonoBehaviour
 
         float distAhead = Vector3.Dot(FlatDirToPlayer(), _dashDir);   // cuánto le falta para pasarlo
 
-        if (distAhead <= _spinTriggerDistance || _stateTimer >= _maxLongDashTime)
+        float trigger = Mathf.Max(_spinTriggerDistance, _velocity.magnitude * _spinLeadTime);
+        if (distAhead <= trigger || _stateTimer >= _maxLongDashTime)
             EnterState(State.SpinGlide);
     }
 
@@ -240,7 +322,7 @@ public class SpikeBallEnemy : MonoBehaviour
     {
         ApproachVelocity(Vector3.zero, _brakeDecel, _brakeDecel);
 
-        if (_velocity.magnitude <= _brakeEndSpeed || _stateTimer >= _maxBrakeTime)
+        if (_velocity.magnitude <= Mathf.Max(_brakeEndSpeed, _spinStartSpeed) || _stateTimer >= _maxBrakeTime)
             EnterState(State.Spin);
     }
 
@@ -343,18 +425,21 @@ public class SpikeBallEnemy : MonoBehaviour
                 _dashDir = Forward;
                 _dashStartPos = transform.position;
                 _dashTargetDist = Vector3.Dot(FlatDirToPlayer(), _dashDir) + _dashOvershoot;
+                _tiltVel += _dashKickTilt * 12f; // latigazo hacia adelante
+                _squash = -_dashStretch;          // estirón
+                _squashVel = 0f;
                 if (_exhaustFire != null) _exhaustFire.Play(true);
                 break;
 
             case State.SpinGlide:
-                _spinSpeed = 0f;
+                _spinSpeed = _spinMaxSpeed * _spinKickstart;
                 _glideDecel = _brakeDecel;
                 PickSpinDirection();
                 break;
 
             case State.Spin:
                 _spinPhase = SpinPhase.Loop;
-                _spinSpeed = 0f;
+                _spinSpeed = _spinMaxSpeed * _spinKickstart;
                 _spinAccumulated = 0f;
                 _angVel = 0f;
                 PickSpinDirection();
@@ -374,6 +459,35 @@ public class SpikeBallEnemy : MonoBehaviour
             _spinSign = Random.value < 0.5f ? -1f : 1f;
         }
     }
+
+    // ---------- Telegraph (lo lee SpikeDashTelegraph) ----------
+
+    public bool IsWindingUp => _state == State.WindUp;
+    public bool IsDashing => _state == State.Dash || _state == State.LongDash;
+    // progreso del aviso completo (lead + carga) y cuánto falta para salir
+    public float WindUpProgress01
+    {
+        get
+        {
+            float total = _telegraphLeadTime + _windUpTime;
+            return total > 0f ? Mathf.Clamp01(_stateTimer / total) : 1f;
+        }
+    }
+    public float TimeToDash => _state == State.WindUp ? Mathf.Max(0f, _telegraphLeadTime + _windUpTime - _stateTimer) : 0f;
+    public bool NextAttackIsLong => _nextAttack == Attack.LongDash;
+
+    public Vector3 PredictedDashDirection
+    {
+        get
+        {
+            Vector3 d = _player != null ? FlatDirToPlayer() : Forward;
+            return d.sqrMagnitude > 0.001f ? d.normalized : Forward;
+        }
+    }
+
+    // hasta donde va a quedar frenado: el player + el overshoot del ataque que viene
+    public float PredictedDashLength =>
+        (_player != null ? FlatDirToPlayer().magnitude : 0f) + (NextAttackIsLong ? _longDashOvershoot : _dashOvershoot);
 
     // ---------- Helpers ----------
 
@@ -416,7 +530,7 @@ public class SpikeBallEnemy : MonoBehaviour
         {
             State.Chase => _reversing ? _reverseTilt
                                           : _chaseTilt * Mathf.InverseLerp(0f, _chaseSpeed, speed),
-            State.WindUp => _windUpTilt,
+            State.WindUp => _windUpTilt + _windUpLeanBack * WindUpProgress(),
             State.Dash => _dashTilt,
             State.LongDash => _dashTilt,
             State.SpinGlide => _spinTilt,
@@ -425,9 +539,32 @@ public class SpikeBallEnemy : MonoBehaviour
             _ => 0f
         };
 
-        _currentTilt = Mathf.Lerp(_currentTilt, target, _tiltLerp * Time.deltaTime);
+        // resorte: llega rápido, se pasa un poco y rebota (más vivo que un Lerp)
+        float dt = Time.deltaTime;
+        float damping = 2f * _tiltDamping * Mathf.Sqrt(_tiltStiffness);
+        _tiltVel += (_tiltStiffness * (target - _currentTilt) - damping * _tiltVel) * dt;
+        _currentTilt += _tiltVel * dt;
+
+        // aplastado mientras carga
+        float squashTarget = _state == State.WindUp ? _windUpSquash * WindUpProgress() : 0f;
+
+        // squash & stretch con resorte (al salir del estirón rebota)
+        float sDamp = 2f * _squashDamping * Mathf.Sqrt(_squashStiffness);
+        _squashVel += (_squashStiffness * (squashTarget - _squash) - sDamp * _squashVel) * dt;
+        _squash += _squashVel * dt;
+        float sy = 1f - _squash;
+        float sxz = 1f + _squash * 0.5f;
+        _tiltPivot.localScale = Vector3.Scale(_pivotBaseScale, new Vector3(sxz, sy, sxz));
+
         float sign = _invertTilt ? -1f : 1f;
         _tiltPivot.localRotation = Quaternion.Euler(0f, 0f, _currentTilt * sign);
+    }
+
+    private float WindUpProgress()
+    {
+        // la animación de carga (inclinarse/aplastarse) usa solo el último tramo, después del aviso
+        float k = _windUpTime > 0f ? Mathf.Clamp01((_stateTimer - _telegraphLeadTime) / _windUpTime) : 1f;
+        return k * k * (3f - 2f * k); // suave al principio, firme al final
     }
 
     private void StopExhaust(bool clear)
@@ -436,6 +573,17 @@ public class SpikeBallEnemy : MonoBehaviour
         _exhaustFire.Stop(true, clear
             ? ParticleSystemStopBehavior.StopEmittingAndClear
             : ParticleSystemStopBehavior.StopEmitting);
+    }
+
+    // Si te embiste durante el dash, frena (el daño y el knockback al player los hace PlayerCollisions por el tag ShipEnemy)
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!collision.gameObject.CompareTag(_playerTag)) return;
+        if (_state == State.Dash || _state == State.LongDash || _state == State.SpinGlide)
+        {
+            _velocity *= 0.3f;
+            EnterState(State.Brake);
+        }
     }
 
     private void OnDrawGizmosSelected()

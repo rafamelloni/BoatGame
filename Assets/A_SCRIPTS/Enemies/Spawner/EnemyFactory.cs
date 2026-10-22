@@ -25,6 +25,14 @@ public class EnemyFactory : MonoBehaviour
     [SerializeField] private GameObject _rafaPrefab;
     [SerializeField] private int _initialRafaStock = 3;
 
+    [Header("Spike")]
+    [SerializeField] private GameObject _spikePrefab;
+    [SerializeField] private int _initialSpikeStock = 3;
+
+    [Header("Heavy Ranged")]
+    [SerializeField] private GameObject _heavyPrefab;
+    [SerializeField] private int _initialHeavyStock = 2;
+
     [Header("References")]
     [SerializeField] private Transform _player;
     [SerializeField] private Transform _playerAimPo;
@@ -43,7 +51,11 @@ public class EnemyFactory : MonoBehaviour
         InitZombieGroupPools();
         InitPool<ShipEnemy>(_shipPrefab, _initialShipStock);
         InitPool<RafaEnemy>(_rafaPrefab, _initialRafaStock);
+        if (_spikePrefab != null) InitPool<SpikeBallEnemy>(_spikePrefab, _initialSpikeStock);
+        if (_heavyPrefab != null) InitPool<HeavyRangedEnemy>(_heavyPrefab, _initialHeavyStock);
     }
+
+    public bool HasPool<T>() where T : MonoBehaviour => _pools.ContainsKey(typeof(T));
 
     public void ApplyPhase(SpawnPhase phase)
     {
@@ -174,6 +186,14 @@ public class EnemyFactory : MonoBehaviour
                 rafa.SetPlayer(_player);
                 rafa.OnDead += OnRafaDead;
                 break;
+            case SpikeBallEnemy spike:
+                spike.SetPlayer(_player);
+                spike.OnDead += OnSpikeDead;
+                break;
+            case HeavyRangedEnemy heavy:
+                heavy.SetPlayer(_player);
+                heavy.OnDead += OnHeavyDead;
+                break;
         }
     }
 
@@ -188,6 +208,12 @@ public class EnemyFactory : MonoBehaviour
             case RafaEnemy rafa:
                 rafa.OnDead -= OnRafaDead;
                 break;
+            case SpikeBallEnemy spike:
+                spike.OnDead -= OnSpikeDead;
+                break;
+            case HeavyRangedEnemy heavy:
+                heavy.OnDead -= OnHeavyDead;
+                break;
         }
         instance.gameObject.SetActive(false);
     }
@@ -201,6 +227,8 @@ public class EnemyFactory : MonoBehaviour
         {
             ShipEnemy => _currentPhase.shipHealth,
             RafaEnemy => _currentPhase.rafaHealth,
+            SpikeBallEnemy => _currentPhase.spikeHealth,
+            HeavyRangedEnemy => _currentPhase.heavyHealth,
             _ => 0f
         };
 
@@ -210,6 +238,8 @@ public class EnemyFactory : MonoBehaviour
 
     private void OnShipDead(ShipEnemy ship) => Return(ship);
     private void OnRafaDead(RafaEnemy rafa) => Return(rafa);
+    private void OnSpikeDead(SpikeBallEnemy spike) => Return(spike);
+    private void OnHeavyDead(HeavyRangedEnemy heavy) => Return(heavy);
 
     private void InitGroupPools()
     {

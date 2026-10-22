@@ -32,7 +32,9 @@ public class BurnStatus : MonoBehaviour
         {
             yield return new WaitForSeconds(tickInterval);
             elapsed += tickInterval;
+            DamageContext.Set(false, DamageKind.Fire);
             _target?.TakeDamage(damagePerTick);
+            DamageContext.Clear();
         }
 
         if (_vfxInstance != null)

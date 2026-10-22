@@ -170,6 +170,10 @@ public class EnemyEmerge : MonoBehaviour
         if (rafa != null) list.Add(rafa);
         var dashBoss = GetComponent<DashBossEnemy>();
         if (dashBoss != null) list.Add(dashBoss);
+        var spike = GetComponent<SpikeBallEnemy>();
+        if (spike != null) list.Add(spike);
+        var heavy = GetComponent<HeavyRangedEnemy>();
+        if (heavy != null) list.Add(heavy);
         return list.ToArray();
     }
 }

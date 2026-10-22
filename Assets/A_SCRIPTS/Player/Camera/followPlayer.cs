@@ -19,6 +19,8 @@ public class followPlayer : MonoBehaviour
     public float shakeStrength = 0.3f;
     public float shakeDuration = 0.3f;
 
+    [HideInInspector] public float extraZoom = 0f; // lo setea SprintScreenFX: aleja la cámara (metros)
+
     private Quaternion fixedRotation;
     private Rigidbody _targetRb;
 
@@ -89,6 +91,7 @@ public class followPlayer : MonoBehaviour
         float compensation = forwardCompensation * Mathf.Min(target.forward.z, 0f);
         desiredPos += Vector3.forward * compensation;
         desiredPos.y += _zoomOffset;
+        desiredPos += offset.normalized * extraZoom;
         desiredPos.x = Mathf.Clamp(desiredPos.x, minBounds.x, maxBounds.x);
         desiredPos.z = Mathf.Clamp(desiredPos.z, minBounds.y, maxBounds.y);
 

@@ -313,6 +313,7 @@ public class CannonBullet : BulletsBase
         bool hasBurn = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.BurnShot);
 
         Collider[] hits = Physics.OverlapSphere(center, radius, _damageLayers);
+        DamageContext.Set(isCrit, DamageKind.Normal); // para los damage numbers
         for (int i = 0; i < hits.Length; i++)
         {
             IDamageable damageable = hits[i].GetComponentInParent<IDamageable>();
@@ -323,6 +324,7 @@ public class CannonBullet : BulletsBase
                     ApplyBurn(damageable);
             }
         }
+        DamageContext.Clear();
 
         bool hasGroundFire = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.GroundFire);
         if (hasGroundFire)
