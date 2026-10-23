@@ -19,6 +19,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public bool IsDying { get; private set; }
     public bool IsInitialized => _rtData != null;
 
+    // Para debug del bug "spawnean muertos": si muere muy rápido después de revivir, avisa quién lo mató
+    [SerializeField] private bool _logEarlyDeaths = true;
+    private float _revivedAt = -999f;
+
     private void Awake()
     {
         _hitFlash = GetComponent<HitFlash>();
@@ -36,7 +40,11 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     public void TakeDamage(float damage)
     {
-        
+        // Un enemigo apagado (muerto o guardado en el pool) no puede recibir daño.
+        // Antes una explosión con varios colliders del mismo enemigo, o un burn,
+        // le podía seguir pegando después de muerto.
+        if (_rtData == null || IsDying || !gameObject.activeInHierarchy) return;
+
         _rtData.currentHealth -= damage;
         OnDamage?.Invoke(_rtData.currentHealth);
         OnAnyEnemyDamaged?.Invoke(transform.position, damage);
@@ -58,6 +66,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     private void Die()
     {
+        if (_logEarlyDeaths && Time.time - _revivedAt < 1.5f)
+            Debug.LogWarning($"[EnemyHealth] {name} murió {Time.time - _revivedAt:0.00}s después de spawnear. Quién lo mató:\n{Environment.StackTrace}", this);
+
         OnDeath?.Invoke();
         OnAnyEnemyDied?.Invoke(transform.position);
         IsDying = true;
@@ -73,6 +84,11 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         gameObject.SetActive(true);
         _rtData.Reset();
         IsDying = false;
+        _revivedAt = Time.time;
+
+        // Si murió prendido fuego, el BurnStatus quedaba pegado con su VFX
+        var burn = GetComponent<BurnStatus>();
+        if (burn != null) burn.Clear();
     }
 
     public void SetMaxHealth(float newHealth)

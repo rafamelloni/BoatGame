@@ -86,6 +86,12 @@ public class EnemySpawner : MonoBehaviour
     private readonly Dictionary<ZombieGroup, Vector3> _activeZombieGroupPositions = new();
     private readonly List<Vector3> _activeShipPositions = new();
     private readonly List<Vector3> _activeRafaPositions = new();
+    // Posición en la que spawneó cada uno. Antes al morir se borraba usando la posición
+    // ACTUAL (ya se había movido), el Remove nunca encontraba nada y la lista solo crecía.
+    private readonly Dictionary<ShipEnemy, Vector3> _shipSpawnPositions = new();
+    private readonly Dictionary<RafaEnemy, Vector3> _rafaSpawnPositions = new();
+    // Timer de vida de cada Rafa: se corta cuando vuelve al pool, si no mataba al Rafa reusado
+    private readonly Dictionary<RafaEnemy, Coroutine> _rafaLifetimes = new();
     private readonly List<SpikeBallEnemy> _activeSpikes = new();
     private readonly List<HeavyRangedEnemy> _activeHeavies = new();
 
@@ -225,11 +231,16 @@ public class EnemySpawner : MonoBehaviour
         DespawnZombieGroups();
         _factory.DespawnAll<ShipEnemy>();
         _factory.DespawnAll<RafaEnemy>();
+        foreach (var co in _rafaLifetimes.Values)
+            if (co != null) StopCoroutine(co);
+        _rafaLifetimes.Clear();
         foreach (var s in _activeSpikes)
             if (s != null) s.OnDead -= OnSpikeReturned;
         if (_factory.HasPool<SpikeBallEnemy>()) _factory.DespawnAll<SpikeBallEnemy>();
         _activeShipPositions.Clear();
         _activeRafaPositions.Clear();
+        _shipSpawnPositions.Clear();
+        _rafaSpawnPositions.Clear();
         _activeSpikes.Clear();
         foreach (var h in _activeHeavies)
             if (h != null) h.OnDead -= OnHeavyReturned;
@@ -358,7 +369,7 @@ public class EnemySpawner : MonoBehaviour
         var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
         if (pos == null) return;
         var ship = _factory.Get<ShipEnemy>(pos.Value, _spawnYOffset);
-        _activeShipPositions.Add(ship.transform.position);
+        RegisterShipPosition(ship);
         ship.OnDead += OnShipReturned;
     }
 
@@ -485,7 +496,7 @@ public class EnemySpawner : MonoBehaviour
                 break;
             case TumultoSpawnType.Ship:
                 var ship = _factory.Get<ShipEnemy>(pos, _spawnYOffset);
-                _activeShipPositions.Add(ship.transform.position);
+                RegisterShipPosition(ship);
                 ship.OnDead += OnShipReturned;
                 break;
             case TumultoSpawnType.Rafa:
@@ -593,14 +604,29 @@ public class EnemySpawner : MonoBehaviour
         var pos = TryGetValidPosition(IsTooCloseToShip);
         if (pos == null) return;
         var ship = _factory.Get<ShipEnemy>(pos.Value, _spawnYOffset);
-        _activeShipPositions.Add(ship.transform.position);
+        RegisterShipPosition(ship);
         ship.OnDead += OnShipReturned;
     }
 
     private void OnShipReturned(ShipEnemy ship)
     {
         ship.OnDead -= OnShipReturned;
-        _activeShipPositions.Remove(ship.transform.position);
+        if (_shipSpawnPositions.TryGetValue(ship, out var spawnPos))
+        {
+            _activeShipPositions.Remove(spawnPos);
+            _shipSpawnPositions.Remove(ship);
+        }
+    }
+
+    private void RegisterShipPosition(ShipEnemy ship)
+    {
+        // Por si quedó registrado de antes (ej. despawn sin OnDead)
+        if (_shipSpawnPositions.TryGetValue(ship, out var oldPos))
+            _activeShipPositions.Remove(oldPos);
+
+        Vector3 pos = ship.transform.position;
+        _shipSpawnPositions[ship] = pos;
+        _activeShipPositions.Add(pos);
     }
 
     private void SpawnRafa()
@@ -612,15 +638,34 @@ public class EnemySpawner : MonoBehaviour
 
     private void RegisterRafa(RafaEnemy rafa)
     {
-        _activeRafaPositions.Add(rafa.transform.position);
+        if (_rafaSpawnPositions.TryGetValue(rafa, out var oldPos))
+            _activeRafaPositions.Remove(oldPos);
+        Vector3 spawnPos = rafa.transform.position;
+        _rafaSpawnPositions[rafa] = spawnPos;
+        _activeRafaPositions.Add(spawnPos);
         rafa.OnDead += OnRafaReturned;
-        StartCoroutine(RafaLifetimeCoroutine(rafa));
+        StopRafaLifetime(rafa);
+        _rafaLifetimes[rafa] = StartCoroutine(RafaLifetimeCoroutine(rafa));
     }
 
     private void OnRafaReturned(RafaEnemy rafa)
     {
         rafa.OnDead -= OnRafaReturned;
-        _activeRafaPositions.Remove(rafa.transform.position);
+        if (_rafaSpawnPositions.TryGetValue(rafa, out var spawnPos))
+        {
+            _activeRafaPositions.Remove(spawnPos);
+            _rafaSpawnPositions.Remove(rafa);
+        }
+        StopRafaLifetime(rafa);
+    }
+
+    private void StopRafaLifetime(RafaEnemy rafa)
+    {
+        if (_rafaLifetimes.TryGetValue(rafa, out var co))
+        {
+            if (co != null) StopCoroutine(co);
+            _rafaLifetimes.Remove(rafa);
+        }
     }
 
     private IEnumerator RafaLifetimeCoroutine(RafaEnemy rafa)

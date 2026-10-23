@@ -82,7 +82,8 @@ public class RT_PlayerHealth : MonoBehaviour
     public float MaxHealth => _stats.maxHealth;
     private void OnApplicationQuit()
     {
-        _lifeVignette.SetFloat("_NombreDelProperty", 0f);
+        if (_lifeVignette != null)
+            _lifeVignette.SetFloat("_VignetteIntensity", 0f);
     }
 
     public void RefreshUI()
@@ -100,6 +101,9 @@ public class RT_PlayerHealth : MonoBehaviour
             _sailMaterial = _sailRenderer.material;
 
         ResetVisuals();
+
+        if (_lifeVignette != null)
+            _lifeVignette.SetFloat("_VignetteIntensity", 0f);
     }
 
     public void TakeDamage(float amount)
@@ -140,7 +144,7 @@ public class RT_PlayerHealth : MonoBehaviour
 
     private IEnumerator ResetHealVignette()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSecondsRealtime(1.5f);
 
         if (_lifeVignette != null)
             _lifeVignette.SetFloat("_VignetteIntensity", 0f);

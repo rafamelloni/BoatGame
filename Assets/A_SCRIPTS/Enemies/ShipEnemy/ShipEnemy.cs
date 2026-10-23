@@ -158,6 +158,10 @@ public class ShipEnemy : Enemy
 
         if (other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("ShipEnemy"))
         {
+            // No matar enemigos que todavia estan saliendo del agua (recien spawneados)
+            var emerge = other.GetComponentInParent<EnemyEmerge>();
+            if (emerge != null && emerge.IsEmerging) return;
+
             other.gameObject.GetComponent<EnemyHealth>().TakeDamage(999f);
             print("cool");
         }

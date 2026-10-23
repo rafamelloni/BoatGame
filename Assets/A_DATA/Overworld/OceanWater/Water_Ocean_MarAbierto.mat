@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Water_Ocean_MarAbierto
+  m_Shader: {fileID: 4800000, guid: 1fd9339839678b146b24c438673be376, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: f87d53fcaf34530488b706ee35d9b519, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _DepthDistance: 0.9
+    - _DepthPower: 1.08
+    - _FoamDistance: 2.05
+    - _FoamNoiseScale: 6.21
+    - _FoamSoftness: 0.013
+    - _FoamSpeed: 3.09
+    - _FresnelPower: 3.71
+    - _FresnelStrength: 0.309
+    - _Glossiness: 29
+    - _NormalStrength: 0.45
+    - _NormalTiling: 0.35
+    - _Refraction: 0
+    - _ScrollSpeed: 0.1
+    - _ShallowOpacity: 0.286
+    - _SpecularStrength: 0
+    - _WaveFrequency: 2.2
+    - _WaveHeight: 0.015
+    - _WaveSpeed: 7
+    m_Colors:
+    - _DeepColor: {r: 0, g: 0.17089081, b: 1, a: 1}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FresnelColor: {r: 0.8, g: 0.95, b: 1, a: 1}
+    - _ShallowColor: {r: 0.21226415, g: 0.38212967, b: 0.8490566, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

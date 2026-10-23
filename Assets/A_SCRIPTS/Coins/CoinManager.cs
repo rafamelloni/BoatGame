@@ -15,6 +15,9 @@ public class CoinManager : MonoBehaviour
     public event Action<int> OnLevelChanged;
     public event Action OnBarFilled;
 
+    // Progreso actual de la barra (0..1), para que la UI se pueda resincronizar
+    public float Progress => _coinsToFill > 0 ? Mathf.Clamp01((float)_coins / _coinsToFill) : 0f;
+
     private void Awake() => Instance = this;
 
     public void AddCoin()

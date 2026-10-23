@@ -43,4 +43,14 @@ public class BurnStatus : MonoBehaviour
         _routine = null;
         Destroy(this);
     }
+
+    // Lo llama EnemyHealth.Revive: un enemigo reusado del pool no tiene que volver prendido fuego
+    public void Clear()
+    {
+        if (_routine != null) StopCoroutine(_routine);
+        _routine = null;
+        if (_vfxInstance != null) Destroy(_vfxInstance);
+        _vfxInstance = null;
+        Destroy(this);
+    }
 }

@@ -20,6 +20,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
     private RT_PlayerUpgrades _playerUpgrades;
     private PlayerUpgrades _islandUpgrades;
     private int _shotsSinceCharge = 0;
+    private Transform _shipRoot;
 
     public event Action<float> OnCooldownStarted;      // arranca la recarga (la UI radial la muestra)
     public event Action<int, int> OnAmmoChanged;       // (actual, máximo)
@@ -99,11 +100,22 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
             // original del click que arrancó la ráfaga.
             Vector3 targetPoint = GetMouseWorldPoint();
             Vector3 shipPos = hardpoints.transform.position;
+            // Usamos el "right" del barco aplanado (sin inclinación). Antes se usaba
+            // transform.right tal cual: con el barco inclinado ese vector apunta un poco
+            // hacia arriba/abajo y el Reflect levantaba el target espejado varios metros.
+            // Con un target muy por encima de la bala, CalculateLaunchVelocity caía en el
+            // fallback de 45° a velocidad máxima y esa bala salía volando re lejos.
+            Vector3 flatRight = hardpoints.transform.right;
+            flatRight.y = 0f;
+            flatRight.Normalize();
+
             Vector3 toTarget = targetPoint - shipPos;
-            Vector3 mirroredTarget = shipPos + Vector3.Reflect(toTarget, hardpoints.transform.right);
+            toTarget.y = 0f;
+            Vector3 mirroredTarget = shipPos + Vector3.Reflect(toTarget, flatRight);
+            mirroredTarget.y = targetPoint.y;
 
             // Detectar de qué lado está el target
-            float side = Vector3.Dot(toTarget, hardpoints.transform.right);
+            float side = Vector3.Dot(toTarget, flatRight);
 
             Vector3 rightTarget = side >= 0f ? targetPoint : mirroredTarget;
             Vector3 leftTarget = side >= 0f ? mirroredTarget : targetPoint;
@@ -172,8 +184,27 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         {
             cb.OnSplit -= SpawnSplitBullet;
             cb.OnSplit += SpawnSplitBullet;
-            cb.Setup(point, _rtData, side, _playerUpgrades, _islandUpgrades, targetPoint, isCharged);
+            cb.Setup(point, _rtData, side, _playerUpgrades, _islandUpgrades, targetPoint, isCharged, GetStableShootPosition(point));
         }
+    }
+
+    // El barco se inclina (bank al girar + balanceo de las olas) y los fire points
+    // bajan con él; a veces quedaban casi al nivel del agua y la bala tocaba el
+    // Floor apenas se activaba el collider. Acá calculamos dónde estaría el fire
+    // point si el barco estuviera derecho (solo con su rotación en Y), así la bala
+    // siempre sale a la misma altura relativa al barco.
+    private Vector3 GetStableShootPosition(Transform point)
+    {
+        if (_shipRoot == null)
+        {
+            var movement = hardpoints.GetComponentInParent<Movement>();
+            _shipRoot = movement != null ? movement.transform : hardpoints.transform;
+        }
+
+        Vector3 local = _shipRoot.InverseTransformPoint(point.position);
+        Vector3 scaledLocal = Vector3.Scale(local, _shipRoot.lossyScale);
+        Quaternion yawOnly = Quaternion.Euler(0f, _shipRoot.eulerAngles.y, 0f);
+        return _shipRoot.position + yawOnly * scaledLocal;
     }
 
     private void SpawnSplitBullet(Vector3 position, Vector3 direction, float damageMultiplier, bool isCharged)

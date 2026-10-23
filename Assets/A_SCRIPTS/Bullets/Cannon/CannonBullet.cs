@@ -49,6 +49,7 @@ public class CannonBullet : BulletsBase
     public event Action<Vector3, Vector3, float, bool> OnSplit;
 
     private Vector3 _targetPoint;
+    private Vector3 _spawnPosition;
 
     private void Awake()
     {
@@ -81,9 +82,10 @@ public class CannonBullet : BulletsBase
         gameObject.SetActive(false);
     }
 
-    public void Setup(Transform point, RT_CannonData rtData, float side, RT_PlayerUpgrades playerUpgrades, PlayerUpgrades islandUpgrades, Vector3 targetPoint, bool isCharged = false)
+    public void Setup(Transform point, RT_CannonData rtData, float side, RT_PlayerUpgrades playerUpgrades, PlayerUpgrades islandUpgrades, Vector3 targetPoint, bool isCharged = false, Vector3? spawnPosition = null)
     {
         _pointShoot = point;
+        _spawnPosition = spawnPosition ?? point.position;
         _rtData = rtData;
         _side = side;
         _playerUpgrades = playerUpgrades;
@@ -118,17 +120,17 @@ public class CannonBullet : BulletsBase
 
     private void Launch()
     {
-        transform.position = _pointShoot.position;
+        transform.position = _spawnPosition;
         transform.rotation = _pointShoot.rotation;
         if (_visualTransform != null)
             _visualTransform.localScale = _isCharged ? _visualBaseScale * _rtData.chargedBulletScale : _visualBaseScale;
         _rb.linearVelocity = Vector3.zero;
         _rb.angularVelocity = Vector3.zero;
-        _rb.position = _pointShoot.position;
+        _rb.position = _spawnPosition;
         _rb.rotation = _pointShoot.rotation;
         _rb.useGravity = true;
 
-        Vector3 startVelocity = CalculateLaunchVelocity(_pointShoot.position, _targetPoint);
+        Vector3 startVelocity = CalculateLaunchVelocity(_spawnPosition, _targetPoint);
         _rb.linearVelocity = startVelocity;
         StartFire();
 

@@ -152,6 +152,10 @@ public class RafaEnemy : Enemy
         Vector3 explosionPoint = other.ClosestPoint(transform.position);
         if (other.gameObject.CompareTag("Enemy"))
         {
+            // No matar enemigos que todavia estan saliendo del agua (recien spawneados)
+            var emerge = other.GetComponentInParent<EnemyEmerge>();
+            if (emerge != null && emerge.IsEmerging) return;
+
             other.gameObject.GetComponent<EnemyHealth>().TakeDamage(999f);
             ParticlePool.Instance.GetParticle(baseData.woodExplosionVFX, explosionPoint);
         }

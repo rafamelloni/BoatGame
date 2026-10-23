@@ -27,6 +27,8 @@ public class EnemyEmerge : MonoBehaviour
     private bool _emerging = false;
     private TurbulenceSource _turbulence;
 
+    public bool IsEmerging => _emerging;
+
     public void Emerge(Transform player)
     {
         if (_emerging) return;

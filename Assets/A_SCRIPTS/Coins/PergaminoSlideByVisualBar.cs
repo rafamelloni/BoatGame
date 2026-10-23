@@ -9,6 +9,9 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
     [Header("Corsshjair Desactivarl")]
     [SerializeField] private GameObject _crosshair;
 
+    [Header("Efecto level up")]
+    [SerializeField] private LevelUpBurst _levelUpBurst;
+
     [Header("Objeto padre de la UI")]
     [SerializeField] private GameObject pergaminoPadre;
     [Header("Movimiento")]
@@ -22,6 +25,13 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
     private bool _isOpen = false;
     private float _startY;
 
+    // Subidas de nivel que todavía no se mostraron. Antes el pergamino miraba si la
+    // barra llegaba a 0.99 en Update; si entraban 2 monedas en el mismo frame la barra
+    // pasaba de 1 a 0.05 antes de que Update la viera y el level up se perdía.
+    // Ahora escuchamos el evento de CoinManager y las encolamos.
+    private int _pendingLevelUps = 0;
+    private bool _subscribed = false;
+
     private void Awake()
     {
         if (pergaminoPadre == null)
@@ -30,17 +40,59 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
         _startY = rectTransform.anchoredPosition.y;
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        if (_isOpen) return;
-        if (fillBar == null) return;
-        if (fillBar.fillAmount >= 0.99f)
-        {
-            _isOpen = true;
-            _crosshair.SetActive(false);
-            OpenPergamino();
+        if (CoinManager.Instance != null) Subscribe();
+        else StartCoroutine(WaitForCoinManager());
+    }
 
-        }
+    private void OnDisable()
+    {
+        if (!_subscribed || CoinManager.Instance == null) return;
+        CoinManager.Instance.OnBarFilled -= HandleBarFilled;
+        CoinManager.Instance.OnLevelChanged -= HandleLevelChanged;
+        _subscribed = false;
+    }
+
+    private IEnumerator WaitForCoinManager()
+    {
+        yield return new WaitUntil(() => CoinManager.Instance != null);
+        Subscribe();
+    }
+
+    private void Subscribe()
+    {
+        if (_subscribed) return;
+        CoinManager.Instance.OnBarFilled += HandleBarFilled;
+        CoinManager.Instance.OnLevelChanged += HandleLevelChanged;
+        _subscribed = true;
+    }
+
+    private void HandleBarFilled()
+    {
+        _pendingLevelUps++;
+        TryStartLevelUp();
+    }
+
+    // ResetCoins() manda nivel 0 (reset de la run): descartamos lo que quedó en cola
+    private void HandleLevelChanged(int level)
+    {
+        if (level == 0) _pendingLevelUps = 0;
+    }
+
+    private void TryStartLevelUp()
+    {
+        if (_isOpen || _pendingLevelUps <= 0) return;
+
+        _pendingLevelUps--;
+        _isOpen = true;
+        if (fillBar != null) fillBar.fillAmount = 1f;
+        _crosshair.SetActive(false);
+
+        if (_levelUpBurst != null)
+            _levelUpBurst.Play(OpenPergamino);
+        else
+            OpenPergamino();
     }
 
     private void OpenPergamino()
@@ -74,11 +126,15 @@ public class PergaminoSlideByVisualBar : MonoBehaviour
 
         yield return MoveTo(startPos, finalPos, closeDuration);
         _isOpen = false;
-        fillBar.fillAmount = 0f;
+        // Antes se ponía en 0: si habías juntado monedas durante el efecto se perdían visualmente
+        fillBar.fillAmount = CoinManager.Instance != null ? CoinManager.Instance.Progress : 0f;
         Time.timeScale = 1f;
         routine = null;
         onComplete?.Invoke();
-        _crosshair.SetActive(true   );
+        _crosshair.SetActive(true);
+
+        // Si mientras elegías se llenó la barra otra vez, sigue el próximo level up
+        TryStartLevelUp();
     }
 
     private IEnumerator MoveTo(Vector2 from, Vector2 to, float moveDuration)

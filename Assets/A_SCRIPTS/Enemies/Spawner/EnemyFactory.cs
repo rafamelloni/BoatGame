@@ -84,13 +84,15 @@ public class EnemyFactory : MonoBehaviour
         group.transform.position = position + new Vector3(0f, yOffset, 0f);
         group.gameObject.SetActive(true);
 
+        // Init -> Revive -> Reset() vuelve la vida al valor base del SO, así que la vida
+        // de la fase se aplica DESPUÉS de Init (antes se aplicaba antes y se pisaba).
+        group.Init(_player, _enemyBullet);
+
         if (_currentPhase.groupHealth > 0)
         {
             foreach (var health in group.GetComponentsInChildren<EnemyHealth>(true))
                 health.SetMaxHealth(_currentPhase.groupHealth);
         }
-
-        group.Init(_player, _enemyBullet);
         group.GetComponent<EnemyEmerge>()?.Emerge(_player);
         return group;
     }
@@ -105,13 +107,15 @@ public class EnemyFactory : MonoBehaviour
         group.transform.position = position + new Vector3(0f, yOffset, 0f);
         group.gameObject.SetActive(true);
 
+        // Init -> Revive -> Reset() vuelve la vida al valor base del SO, así que la vida
+        // de la fase se aplica DESPUÉS de Init (antes se aplicaba antes y se pisaba).
+        group.Init(_player, _enemyBullet);
+
         if (_currentPhase.zombieHealth > 0)
         {
             foreach (var health in group.GetComponentsInChildren<EnemyHealth>(true))
                 health.SetMaxHealth(_currentPhase.zombieHealth);
         }
-
-        group.Init(_player, _enemyBullet);
         group.GetComponent<EnemyEmerge>()?.Emerge(_player);
         return group;
     }
