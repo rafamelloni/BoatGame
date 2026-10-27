@@ -39,14 +39,33 @@ public class Coin : MonoBehaviour
     public event System.Action<Coin> OnCollected;
 
     [SerializeField] private TrailRenderer _trail;
+    private float _trailBaseWidth = -1f;
+
+    [Header("Chispas del trail")]
+    [SerializeField] private bool _sparkles = true;
+    [Tooltip("Chispas por metro recorrido")]
+    [SerializeField] private float _sparklesPerMeter = 6f;
+    [SerializeField] private float _sparkleLifetime = 0.45f;
+    [SerializeField] private Vector2 _sparkleSize = new Vector2(0.08f, 0.18f);
+    [SerializeField] private Color _sparkleColorA = new Color(1f, 0.9f, 0.3f, 1f);
+    [SerializeField] private Color _sparkleColorB = new Color(1f, 0.6f, 0.05f, 1f);
+    private ParticleSystem _sparkPS;
+    private ParticleSystem.EmissionModule _sparkEmission;
     public static event System.Action OnCoinArriving;
     public static event System.Action OnCoinCollected;
 
+
+    private void Awake()
+    {
+        if (_sparkles) CreateSparkles();
+    }
 
     private void OnDisable()
     {
         if (_trail != null)
             _trail.Clear();
+        if (_sparkPS != null)
+            _sparkPS.Clear();
         transform.localScale = Vector3.one;
         _launchVelocity = Vector3.zero;
         _launchGravityMultiplier = 1f;
@@ -63,6 +82,7 @@ public class Coin : MonoBehaviour
         _magnetRadius = pickupRange;
         _velocity = Vector3.zero;
         transform.localScale = Vector3.one;
+        ClearTrail();
     }
 
     public void InitLaunched(Transform target, Transform player, Vector3 spawnPos, float pickupRange, Vector3 launchVelocity, float powerMultiplier = 1f)
@@ -77,6 +97,20 @@ public class Coin : MonoBehaviour
         _launchGravityMultiplier = powerMultiplier * powerMultiplier;
         _state = State.Launch;
         transform.localScale = Vector3.one;
+        ClearTrail();
+    }
+
+    // Al sacarla del pool la moneda aparece en otro lado: sin esto el trail dibuja una raya
+    // desde la posición vieja o queda en un estado raro y a veces no se ve.
+    private void ClearTrail()
+    {
+        if (_trail != null) _trail.Clear();
+        if (_sparkPS != null)
+        {
+            // reinicia el emisor para que no tire una fila de chispas desde la posición vieja
+            _sparkPS.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            _sparkPS.Play();
+        }
     }
 
     private void Update()
@@ -92,6 +126,16 @@ public class Coin : MonoBehaviour
             float scale = Mathf.Lerp(1f, 0.1f, t);
             transform.localScale = Vector3.one * scale;
         }
+
+        // Trail: solo cuando la moneda viaja (no mientras flota) y se achica junto con la moneda
+        if (_trail != null)
+        {
+            if (_trailBaseWidth < 0f) _trailBaseWidth = _trail.widthMultiplier;
+            _trail.emitting = _state != State.Float;
+            _trail.widthMultiplier = _trailBaseWidth * transform.localScale.x;
+        }
+        if (_sparkPS != null)
+            _sparkEmission.enabled = _state != State.Float;
 
         switch (_state)
         {
@@ -194,5 +238,54 @@ public class Coin : MonoBehaviour
         }
 
         transform.Rotate(Vector3.up, _rotationSpeed * 2f * Time.deltaTime);
+    }
+
+    private void CreateSparkles()
+    {
+        var go = new GameObject("CoinSparkles");
+        go.transform.SetParent(transform, false);
+        _sparkPS = go.AddComponent<ParticleSystem>();
+        _sparkPS.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        var main = _sparkPS.main;
+        main.loop = true;
+        main.playOnAwake = true;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(_sparkleLifetime * 0.6f, _sparkleLifetime);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.5f, 1.8f);
+        main.startSize = new ParticleSystem.MinMaxCurve(_sparkleSize.x, _sparkleSize.y);
+        main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+        main.startColor = new ParticleSystem.MinMaxGradient(_sparkleColorA, _sparkleColorB);
+        main.gravityModifier = 0.4f;
+        main.maxParticles = 60;
+
+        _sparkEmission = _sparkPS.emission;
+        _sparkEmission.rateOverTime = 0f;
+        _sparkEmission.rateOverDistance = _sparklesPerMeter;
+        _sparkEmission.enabled = false;
+
+        var shape = _sparkPS.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.15f;
+
+        var size = _sparkPS.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0f)));
+
+        var col = _sparkPS.colorOverLifetime;
+        col.enabled = true;
+        var fade = new Gradient();
+        fade.SetKeys(
+            new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+            new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 0.6f), new GradientAlphaKey(0f, 1f) });
+        col.color = fade;
+
+        var rend = go.GetComponent<ParticleSystemRenderer>();
+        rend.renderMode = ParticleSystemRenderMode.Billboard;
+        rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        rend.receiveShadows = false;
+        if (_trail != null) rend.sharedMaterial = _trail.sharedMaterial;
+
+        _sparkPS.Play();
     }
 }

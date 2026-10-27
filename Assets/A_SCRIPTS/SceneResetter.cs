@@ -86,6 +86,9 @@ public class SceneResetter : MonoBehaviour
 
     private void ResetAll()
     {
+        // Reliquias: primero, para que deshagan sus mejoras antes de que se reseteen los stats
+        if (RelicInventory.Instance != null) RelicInventory.Instance.ResetAll();
+
         DeleteBullets();
 
         // Player

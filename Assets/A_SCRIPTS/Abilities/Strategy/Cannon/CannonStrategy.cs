@@ -91,6 +91,14 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         OnAmmoChanged?.Invoke(_currentAmmo, _rtData.maxAmmo);
     }
 
+    // Devuelve la bala del disparo recién hecho (reliquia Ron: "Barril sin fondo")
+    public void RefundShot()
+    {
+        if (_reloading) return;
+        _currentAmmo = Mathf.Min(_currentAmmo + 1, _rtData.maxAmmo);
+        OnAmmoChanged?.Invoke(_currentAmmo, _rtData.maxAmmo);
+    }
+
     private IEnumerator FireBurst()
     {
         for (int i = 0; i < _rtData.shotsPerBurst; i++)

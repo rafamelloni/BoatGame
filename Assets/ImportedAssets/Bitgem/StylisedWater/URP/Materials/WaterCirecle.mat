@@ -55,7 +55,9 @@ Material:
     - Vector1_E5C51606: 3.5
     - Vector1_F38B44AA: 0.09
     - _AlphaClipT: 0.5
+    - _BandSoftness: 0.05
     - _ClipRadius: 78.6
+    - _DepthBands: 6
     - _EdgeFoamWidth: 3.83
     - _ImpactLifetime: 1.2
     - _ImpactNormal: 0.6
@@ -63,6 +65,8 @@ Material:
     - _ImpactRingWidth: 0.5
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _RippleShade: 0.3
+    - _SparkleThreshold: 0.464
     - _TurbulenceFoam: 0.85
     - _TurbulenceHeight: 0.25
     - _TurbulenceNoiseScale: 1.2
@@ -74,11 +78,14 @@ Material:
     - _WaveScale: 0
     - _WaveSpeed: 1.81
     m_Colors:
-    - Color_7D9A58EC: {r: 0, g: 0.3542733, b: 0.7924528, a: 1}
-    - Color_F01C36BF: {r: 0, g: 0, b: 1, a: 1}
+    - Color_7D9A58EC: {r: 0, g: 0.44134122, b: 0.990566, a: 1}
+    - Color_F01C36BF: {r: 0.46257564, g: 0.46257564, b: 0.5188679, a: 1}
     - Vector2_37B21477: {r: 0.3, g: 0.3, b: 0, a: 0}
     - _ClipCenterXZ: {r: 98.2, g: 71.5, b: 0, a: 0}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SparkleColor: {r: 1, g: 1, b: 1, a: 0.6666667}
     - _TurbulenceColor: {r: 0.54999995, g: 0.85, b: 0.9, a: 1}
+    - _WaterShadowColor: {r: 0.3484336, g: 0.37597314, b: 0.509434, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &319428671041606764

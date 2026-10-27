@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6954551594818741192
+--- !u!114 &-1316192995985191600
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ToonLItShipBigB
+  m_Name: RangedLevel1Toon
   m_Shader: {fileID: -6465566751694194690, guid: 420fae475f8b478bb47303b606cf19a3, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -38,9 +38,9 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: eaaabe5df84f0fa449705b200e5f47e7, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3ed07e57fb93dc044baa9c285ef0039f, type: 3}
         m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 1, y: 0}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -61,9 +61,9 @@ Material:
     - _QueueOffset: 0
     - _ShadowSoftness: 0.001
     - _ShadowThreshold: -1
-    - _TextureDetail: 0
+    - _TextureDetail: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _ShadowColor: {r: 0.745283, g: 0.4390341, b: 0, a: 1}
+    - _ShadowColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

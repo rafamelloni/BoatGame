@@ -11,6 +11,9 @@ public class RT_PlayerHealth : MonoBehaviour
     public event System.Action OnDeath;
     public event System.Action OnDamage;
 
+    // Modifica el daño que entra antes de restarlo (ej. reliquia Ancla: "Anclado")
+    public System.Func<float, float> IncomingDamageModifier;
+
     [Header("Vignette")]
     [SerializeField] private Material _vignetteMaterial;
     [SerializeField] private float _vignetteMaxIntensity = 1.5f;
@@ -112,6 +115,9 @@ public class RT_PlayerHealth : MonoBehaviour
 
         if (UnityEngine.Random.value < _stats.blockChance)
             return; // bloqueado, no hace nada
+
+        if (IncomingDamageModifier != null)
+            amount = IncomingDamageModifier(amount);
 
         _stats.currentHealth -= amount;
         _stats.currentHealth = Mathf.Max(_stats.currentHealth, 0f);
