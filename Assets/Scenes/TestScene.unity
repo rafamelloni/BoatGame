@@ -95921,14 +95921,25 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 3fc893b24b8d3804c8974508c363c092, type: 2}
     - target: {fileID: 7497895208715138960, guid: 65b14392a6448324aa1bd1893c09fbd3, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7497895208715138960, guid: 65b14392a6448324aa1bd1893c09fbd3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 3fc893b24b8d3804c8974508c363c092, type: 2}
+    - target: {fileID: 7497895208715138960, guid: 65b14392a6448324aa1bd1893c09fbd3, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 0c77b08dee22482ca851a4e53a4eeb65, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: -298092508047035362, guid: 65b14392a6448324aa1bd1893c09fbd3, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 65b14392a6448324aa1bd1893c09fbd3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1702582661}
   m_SourcePrefab: {fileID: 100100000, guid: 65b14392a6448324aa1bd1893c09fbd3, type: 3}
 --- !u!1 &959761698
 GameObject:
@@ -95962,9 +95973,9 @@ MonoBehaviour:
   _phases:
   - name: Start
     startAtSecond: 0
-    groupSpawnInterval: 0
+    groupSpawnInterval: 1
     groupPrefabIndex: 0
-    maxActiveGroups: 0
+    maxActiveGroups: 3
     groupHealth: 0
     shipSpawnInterval: 0
     maxActiveShips: 0
@@ -95974,13 +95985,13 @@ MonoBehaviour:
     rafaHealth: 0
     zombieSpawnInterval: 1
     zombieGroupPrefabIndex: 0
-    maxActiveZombies: 2
+    maxActiveZombies: 3
     zombieHealth: 0
-    spikeSpawnInterval: 3
-    maxActiveSpikes: 2
+    spikeSpawnInterval: 0
+    maxActiveSpikes: 0
     spikeHealth: 0
-    heavySpawnInterval: 1
-    maxActiveHeavies: 1
+    heavySpawnInterval: 0
+    maxActiveHeavies: 0
     heavyHealth: 0
     tumultoMinGroups: 0
     tumultoCheckCooldown: 0
@@ -176086,11 +176097,33 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1700847347}
   m_CullTransparentMesh: 1
+--- !u!1 &1702582659 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 65b14392a6448324aa1bd1893c09fbd3, type: 3}
+  m_PrefabInstance: {fileID: 953457852}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1702582660 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 65b14392a6448324aa1bd1893c09fbd3, type: 3}
   m_PrefabInstance: {fileID: 953457852}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1702582661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1702582659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec8e5b5c29152f449156dff58a0b01d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ToonOutline
+  _outlineMaterial: {fileID: 2100000, guid: 0c77b08dee22482ca851a4e53a4eeb65, type: 2}
+  _overrideMaterial: 1
+  _width: 1.5
+  _color: {r: 0.16, g: 0.08, b: 0.06, a: 1}
+  _exclude: []
 --- !u!1 &1702992026
 GameObject:
   m_ObjectHideFlags: 0

@@ -588,6 +588,7 @@ GameObject:
   - component: {fileID: 7524648583660896354}
   - component: {fileID: 1524671072230816465}
   - component: {fileID: 4167092525061614875}
+  - component: {fileID: 1303295750722404954}
   m_Layer: 6
   m_Name: 'enemy Tier1 '
   m_TagString: Enemy
@@ -827,6 +828,23 @@ MonoBehaviour:
   flashDuration: 0.16
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   hitParticles: {fileID: 7952466534599534888}
+--- !u!114 &1303295750722404954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3945307318471089387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec8e5b5c29152f449156dff58a0b01d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ToonOutline
+  _outlineMaterial: {fileID: 2100000, guid: 0c77b08dee22482ca851a4e53a4eeb65, type: 2}
+  _overrideMaterial: 1
+  _width: 1
+  _color: {r: 0.16, g: 0.08, b: 0.06, a: 1}
+  _exclude: []
 --- !u!1 &4467937290645913074
 GameObject:
   m_ObjectHideFlags: 0
@@ -879,6 +897,7 @@ GameObject:
   - component: {fileID: 8407088794296492452}
   - component: {fileID: 1555957245088929329}
   - component: {fileID: 4834087585889126523}
+  - component: {fileID: 4347535990316498097}
   m_Layer: 6
   m_Name: enemy Tier1  Leader
   m_TagString: Enemy
@@ -1118,6 +1137,23 @@ MonoBehaviour:
   flashDuration: 0.16
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   hitParticles: {fileID: 5043267293168025352}
+--- !u!114 &4347535990316498097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4531412673893163564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec8e5b5c29152f449156dff58a0b01d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ToonOutline
+  _outlineMaterial: {fileID: 2100000, guid: 0c77b08dee22482ca851a4e53a4eeb65, type: 2}
+  _overrideMaterial: 1
+  _width: 1
+  _color: {r: 0.16, g: 0.08, b: 0.06, a: 1}
+  _exclude: []
 --- !u!1 &4610849784711089759
 GameObject:
   m_ObjectHideFlags: 0
@@ -1290,6 +1326,7 @@ GameObject:
   - component: {fileID: 2049960299776254979}
   - component: {fileID: 4097350991145728980}
   - component: {fileID: 3753726760745853872}
+  - component: {fileID: 7421528180765124866}
   m_Layer: 6
   m_Name: enemy Tier1  (2)
   m_TagString: Enemy
@@ -1529,6 +1566,23 @@ MonoBehaviour:
   flashDuration: 0.16
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   hitParticles: {fileID: 7109867635002552008}
+--- !u!114 &7421528180765124866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5147916333719501503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec8e5b5c29152f449156dff58a0b01d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ToonOutline
+  _outlineMaterial: {fileID: 2100000, guid: 0c77b08dee22482ca851a4e53a4eeb65, type: 2}
+  _overrideMaterial: 1
+  _width: 1
+  _color: {r: 0.16, g: 0.08, b: 0.06, a: 1}
+  _exclude: []
 --- !u!1 &5429345561499200104
 GameObject:
   m_ObjectHideFlags: 0
@@ -2177,6 +2231,7 @@ GameObject:
   - component: {fileID: 6622581845010528114}
   - component: {fileID: 669178669653101675}
   - component: {fileID: 6091301059232320245}
+  - component: {fileID: 1936266550415005240}
   m_Layer: 6
   m_Name: enemy Tier1  (1)
   m_TagString: Enemy
@@ -2417,6 +2472,23 @@ MonoBehaviour:
   flashDuration: 0.16
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   hitParticles: {fileID: 2887709644736271109}
+--- !u!114 &1936266550415005240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7015956918021936109}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec8e5b5c29152f449156dff58a0b01d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ToonOutline
+  _outlineMaterial: {fileID: 2100000, guid: 0c77b08dee22482ca851a4e53a4eeb65, type: 2}
+  _overrideMaterial: 1
+  _width: 1
+  _color: {r: 0.16, g: 0.08, b: 0.06, a: 1}
+  _exclude: []
 --- !u!1 &8425585245558081179
 GameObject:
   m_ObjectHideFlags: 0

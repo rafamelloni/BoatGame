@@ -6,11 +6,13 @@
 // - Las sombras proyectadas usan el mismo corte, asi tienen borde limpio aunque la luz use Soft Shadows.
 // - La sombra = textura * ShadowColor + un poco de luz del cielo (AmbientStrength). En 0 = solo ShadowColor.
 // - TextureDetail mezcla con una version borroneada (mip alto). En texturas atlas dejarlo en 1.
+// - Línea (LineColor/Width/Strength): franja oscura en el corte luz/sombra, look de dibujo.
 // - Anti shadow acne: muestreo desplazado sobre la normal + sin sombra proyectada en caras rasantes.
 
 void ToonLit_float(UnityTexture2D BaseMap, float2 UV, float4 BaseColor, float4 ShadowColor,
                    float ShadowThreshold, float ShadowSoftness, float TextureDetail, float BlurMip,
                    float3 PositionWS, float3 NormalWS, float AmbientStrength,
+                   float4 LineColor, float LineWidth, float LineStrength,
                    out float3 Color)
 {
     float2 uv = BaseMap.GetTransformedUV(UV);
@@ -45,6 +47,11 @@ void ToonLit_float(UnityTexture2D BaseMap, float2 UV, float4 BaseColor, float4 S
     float3 litCol    = albedo * lightColor;
     float3 shadowCol = albedo * (ShadowColor.rgb + ambient * AmbientStrength);
     Color = lerp(shadowCol, litCol, lightAmount);
+
+    // línea de "dibujo" justo donde la luz pasa a sombra (grosor en unidades de N·L)
+    float w = max(LineWidth, 0.0001);
+    float lineMask = (1.0 - smoothstep(w * 0.5, w, abs(NdotL - ShadowThreshold))) * LineStrength * step(0.0001, LineWidth);
+    Color = lerp(Color, albedo * LineColor.rgb, saturate(lineMask));
 }
 
 #endif
