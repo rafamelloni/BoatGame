@@ -65,7 +65,7 @@ Material:
     - _ImpactRingWidth: 0.5
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _RippleShade: 0
+    - _RippleShade: 0.275
     - _SparkleThreshold: 0.464
     - _TurbulenceFoam: 0.85
     - _TurbulenceHeight: 0.25

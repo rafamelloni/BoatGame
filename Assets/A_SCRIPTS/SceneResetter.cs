@@ -121,6 +121,7 @@ public class SceneResetter : MonoBehaviour
         _coinSpawner.DespawnAll();
         _bossSequenceManager.ResetAll();
         _lifeBoxSpawner.ClearAllCrates();
+        SpecialTower.ResetAllTowers();
 
         // Preselección
         PreselectionData.Reset();

@@ -63,6 +63,38 @@ float CursorFoam_Mask(float3 posWS)
     return step(1.0 - m, n);
 }
 
+// ---------------- Estelas de enemigos (EnemyWaterWake) ----------------
+// Globales seteadas por EnemyWaterWakeManager.cs. NO agregarlas al Blackboard.
+// Las estelas están pintadas en una textura vista desde arriba que sigue al jugador:
+// r = vida restante (1 -> 0), g = fuerza. Los bordes viven menos, así que se afina sola.
+TEXTURE2D(_EnemyWakeTex);
+SAMPLER(sampler_EnemyWakeTex);
+float4 _EnemyWakeArea;    // xy = centro XZ, z = tamaño en metros, w = 1 si está activo
+float4 _EnemyWakeParams;  // x = escala del ruido, y = velocidad del ruido, z = dissolve, w = nitidez del borde
+
+// Manchas de espuma a lo largo de las estelas de los enemigos
+float EnemyWake_Mask(float3 posWS)
+{
+    if (_EnemyWakeArea.w < 0.5) return 0.0;
+
+    float2 uv = (posWS.xz - _EnemyWakeArea.xy) / _EnemyWakeArea.z + 0.5;
+    if (uv.x <= 0.0 || uv.y <= 0.0 || uv.x >= 1.0 || uv.y >= 1.0) return 0.0;
+
+    float4 w = SAMPLE_TEXTURE2D_LOD(_EnemyWakeTex, sampler_EnemyWakeTex, uv, 0);
+    if (w.r <= 0.0005) return 0.0;
+
+    float edge = saturate(w.r * max(_EnemyWakeParams.w, 1.0));   // borde: deshilachado o limpio
+    float k = w.r * w.r * (3.0 - 2.0 * w.r);                       // desvanecido suave de la vida
+    float m = w.g * edge * lerp(1.0, k, saturate(_EnemyWakeParams.z));
+    if (m <= 0.0) return 0.0;
+
+    float2 xz = posWS.xz;
+    float tt = _Time.y * _EnemyWakeParams.y;
+    float2 nuv = xz * max(_EnemyWakeParams.x, 0.01);
+    float n = (CursorFoam_Noise(nuv + float2(tt, -tt * 0.7)) + CursorFoam_Noise(nuv * 1.9 + float2(-tt * 0.8, tt) + 31.7)) * 0.5;
+    return step(1.0 - m, n);
+}
+
 float Shrine_Luma(float3 c) { return dot(c, float3(0.299, 0.587, 0.114)); }
 
 // Pinta el agua dentro del radio llenado con el color del templo (conserva las bandas del agua),
@@ -117,6 +149,7 @@ float3 Shrine_Apply(float3 col, float3 posWS, float3 lightTint)
 // - Brillos estilizados: manchas planas en las pendientes de las olitas que miran al sol.
 // - Espuma y turbulencia como estaban, por encima.
 // - Templos (ChargeShrine): tiñen el agua en círculo a medida que se cargan.
+// - Estelas de enemigos (EnemyWaterWake): espuma fina detrás de cada barco enemigo.
 
 void WaterToonShade_float(float DepthT, float Foam, float SceneAmount, float3 SceneColor,
                           float TurbMask, float4 TurbColor, float4 ShallowColor, float4 DeepColor,
@@ -166,6 +199,9 @@ void WaterToonShade_float(float DepthT, float Foam, float SceneAmount, float3 Sc
 
     // --- espuma del crosshair: se suma a la espuma del agua (sin brillo ni tinte) ---
     Foam = max(saturate(Foam), CursorFoam_Mask(PositionWS));
+
+    // --- estelas de los enemigos (EnemyWaterWake) ---
+    Foam = max(Foam, EnemyWake_Mask(PositionWS));
 
     // --- brillos estilizados ---
     float  sparkle = step(SparkleThreshold, slope) * shadow * (1.0 - saturate(Foam)) * SparkleColor.a;

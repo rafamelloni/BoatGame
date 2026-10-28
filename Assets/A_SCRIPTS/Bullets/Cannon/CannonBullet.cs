@@ -27,7 +27,9 @@ public class CannonBullet : BulletsBase
     [SerializeField] private LayerMask _enemyLayers;
 
     [Header("Split")]
-    [SerializeField] private float _splitDelay = 1f;
+    [Tooltip("En qué parte del vuelo se divide (0.5 = a mitad de camino)")]
+    [Range(0.1f, 0.9f)]
+    [SerializeField] private float _splitAtFlight = 0.5f;
     [SerializeField] private float _spreadAngle = 30f;
     [SerializeField] private float _splitDamageMultiplier = 0.5f;
 
@@ -50,6 +52,8 @@ public class CannonBullet : BulletsBase
 
     private Vector3 _targetPoint;
     private Vector3 _spawnPosition;
+    private float _flightTime;
+    private Vector3 _landingPoint;
 
     private void Awake()
     {
@@ -96,7 +100,7 @@ public class CannonBullet : BulletsBase
         Launch();
     }
 
-    public void SetupSplit(Vector3 position, Vector3 direction, RT_CannonData rtData, RT_PlayerUpgrades playerUpgrades, bool isCharged = false)
+    public void SetupSplit(Vector3 position, Vector3 velocity, RT_CannonData rtData, RT_PlayerUpgrades playerUpgrades, bool isCharged = false)
     {
         _rtData = rtData;
         _playerUpgrades = playerUpgrades;
@@ -106,16 +110,15 @@ public class CannonBullet : BulletsBase
             _visualTransform.localScale = _isCharged ? _visualBaseScale * _rtData.chargedBulletScale : _visualBaseScale;
 
         transform.position = position;
-        transform.rotation = Quaternion.LookRotation(direction);
-        _rb.linearVelocity = Vector3.zero;
+        if (velocity.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.LookRotation(velocity);
         _rb.angularVelocity = Vector3.zero;
         _rb.position = position;
-        _rb.useGravity = false;
-        _rb.linearVelocity = direction * rtData.bulletSpeed;
+        _rb.useGravity = true;
+        _rb.linearVelocity = velocity;
         StartFire();
 
         StartCoroutine(ActivateColliderBulelt());
-        StartCoroutine(DropBullet());
     }
 
     private void Launch()
@@ -132,6 +135,7 @@ public class CannonBullet : BulletsBase
 
         Vector3 startVelocity = CalculateLaunchVelocity(_spawnPosition, _targetPoint);
         _rb.linearVelocity = startVelocity;
+        CacheLanding(startVelocity);
         StartFire();
 
         if (_impactIndicator != null && _showImpactIndicator)
@@ -207,17 +211,33 @@ public class CannonBullet : BulletsBase
         return toTargetXZ.normalized * v * cosAngle + Vector3.up * v * sinAngle;
     }
 
+    // Calcula cuánto tarda la bala en caer y dónde cae realmente
+    // (si el click está fuera de rango, es el punto real de caída, no el click).
+    private void CacheLanding(Vector3 v0)
+    {
+        float g = Mathf.Abs(Physics.gravity.y);
+        float dy = _spawnPosition.y - _targetPoint.y;
+        float disc = v0.y * v0.y + 2f * g * dy;
+        _flightTime = disc > 0f ? (v0.y + Mathf.Sqrt(disc)) / g : 0f;
+
+        Vector3 flatVel = new Vector3(v0.x, 0f, v0.z);
+        _landingPoint = _spawnPosition + flatVel * _flightTime;
+        _landingPoint.y = _targetPoint.y;
+    }
+
     private IEnumerator SplitCoroutine()
     {
-        yield return new WaitForSeconds(_splitDelay);
+        float splitTime = _flightTime * _splitAtFlight;
+        yield return new WaitForSeconds(splitTime);
 
         if (!gameObject.activeInHierarchy) yield break;
 
-        Vector3 currentDir = _rb.linearVelocity.normalized;
-        currentDir.y = 0f;
-        currentDir.Normalize();
-
+        float remaining = Mathf.Max(0.05f, _flightTime - splitTime);
         Vector3 splitPos = transform.position;
+        Vector3 toLanding = _landingPoint - splitPos;
+        Vector3 toLandingFlat = new Vector3(toLanding.x, 0f, toLanding.z);
+        float landingY = _landingPoint.y;
+
         bool wasCharged = _isCharged;
         var cachedOnSplit = OnSplit;
         OnSplit = null;
@@ -226,8 +246,12 @@ public class CannonBullet : BulletsBase
         float[] angles = { -_spreadAngle, 0f, _spreadAngle };
         foreach (float angle in angles)
         {
-            Vector3 splitDir = Quaternion.Euler(0f, angle, 0f) * currentDir;
-            cachedOnSplit?.Invoke(splitPos, splitDir, _splitDamageMultiplier, wasCharged);
+            Vector3 childTarget = splitPos + Quaternion.Euler(0f, angle, 0f) * toLandingFlat;
+            childTarget.y = landingY;
+
+            // Velocidad exacta para llegar a childTarget en "remaining" segundos con gravedad
+            Vector3 velocity = (childTarget - splitPos - 0.5f * Physics.gravity * remaining * remaining) / remaining;
+            cachedOnSplit?.Invoke(splitPos, velocity, _splitDamageMultiplier, wasCharged);
         }
     }
 
