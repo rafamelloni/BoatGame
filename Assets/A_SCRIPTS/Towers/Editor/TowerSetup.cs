@@ -1,134 +1,263 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// Arma las dos torres de prueba (con formas simples) listas para jugar.
-// Menú: Tools > Botes > Crear torres (Espiral y Mortero)
+// Menús de la torre mortero:
 //
-// - Crea los prefabs en Assets/A_SCRIPTS/Towers (si ya existen NO los pisa, solo los vuelve a poner en la escena).
-// - Pone una de cada una en la escena, cerca de donde está mirando la Scene view.
-// - Tag "Enemy" + layer "EnemyLayer" para que tus balas les peguen, collider, HitFlash.
-// Después reemplazá los hijos de "Visual" por tus modelos (dejá FirePoint y Head donde corresponda).
+//  Tools > Botes > Crear torre mortero
+//      Crea el prefab de prueba (formas simples) en Assets/A_SCRIPTS/Towers si no existe y pone uno en la escena.
+//
+//  Tools > Botes > Ordenar referencias de la torre   (o en el componente: ⋮ > Ordenar referencias)
+//      Para cuando le cambiás el modelo. Con la torre seleccionada (en la escena o abierta en modo prefab):
+//       - Visual Root: el hijo que tiene el modelo (si hay varios hijos con modelos, los junta en "Visual")
+//       - Head / Pulse Target: un hijo que se llame "Head" (si no hay, la torre no gira y se infla el Visual)
+//       - Fire Point: un hijo "FirePoint"; si no hay lo crea arriba del modelo
+//       - Collider: ajusta la cápsula del root al tamaño del modelo nuevo
+//       - Tag "Enemy" + layer "EnemyLayer" en todo (para que tus balas le peguen)
+//       - HitFlash: le carga los renderers del modelo nuevo
+//       - Barra de vida: la pone un metro arriba del modelo
+//      Las partículas (VFX) son opcionales: si están vacías no pasa nada.
 public static class TowerSetup
 {
     private const string Folder = "Assets/A_SCRIPTS/Towers";
-    private const string SpiralPath = Folder + "/TorreEspiral.prefab";
     private const string MortarPath = Folder + "/TorreMortero.prefab";
 
-    [MenuItem("Tools/Botes/Crear torres (Espiral y Mortero)")]
+    // ------------------------------------------------------------ crear
+
+    [MenuItem("Tools/Botes/Crear torre mortero")]
     public static void Run()
     {
         if (!AssetDatabase.IsValidFolder(Folder))
             AssetDatabase.CreateFolder("Assets/A_SCRIPTS", "Towers");
 
-        var spiral = AssetDatabase.LoadAssetAtPath<GameObject>(SpiralPath);
-        if (spiral == null) spiral = BuildPrefab(false);
-
         var mortar = AssetDatabase.LoadAssetAtPath<GameObject>(MortarPath);
-        if (mortar == null) mortar = BuildPrefab(true);
+        if (mortar == null) mortar = BuildPrefab();
 
         Vector3 pivot = Vector3.zero;
         if (SceneView.lastActiveSceneView != null) pivot = SceneView.lastActiveSceneView.pivot;
         pivot.y = 0f;
 
-        var a = (GameObject)PrefabUtility.InstantiatePrefab(spiral);
-        a.transform.position = pivot + new Vector3(-8f, 0f, 0f);
-        Undo.RegisterCreatedObjectUndo(a, "Crear TorreEspiral");
-
         var b = (GameObject)PrefabUtility.InstantiatePrefab(mortar);
-        b.transform.position = pivot + new Vector3(8f, 0f, 0f);
+        b.transform.position = pivot;
         Undo.RegisterCreatedObjectUndo(b, "Crear TorreMortero");
 
-        EditorSceneManager.MarkSceneDirty(a.scene);
-        Selection.objects = new Object[] { a, b };
+        EditorSceneManager.MarkSceneDirty(b.scene);
+        Selection.activeGameObject = b;
         AssetDatabase.SaveAssets();
-        Debug.Log("[TowerSetup] Listo: una TorreEspiral y una TorreMortero en la escena. Movelas a donde quieras y guardá la escena.");
+        Debug.Log("[TowerSetup] Listo: una TorreMortero en la escena. Movela a donde quieras y guardá la escena.");
     }
 
-    private static GameObject BuildPrefab(bool mortar)
+    private static GameObject BuildPrefab()
     {
-        string name = mortar ? "TorreMortero" : "TorreEspiral";
-        var root = new GameObject(name);
+        var root = new GameObject("TorreMortero");
 
-        // ---- visual (formas simples para probar) ----
         var visual = new GameObject("Visual");
         visual.transform.SetParent(root.transform, false);
 
-        Material bodyMat = GetOrCreateMat(mortar ? "M_TowerMortar" : "M_TowerSpiral",
-                                          mortar ? new Color(0.35f, 0.3f, 0.28f) : new Color(0.3f, 0.22f, 0.45f));
-        Material accentMat = GetOrCreateMat(mortar ? "M_TowerMortarAccent" : "M_TowerSpiralAccent",
-                                            mortar ? new Color(0.85f, 0.35f, 0.15f) : new Color(1f, 0.35f, 0.75f));
+        Material bodyMat = GetOrCreateMat("M_TowerMortar", new Color(0.35f, 0.3f, 0.28f));
+        Material accentMat = GetOrCreateMat("M_TowerMortarAccent", new Color(0.85f, 0.35f, 0.15f));
 
-        var body = Prim(PrimitiveType.Cylinder, "Base", visual.transform, new Vector3(0f, 1.5f, 0f), new Vector3(2.2f, 1.5f, 2.2f), bodyMat);
+        Prim(PrimitiveType.Cylinder, "Base", visual.transform, new Vector3(0f, 1.5f, 0f), new Vector3(2.2f, 1.5f, 2.2f), bodyMat);
         Prim(PrimitiveType.Cylinder, "Ring", visual.transform, new Vector3(0f, 3.05f, 0f), new Vector3(2.6f, 0.12f, 2.6f), accentMat);
 
         var head = new GameObject("Head");
         head.transform.SetParent(visual.transform, false);
         head.transform.localPosition = new Vector3(0f, 3.6f, 0f);
+        Prim(PrimitiveType.Cube, "HeadBox", head.transform, Vector3.zero, new Vector3(1.6f, 0.9f, 1.6f), bodyMat);
+        var barrel = Prim(PrimitiveType.Cylinder, "Barrel", head.transform, new Vector3(0f, 0.7f, 0.35f), new Vector3(0.7f, 0.7f, 0.7f), accentMat);
+        barrel.transform.localRotation = Quaternion.Euler(30f, 0f, 0f);
+        var firePoint = new GameObject("FirePoint").transform;
+        firePoint.SetParent(head.transform, false);
+        firePoint.localPosition = new Vector3(0f, 1.4f, 0.75f);
 
-        Transform firePoint;
-        if (mortar)
+        root.AddComponent<CapsuleCollider>();
+        root.AddComponent<HitFlash>();
+        root.AddComponent<EnemyHealthBar>();
+        var tower = root.AddComponent<MortarTower>();
+        var so = new SerializedObject(tower);
+        so.FindProperty("_maxHealth").floatValue = 350f;
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        FixReferences(tower, false);
+
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, MortarPath);
+        Object.DestroyImmediate(root);
+        Debug.Log($"[TowerSetup] Prefab creado: {MortarPath}");
+        return prefab;
+    }
+
+    // ------------------------------------------------------------ ordenar referencias
+
+    [MenuItem("Tools/Botes/Ordenar referencias de la torre")]
+    private static void FixSelected()
+    {
+        var tower = Selection.activeGameObject != null ? Selection.activeGameObject.GetComponentInParent<SpecialTower>() : null;
+        if (tower == null)
         {
-            Prim(PrimitiveType.Cube, "HeadBox", head.transform, Vector3.zero, new Vector3(1.6f, 0.9f, 1.6f), bodyMat);
-            var barrel = Prim(PrimitiveType.Cylinder, "Barrel", head.transform, new Vector3(0f, 0.7f, 0.35f), new Vector3(0.7f, 0.7f, 0.7f), accentMat);
-            barrel.transform.localRotation = Quaternion.Euler(30f, 0f, 0f);
-            firePoint = new GameObject("FirePoint").transform;
-            firePoint.SetParent(head.transform, false);
-            firePoint.localPosition = new Vector3(0f, 1.4f, 0.75f);
+            EditorUtility.DisplayDialog("Torre", "Seleccioná la torre (o cualquier hijo de la torre) en la escena o en modo prefab.", "Ok");
+            return;
         }
-        else
+        FixReferences(tower, true);
+    }
+
+    [MenuItem("CONTEXT/MortarTower/Ordenar referencias")]
+    private static void FixFromContext(MenuCommand cmd) => FixReferences((SpecialTower)cmd.context, true);
+
+    public static void FixReferences(SpecialTower tower, bool withUndo)
+    {
+        Transform root = tower.transform;
+        if (withUndo) Undo.RegisterFullObjectHierarchyUndo(tower.gameObject, "Ordenar referencias de la torre");
+        var log = new List<string>();
+        var so = new SerializedObject(tower);
+
+        // 1) Visual: dónde está el modelo
+        Transform visual = (so.FindProperty("_visualRoot").objectReferenceValue as GameObject)?.transform;
+        if (visual == null || !HasRenderers(visual)) visual = FindChild(root, "Visual");
+        if (visual == null || !HasRenderers(visual))
         {
-            Prim(PrimitiveType.Sphere, "Orb", head.transform, Vector3.zero, Vector3.one * 1.6f, accentMat);
-            firePoint = new GameObject("FirePoint").transform;
-            firePoint.SetParent(root.transform, false);
-            firePoint.localPosition = new Vector3(0f, 1.5f, 0f); // a la altura del barco, para que las balas le peguen
+            var withModel = new List<Transform>();
+            foreach (Transform c in root) if (HasRenderers(c)) withModel.Add(c);
+
+            if (withModel.Count == 1) visual = withModel[0];
+            else if (withModel.Count > 1)
+            {
+                var container = new GameObject("Visual").transform;
+                if (withUndo) Undo.RegisterCreatedObjectUndo(container.gameObject, "Crear Visual");
+                container.SetParent(root, false);
+                foreach (var c in withModel)
+                {
+                    if (withUndo) Undo.SetTransformParent(c, container, "Mover a Visual");
+                    else c.SetParent(container, true);
+                }
+                visual = container;
+                log.Add($"Junté {withModel.Count} modelos dentro de 'Visual'");
+            }
         }
+        if (visual == null)
+        {
+            Debug.LogWarning("[TowerSetup] No encontré el modelo de la torre: tiene que ser un hijo del objeto que tiene MortarTower " +
+                             "(no un MeshRenderer en el mismo objeto), así se puede hundir sin mover el collider.", tower);
+            return;
+        }
+        so.FindProperty("_visualRoot").objectReferenceValue = visual.gameObject;
+        log.Add($"Visual Root = {visual.name}");
 
-        // ---- colisión: una sola cápsula en el root ----
-        foreach (var c in root.GetComponentsInChildren<Collider>(true)) Object.DestroyImmediate(c);
-        var capsule = root.AddComponent<CapsuleCollider>();
-        capsule.center = new Vector3(0f, 2f, 0f);
-        capsule.radius = 1.3f;
-        capsule.height = 4.5f;
+        // 2) Head (opcional)
+        Transform head = FindChild(root, "Head");
+        so.FindProperty("_head").objectReferenceValue = head;
+        so.FindProperty("_pulseTarget").objectReferenceValue = head != null ? head : visual;
+        log.Add(head != null ? $"Head = {head.name}" : "Sin Head: la torre no gira, se infla el Visual entero");
 
-        // ---- tag / layer para que tus balas le peguen ----
+        // 3) Medidas del modelo
+        Bounds b = RenderBounds(visual);
+
+        // 4) FirePoint
+        Transform fire = FindChild(root, "FirePoint");
+        if (fire == null)
+        {
+            fire = new GameObject("FirePoint").transform;
+            if (withUndo) Undo.RegisterCreatedObjectUndo(fire.gameObject, "Crear FirePoint");
+            fire.SetParent(head != null ? head : root, false);
+            fire.position = new Vector3(b.center.x, b.max.y + 0.5f, b.center.z);
+            log.Add("Creé FirePoint arriba del modelo");
+        }
+        so.FindProperty("_firePoint").objectReferenceValue = fire;
+
+        // 5) Collider: cápsula del root ajustada al modelo
+        var capsule = root.GetComponent<CapsuleCollider>();
+        if (capsule == null)
+        {
+            capsule = withUndo ? Undo.AddComponent<CapsuleCollider>(root.gameObject) : root.gameObject.AddComponent<CapsuleCollider>();
+        }
+        else if (withUndo) Undo.RecordObject(capsule, "Ajustar collider");
+        Vector3 ls = root.lossyScale;
+        float sx = Mathf.Max(0.0001f, Mathf.Abs(ls.x)), sy = Mathf.Max(0.0001f, Mathf.Abs(ls.y)), sz = Mathf.Max(0.0001f, Mathf.Abs(ls.z));
+        capsule.direction = 1;
+        capsule.isTrigger = false;
+        capsule.center = root.InverseTransformPoint(b.center);
+        capsule.height = b.size.y / sy;
+        capsule.radius = Mathf.Max(b.size.x / sx, b.size.z / sz) * 0.5f * 0.85f;
+        log.Add($"Collider: alto {capsule.height:0.0}, radio {capsule.radius:0.0}");
+
+        // 6) Tag + layer para que tus balas le peguen
         int layer = LayerMask.NameToLayer("EnemyLayer");
         foreach (var t in root.GetComponentsInChildren<Transform>(true))
         {
+            if (withUndo) Undo.RecordObject(t.gameObject, "Tag/Layer");
             t.gameObject.tag = "Enemy";
             if (layer >= 0) t.gameObject.layer = layer;
         }
+        if (layer < 0) log.Add("OJO: no existe el layer 'EnemyLayer'");
 
-        root.AddComponent<HitFlash>();
+        // 7) HitFlash con los renderers del modelo nuevo
+        var flash = root.GetComponent<HitFlash>();
+        if (flash == null) flash = withUndo ? Undo.AddComponent<HitFlash>(root.gameObject) : root.gameObject.AddComponent<HitFlash>();
+        var fso = new SerializedObject(flash);
+        var list = fso.FindProperty("renderers");
+        var rends = new List<Renderer>();
+        foreach (var r in visual.GetComponentsInChildren<Renderer>(true)) if (!(r is ParticleSystemRenderer)) rends.Add(r);
+        list.arraySize = rends.Count;
+        for (int i = 0; i < rends.Count; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = rends[i];
+        fso.ApplyModifiedProperties();
+        log.Add($"HitFlash: {rends.Count} renderers");
 
-        // ---- script de la torre ----
-        SpecialTower tower = mortar ? root.AddComponent<MortarTower>() : (SpecialTower)root.AddComponent<SpiralTower>();
-        var so = new SerializedObject(tower);
-        so.FindProperty("_visualRoot").objectReferenceValue = visual;
-        so.FindProperty("_head").objectReferenceValue = head.transform;
-        so.FindProperty("_pulseTarget").objectReferenceValue = head.transform;
-        so.FindProperty("_firePoint").objectReferenceValue = firePoint;
+        // 8) Barra de vida (la misma de los enemigos) arriba del modelo
+        var bar = root.GetComponent<EnemyHealthBar>();
+        if (bar == null) bar = withUndo ? Undo.AddComponent<EnemyHealthBar>(root.gameObject) : root.gameObject.AddComponent<EnemyHealthBar>();
+        var bso = new SerializedObject(bar);
+        bso.FindProperty("_worldOffset").vector3Value = new Vector3(0f, b.max.y - root.position.y + 1f, 0f);
+        bso.FindProperty("_hideUntilHit").boolValue = true;
+        bso.ApplyModifiedProperties();
 
-        var deathVfx = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/A_VFX/PARTICLES/Explosions/WoodExplosionVFX.prefab");
-        if (deathVfx != null) so.FindProperty("_deathVfx").objectReferenceValue = deathVfx;
-        if (mortar)
+        so.ApplyModifiedProperties();
+
+        if (withUndo)
         {
-            var splash = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/A_VFX/PARTICLES/Explosions/WaterSplash.prefab");
-            if (splash != null) so.FindProperty("_landingVfx").objectReferenceValue = splash;
-            so.FindProperty("_maxHealth").floatValue = 350f;
+            if (PrefabUtility.IsPartOfPrefabInstance(tower)) PrefabUtility.RecordPrefabInstancePropertyModifications(tower);
+            EditorUtility.SetDirty(tower);
+            if (tower.gameObject.scene.IsValid()) EditorSceneManager.MarkSceneDirty(tower.gameObject.scene);
         }
-        so.ApplyModifiedPropertiesWithoutUndo();
 
-        string path = mortar ? MortarPath : SpiralPath;
-        var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
-        Object.DestroyImmediate(root);
-        Debug.Log($"[TowerSetup] Prefab creado: {path}");
-        return prefab;
+        string extra = PrefabUtility.IsPartOfPrefabInstance(tower)
+            ? "\nEstá en la escena: si querés que quede en el prefab, Overrides > Apply All."
+            : "";
+        Debug.Log("[TowerSetup] Referencias ordenadas:\n - " + string.Join("\n - ", log) + extra, tower);
     }
+
+    private static bool HasRenderers(Transform t)
+    {
+        foreach (var r in t.GetComponentsInChildren<Renderer>(true))
+            if (!(r is ParticleSystemRenderer)) return true;
+        return false;
+    }
+
+    private static Transform FindChild(Transform root, string name)
+    {
+        foreach (var t in root.GetComponentsInChildren<Transform>(true))
+            if (t != root && string.Equals(t.name, name, System.StringComparison.OrdinalIgnoreCase)) return t;
+        return null;
+    }
+
+    private static Bounds RenderBounds(Transform visual)
+    {
+        bool has = false;
+        var b = new Bounds(visual.position, Vector3.zero);
+        foreach (var r in visual.GetComponentsInChildren<Renderer>(true))
+        {
+            if (r is ParticleSystemRenderer) continue;
+            if (!has) { b = r.bounds; has = true; }
+            else b.Encapsulate(r.bounds);
+        }
+        return b;
+    }
+
+    // ------------------------------------------------------------ util
 
     private static GameObject Prim(PrimitiveType type, string name, Transform parent, Vector3 pos, Vector3 scale, Material mat)
     {
         var go = GameObject.CreatePrimitive(type);
+        Object.DestroyImmediate(go.GetComponent<Collider>());
         go.name = name;
         go.transform.SetParent(parent, false);
         go.transform.localPosition = pos;
@@ -148,6 +277,13 @@ public static class TowerSetup
         mat = new Material(shader);
         if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
         if (mat.HasProperty("_Color")) mat.SetColor("_Color", color);
+        // emisión prendida (en negro) para que el HitFlash se vea, igual que en los enemigos
+        if (mat.HasProperty("_EmissionColor"))
+        {
+            mat.EnableKeyword("_EMISSION");
+            mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;
+            mat.SetColor("_EmissionColor", Color.black);
+        }
         AssetDatabase.CreateAsset(mat, path);
         return mat;
     }

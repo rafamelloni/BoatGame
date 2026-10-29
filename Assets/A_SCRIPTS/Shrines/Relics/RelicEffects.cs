@@ -1,61 +1,115 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum RelicType { None, Ancla, Timon, Ron }
+// Ancla, Timon y Ron quedan solo para no romper los assets viejos: ya no hacen nada ni salen en los templos.
+public enum RelicType
+{
+    None, Ancla, Timon, Ron,
+    // Common
+    PolvoraFina, RelojArena, BalasRepuesto, MechaLarga, Pluma, Salvavidas, Catalejo,
+    // Rare
+    Antorcha, Garfio, UltimoAliento, Pleno, Mina,
+    // Super Rare
+    Metralla, Holandes, BalaFantasma, CargadorSinFondo
+}
 
-// Las mejoras que dan las reliquias (solo duran la run).
-//  - Cada fragmento da una mejora chica de stats
-//  - Al juntar las 3 piezas se desbloquea un efecto especial
+// Banderas que leen otros scripts (CannonBullet) sin depender de RelicEffects.
+public static class RelicRuntime
+{
+    // Cuántos enemigos atraviesa cada bala antes de comportarse normal (Bala fantasma)
+    public static int PierceCount;
+    // true mientras explota una balita de Metralla o una mina: esas kills no generan más Metralla
+    public static bool SuppressProcs;
+}
+
+// Lo que hacen las reliquias (solo duran la run).
 // Todo lo que suma lo anota para poder deshacerlo exacto al reiniciar la run.
 // Va en el mismo objeto que RelicInventory (si no está, RelicInventory lo agrega solo).
 public class RelicEffects : MonoBehaviour
 {
     public static RelicEffects Instance { get; private set; }
 
-    [Header("Ancla — por fragmento")]
-    [SerializeField, Range(0f, 1f)] private float _anclaMaxHealthPct = 0.15f;
-    [SerializeField, Range(0f, 1f)] private float _anclaBlockChance = 0.04f;
-    [Header("Ancla — completa: Anclado")]
-    [Tooltip("Por debajo de esta fracción de tu velocidad máxima contás como 'anclado'")]
-    [SerializeField, Range(0f, 1f)] private float _anclaSlowThreshold = 0.35f;
-    [SerializeField, Range(0f, 1f)] private float _anclaDamageReduction = 0.4f;
+    public static bool IsLegacy(RelicType t) =>
+        t == RelicType.None || t == RelicType.Ancla || t == RelicType.Timon || t == RelicType.Ron;
 
-    [Header("Timón — por fragmento")]
-    [SerializeField, Range(0f, 1f)] private float _timonMoveSpeedPct = 0.10f;
-    [SerializeField, Range(0f, 1f)] private float _timonTurnSpeedPct = 0.15f;
-    [Header("Timón — completa: Viento a favor")]
-    [SerializeField] private float _timonSprintMultiplierAdd = 0.3f;
-    [Tooltip("El sprint gasta esta fracción de lo normal (0.5 = la mitad)")]
-    [SerializeField, Range(0.1f, 1f)] private float _timonSprintDrainMul = 0.5f;
+    // ------------------------------------------------------------ valores
 
-    [Header("Ron — por fragmento")]
-    [SerializeField, Range(0f, 1f)] private float _ronDamagePct = 0.12f;
-    [SerializeField, Range(0f, 0.5f)] private float _ronReloadPct = 0.08f;
-    [Header("Ron — completa: Barril sin fondo")]
-    [Tooltip("Probabilidad de que un disparo no gaste munición")]
-    [SerializeField, Range(0f, 1f)] private float _ronFreeShotChance = 0.3f;
+    [Header("Common (se apilan: cada copia suma de nuevo)")]
+    [SerializeField, Range(0f, 1f)] private float _damagePct = 0.10f;           // Pólvora fina
+    [SerializeField, Range(0f, 0.5f)] private float _reloadPct = 0.10f;         // Reloj de arena
+    [SerializeField] private int _extraAmmo = 1;                                 // Balas de repuesto
+    [SerializeField, Range(0f, 1f)] private float _explosionPct = 0.10f;        // Mecha larga
+    [SerializeField, Range(0f, 1f)] private float _bulletSpeedPct = 0.10f;      // Pluma de gaviota
+    [SerializeField, Range(0f, 1f)] private float _maxHealthPct = 0.10f;        // Salvavidas
+    [SerializeField, Range(0f, 1f)] private float _critChance = 0.05f;          // Catalejo
 
-    // referencias (se buscan solas)
+    [Header("Antorcha — después de recargar")]
+    [SerializeField] private float _freshDamageMult = 1.5f;
+    [SerializeField] private float _freshDuration = 1f;
+
+    [Header("Garfio — cada kill acelera la próxima recarga")]
+    [SerializeField, Range(0f, 0.3f)] private float _killReloadBonus = 0.08f;
+    [SerializeField, Range(0f, 0.9f)] private float _killReloadMax = 0.5f;
+
+    [Header("Último aliento")]
+    [SerializeField, Range(0f, 1f)] private float _lastBreathThreshold = 0.3f;
+    [Tooltip("Multiplica el tiempo de recarga (0.5 = el doble de rápido)")]
+    [SerializeField, Range(0.1f, 1f)] private float _lastBreathReloadMul = 0.5f;
+
+    [Header("Dados cargados (Pleno)")]
+    [SerializeField] private int _plenoKills = 3;
+
+    [Header("Mina de pólvora")]
+    [SerializeField] private float _mineLifetime = 5f;
+    [SerializeField] private float _mineTriggerRadius = 2.5f;
+    [SerializeField] private float _mineExplosionRadius = 3.5f;
+    [Tooltip("Daño de la mina = daño del cañón x esto")]
+    [SerializeField] private float _mineDamageMul = 0.8f;
+    [SerializeField] private int _maxMines = 8;
+
+    [Header("Metralla")]
+    [SerializeField] private int _shrapnelCount = 3;
+    [Tooltip("Daño de cada balita = daño del cañón x esto")]
+    [SerializeField] private float _shrapnelDamageMul = 0.25f;
+    [SerializeField] private float _shrapnelDistance = 5f;
+    [SerializeField] private float _shrapnelFlightTime = 0.5f;
+    [Tooltip("Tope de balitas por segundo, para que una cadena de kills no explote todo")]
+    [SerializeField] private float _maxShrapnelPerSecond = 12f;
+
+    [Header("Linterna del Holandés")]
+    [SerializeField, Range(0.1f, 1f)] private float _reviveHealthPct = 0.5f;
+
+    [Header("Bala fantasma")]
+    [SerializeField] private int _pierceCount = 1;
+
+    [Header("Barril sin fondo")]
+    [SerializeField] private int _bottomlessKills = 15;
+    [SerializeField] private float _bottomlessDuration = 5f;
+
+    // ------------------------------------------------------------ estado
+
     private RT_PlayerStats _stats;
+    private RT_PlayerStats _critStats;
     private RT_PlayerHealth _health;
-    private Movement _move;
     private CannonStrategy _cannon;
-
     private RelicInventory _inventory;
 
-    // deshacer: cada cambio aplicado guarda cómo revertirlo
     private readonly List<System.Action> _undo = new List<System.Action>();
-    private int _lastAmmo = -1;
+    private readonly HashSet<RelicType> _active = new HashSet<RelicType>();
+    private readonly List<PowderMine> _mines = new List<PowderMine>();
+
+    private bool _cannonHooked, _healthHooked;
+    private int _garfioKills;
+    private int _bottomlessCounter;
+    private bool _reviveUsed;
+    private float _shrapnelBudget;
+    private Coroutine _freshRoutine, _bottomlessRoutine;
 
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(this); return; }
         Instance = this;
-    }
-
-    private void OnDestroy()
-    {
-        if (Instance == this) Instance = null;
     }
 
     private void Start()
@@ -64,37 +118,130 @@ public class RelicEffects : MonoBehaviour
         if (_inventory == null) _inventory = FindFirstObjectByType<RelicInventory>();
         if (_inventory != null)
         {
-            _inventory.OnFragmentAdded += OnFragmentAdded;
+            _inventory.OnRelicAdded += OnRelicAdded;
             _inventory.OnReset += RevertAll;
         }
+        EnemyHealth.OnAnyEnemyDamagedInfo += OnEnemyDamaged;
+        CannonBullet.OnBulletExploded += OnBulletExploded;
+        CannonBullet.OnBulletHitWater += OnBulletHitWater;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+        if (_inventory != null)
+        {
+            _inventory.OnRelicAdded -= OnRelicAdded;
+            _inventory.OnReset -= RevertAll;
+        }
+        EnemyHealth.OnAnyEnemyDamagedInfo -= OnEnemyDamaged;
+        CannonBullet.OnBulletExploded -= OnBulletExploded;
+        CannonBullet.OnBulletHitWater -= OnBulletHitWater;
+        RelicRuntime.PierceCount = 0;
+    }
+
+    private void Update()
+    {
+        _shrapnelBudget = Mathf.Min(_maxShrapnelPerSecond, _shrapnelBudget + _maxShrapnelPerSecond * Time.deltaTime);
     }
 
     // ------------------------------------------------------------ aplicar
 
-    private void OnFragmentAdded(SO_RelicData relic, int count)
+    private void OnRelicAdded(SO_RelicData relic, int count)
     {
         if (relic == null) return;
         FindRefs();
-        bool complete = count >= RelicInventory.FragmentsToComplete;
 
         switch (relic.effectType)
         {
-            case RelicType.Ancla:
-                AddMaxHealthPct(_anclaMaxHealthPct);
-                AddBlockChance(_anclaBlockChance);
-                if (complete) EnableAnclado();
-                break;
+            // Common
+            case RelicType.PolvoraFina: AddCannonDamagePct(_damagePct); break;
+            case RelicType.RelojArena: AddReloadPct(_reloadPct); break;
+            case RelicType.BalasRepuesto: AddAmmo(_extraAmmo); break;
+            case RelicType.MechaLarga: AddExplosionPct(_explosionPct); break;
+            case RelicType.Pluma: AddBulletSpeedPct(_bulletSpeedPct); break;
+            case RelicType.Salvavidas: AddMaxHealthPct(_maxHealthPct); break;
+            case RelicType.Catalejo: AddCrit(_critChance); break;
 
-            case RelicType.Timon:
-                AddMovePct(_timonMoveSpeedPct, _timonTurnSpeedPct);
-                if (complete) EnableVientoAFavor();
+            // Rare / Super Rare: se prenden y los manejan los eventos de abajo
+            case RelicType.Antorcha:
+            case RelicType.Garfio:
+            case RelicType.UltimoAliento:
+                HookCannon();
+                Enable(relic.effectType);
                 break;
-
-            case RelicType.Ron:
-                AddCannonPct(_ronDamagePct, _ronReloadPct);
-                if (complete) EnableBarrilSinFondo();
+            case RelicType.Holandes:
+                HookHealth();
+                Enable(relic.effectType);
+                break;
+            case RelicType.BalaFantasma:
+                RelicRuntime.PierceCount += _pierceCount;
+                int p = _pierceCount;
+                _undo.Add(() => RelicRuntime.PierceCount = Mathf.Max(0, RelicRuntime.PierceCount - p));
+                Enable(relic.effectType);
+                break;
+            case RelicType.Pleno:
+            case RelicType.Mina:
+            case RelicType.Metralla:
+            case RelicType.CargadorSinFondo:
+                Enable(relic.effectType);
                 break;
         }
+    }
+
+    private void Enable(RelicType t)
+    {
+        if (_active.Add(t)) _undo.Add(() => _active.Remove(t));
+    }
+
+    private bool Has(RelicType t) => _active.Contains(t);
+
+    // --- stats
+
+    private void AddCannonDamagePct(float pct)
+    {
+        if (_cannon == null) return;
+        var data = _cannon._rtData;
+        float d = data.damage * pct;
+        data.damage += d;
+        _undo.Add(() => data.damage -= d);
+    }
+
+    private void AddReloadPct(float pct)
+    {
+        if (_cannon == null) return;
+        var data = _cannon._rtData;
+        float c = data.cooldown * pct;
+        data.cooldown -= c;
+        _undo.Add(() => data.cooldown += c);
+    }
+
+    private void AddAmmo(int amount)
+    {
+        if (_cannon == null) return;
+        var cannon = _cannon;
+        cannon.AddAmmo(amount);
+        _undo.Add(() => cannon.AddAmmo(-amount));
+    }
+
+    private void AddExplosionPct(float pct)
+    {
+        if (_cannon == null) return;
+        var data = _cannon._rtData;
+        float r = data.explosionRadius * pct;
+        data.explosionRadius += r;
+        _undo.Add(() => data.explosionRadius -= r);
+    }
+
+    private void AddBulletSpeedPct(float pct)
+    {
+        if (_cannon == null) return;
+        var data = _cannon._rtData;
+        float m = 1f + pct;
+        data.launchSpeed *= m;
+        data.bulletSpeed *= m;
+        data.verticalArc /= m; // arco más plano = la bala llega antes
+        _undo.Add(() => { data.launchSpeed /= m; data.bulletSpeed /= m; data.verticalArc *= m; });
     }
 
     private void AddMaxHealthPct(float pct)
@@ -108,81 +255,161 @@ public class RelicEffects : MonoBehaviour
         _undo.Add(() => { st.maxHealth -= add; st.currentHealth = Mathf.Min(st.currentHealth, st.maxHealth); });
     }
 
-    private void AddBlockChance(float add)
+    private void AddCrit(float add)
     {
-        if (_stats == null) return;
-        _stats.blockChance += add;
-        var st = _stats;
-        _undo.Add(() => st.blockChance -= add);
+        if (_critStats == null) return;
+        var st = _critStats;
+        st.critChance += add;
+        _undo.Add(() => st.critChance -= add);
     }
 
-    private void AddMovePct(float movePct, float turnPct)
-    {
-        if (_stats == null) return;
-        float m = _stats.moveSpeed * movePct;
-        float t = _stats.turnSpeed * turnPct;
-        _stats.moveSpeed += m;
-        _stats.turnSpeed += t;
-        var st = _stats;
-        _undo.Add(() => { st.moveSpeed -= m; st.turnSpeed -= t; });
-    }
+    // --- enganches
 
-    private void AddCannonPct(float dmgPct, float reloadPct)
+    private void HookCannon()
     {
-        if (_cannon == null) return;
-        var data = _cannon._rtData;
-        float d = data.damage * dmgPct;
-        float c = data.cooldown * reloadPct;
-        data.damage += d;
-        data.cooldown -= c;
-        _undo.Add(() => { data.damage -= d; data.cooldown += c; });
-    }
-
-    // Ancla completa: si vas despacio recibís menos daño
-    private void EnableAnclado()
-    {
-        if (_health == null) return;
-        var health = _health;
-        System.Func<float, float> mod = amount =>
-        {
-            if (_move != null && _move.SpeedRatio < _anclaSlowThreshold)
-                return amount * (1f - _anclaDamageReduction);
-            return amount;
-        };
-        health.IncomingDamageModifier += mod;
-        _undo.Add(() => health.IncomingDamageModifier -= mod);
-    }
-
-    // Timón completo: sprint más rápido y que gasta menos
-    private void EnableVientoAFavor()
-    {
-        if (_move == null) return;
-        var mv = _move;
-        float originalDrain = mv.sprintDrainRate;
-        mv.sprintSpeedMultiplier += _timonSprintMultiplierAdd;
-        mv.sprintDrainRate *= _timonSprintDrainMul;
-        float add = _timonSprintMultiplierAdd;
-        _undo.Add(() => { mv.sprintSpeedMultiplier -= add; mv.sprintDrainRate = originalDrain; });
-    }
-
-    // Ron completo: chance de que un disparo no gaste bala
-    private void EnableBarrilSinFondo()
-    {
-        if (_cannon == null) return;
+        if (_cannonHooked || _cannon == null) return;
+        _cannonHooked = true;
         var cannon = _cannon;
-        _lastAmmo = cannon.CurrentAmmo;
-        System.Action<int, int> handler = (current, max) =>
+        cannon.ReloadTimeMultiplier = ConsumeReloadMultiplier;
+        cannon.OnReloaded += HandleReloaded;
+        _undo.Add(() =>
         {
-            bool shot = !cannon.IsReloading && current == _lastAmmo - 1;
-            _lastAmmo = current;
-            if (shot && Random.value < _ronFreeShotChance)
+            cannon.ReloadTimeMultiplier = null;
+            cannon.OnReloaded -= HandleReloaded;
+            _cannonHooked = false;
+        });
+    }
+
+    private void HookHealth()
+    {
+        if (_healthHooked || _health == null) return;
+        _healthHooked = true;
+        var health = _health;
+        health.IncomingDamageModifier += ModifyIncomingDamage;
+        _undo.Add(() =>
+        {
+            health.IncomingDamageModifier -= ModifyIncomingDamage;
+            _healthHooked = false;
+        });
+    }
+
+    // Lo llama el cañón UNA vez al empezar cada recarga
+    private float ConsumeReloadMultiplier()
+    {
+        float m = 1f;
+        if (Has(RelicType.Garfio))
+        {
+            m *= 1f - Mathf.Min(_killReloadMax, _garfioKills * _killReloadBonus);
+            _garfioKills = 0; // se resetea al recargar
+        }
+        if (Has(RelicType.UltimoAliento) && _stats != null && _stats.maxHealth > 0f
+            && _stats.currentHealth / _stats.maxHealth < _lastBreathThreshold)
+            m *= _lastBreathReloadMul;
+        return m;
+    }
+
+    private void HandleReloaded()
+    {
+        if (Has(RelicType.Antorcha) && _cannon != null)
+        {
+            if (_freshRoutine != null) StopCoroutine(_freshRoutine);
+            _freshRoutine = StartCoroutine(FreshClip(_cannon._rtData));
+        }
+    }
+
+    private IEnumerator FreshClip(RT_CannonData data)
+    {
+        data.fireDamageMultiplier = _freshDamageMult;
+        yield return new WaitForSeconds(_freshDuration);
+        data.fireDamageMultiplier = 1f;
+        _freshRoutine = null;
+    }
+
+    // Linterna del Holandés: el golpe que te mataría te deja con vida (una vez por run)
+    private float ModifyIncomingDamage(float amount)
+    {
+        if (!Has(RelicType.Holandes) || _reviveUsed || _stats == null) return amount;
+        if (amount < _stats.currentHealth) return amount;
+
+        _reviveUsed = true;
+        float target = _stats.maxHealth * _reviveHealthPct;
+        if (_health != null) _health.Heal(Mathf.Max(0f, target - _stats.currentHealth));
+        else _stats.currentHealth = target;
+        return 0f;
+    }
+
+    // ------------------------------------------------------------ eventos del juego
+
+    private void OnEnemyDamaged(DamageInfo info)
+    {
+        if (!info.killed || _active.Count == 0) return;
+        FindRefs();
+
+        if (Has(RelicType.Garfio)) _garfioKills++;
+
+        if (Has(RelicType.CargadorSinFondo) && _bottomlessRoutine == null)
+        {
+            _bottomlessCounter++;
+            if (_bottomlessCounter >= _bottomlessKills)
             {
-                cannon.RefundShot();
-                _lastAmmo = cannon.CurrentAmmo;
+                _bottomlessCounter = 0;
+                _bottomlessRoutine = StartCoroutine(Bottomless());
             }
-        };
-        cannon.OnAmmoChanged += handler;
-        _undo.Add(() => cannon.OnAmmoChanged -= handler);
+        }
+
+        // solo las kills "de verdad" (bala, fuego...) largan balitas; las de balitas o minas no encadenan
+        if (Has(RelicType.Metralla) && !RelicRuntime.SuppressProcs) SpawnShrapnel(info.position);
+    }
+
+    private IEnumerator Bottomless()
+    {
+        if (_cannon != null) _cannon.InfiniteAmmo = true;
+        yield return new WaitForSeconds(_bottomlessDuration);
+        if (_cannon != null) _cannon.InfiniteAmmo = false;
+        _bottomlessRoutine = null;
+    }
+
+    private void SpawnShrapnel(Vector3 pos)
+    {
+        if (_cannon == null || _shrapnelCount <= 0) return;
+        float g = Physics.gravity.y;
+        float t = Mathf.Max(0.1f, _shrapnelFlightTime);
+        float offset = Random.Range(0f, 360f);
+        Vector3 start = pos + Vector3.up * 1.2f;
+
+        for (int i = 0; i < _shrapnelCount; i++)
+        {
+            if (_shrapnelBudget < 1f) return;
+            _shrapnelBudget -= 1f;
+
+            float a = (offset + i * 360f / _shrapnelCount) * Mathf.Deg2Rad;
+            Vector3 dir = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+            Vector3 target = pos + dir * _shrapnelDistance;
+            // velocidad exacta para caer en target en t segundos
+            Vector3 v = (target - start - 0.5f * new Vector3(0f, g, 0f) * t * t) / t;
+            _cannon.FireExtraBullet(start, v, _shrapnelDamageMul);
+        }
+    }
+
+    private void OnBulletExploded(Vector3 center, int kills)
+    {
+        if (Has(RelicType.Pleno) && kills >= _plenoKills && _cannon != null)
+            _cannon.RefundShot();
+    }
+
+    private void OnBulletHitWater(Vector3 point, LayerMask damageLayers, GameObject explosionVfx)
+    {
+        if (!Has(RelicType.Mina) || _cannon == null) return;
+
+        _mines.RemoveAll(m => m == null);
+        if (_mines.Count >= _maxMines && _mines.Count > 0)
+        {
+            Destroy(_mines[0].gameObject);
+            _mines.RemoveAt(0);
+        }
+
+        float damage = _cannon._rtData.damage * _mineDamageMul;
+        _mines.Add(PowderMine.Spawn(point, _mineLifetime, _mineTriggerRadius, _mineExplosionRadius, damage, damageLayers, explosionVfx));
     }
 
     // ------------------------------------------------------------ reset
@@ -195,18 +422,47 @@ public class RelicEffects : MonoBehaviour
             catch (System.Exception e) { Debug.LogException(e); }
         }
         _undo.Clear();
-        _lastAmmo = -1;
+        _active.Clear();
+
+        StopAllCoroutines();
+        _freshRoutine = null;
+        _bottomlessRoutine = null;
+        if (_cannon != null)
+        {
+            _cannon.InfiniteAmmo = false;
+            _cannon._rtData.fireDamageMultiplier = 1f;
+        }
+
+        foreach (var m in _mines) if (m != null) Destroy(m.gameObject);
+        _mines.Clear();
+
+        RelicRuntime.PierceCount = 0;
+        RelicRuntime.SuppressProcs = false;
+        _garfioKills = 0;
+        _bottomlessCounter = 0;
+        _reviveUsed = false;
+        _cannonHooked = _healthHooked = false;
+
         // la run nueva puede crear otro cañón/jugador: volver a buscarlos
-        _cannon = null; _stats = null; _health = null; _move = null;
+        _cannon = null; _stats = null; _critStats = null; _health = null;
     }
 
     private void FindRefs()
     {
-        if (_move == null) _move = FindFirstObjectByType<Movement>();
-        if (_stats == null && _move != null) _stats = _move.GetComponent<RT_PlayerStats>();
-        if (_stats == null) _stats = FindFirstObjectByType<RT_PlayerStats>();
+        if (_stats == null)
+        {
+            var move = FindFirstObjectByType<Movement>();
+            if (move != null) _stats = move.GetComponent<RT_PlayerStats>();
+            if (_stats == null) _stats = FindFirstObjectByType<RT_PlayerStats>();
+        }
         if (_health == null && _stats != null) _health = _stats.GetComponent<RT_PlayerHealth>();
         if (_health == null) _health = FindFirstObjectByType<RT_PlayerHealth>();
+        if (_critStats == null)
+        {
+            // el crítico de la bala se lee de PlayerUpgrades.Stats
+            var pu = FindFirstObjectByType<PlayerUpgrades>();
+            _critStats = pu != null && pu.Stats != null ? pu.Stats : _stats;
+        }
         if (_cannon == null)
         {
             var ac = FindFirstObjectByType<AbilityController>();
@@ -216,60 +472,35 @@ public class RelicEffects : MonoBehaviour
 
     // ------------------------------------------------------------ textos
 
-    // Qué te dio ESTE fragmento (para el panel del cofre)
-    public string DescribeGain(SO_RelicData relic, int count)
+    // Qué hace la reliquia (panel del cofre y cartel del HUD). Para las Common muestra el total apilado.
+    public string Describe(SO_RelicData relic, int count)
     {
         if (relic == null) return "";
-        bool complete = count >= RelicInventory.FragmentsToComplete;
-        string step = FragmentText(relic.effectType);
-        if (complete) step += $"\n<b>¡{SpecialName(relic.effectType)} desbloqueado!</b>";
-        return step;
-    }
-
-    // Todo lo que hace la reliquia (para el cartel del HUD), marcando lo que ya tenés
-    public string DescribeAll(SO_RelicData relic, int count)
-    {
-        if (relic == null) return "";
-        int need = RelicInventory.FragmentsToComplete;
-        string on = "#FFD966", off = "#8A8FA8";
-        string perFrag = $"<color={(count > 0 ? on : off)}>Cada fragmento: {FragmentText(relic.effectType)}</color>";
-        if (count > 0) perFrag += $"  <color={on}>(x{Mathf.Min(count, need)})</color>";
-        string special = $"<color={(count >= need ? on : off)}>Completa — <b>{SpecialName(relic.effectType)}</b>: {SpecialText(relic.effectType)}</color>";
-        return perFrag + "\n" + special;
-    }
-
-    private string FragmentText(RelicType t)
-    {
-        switch (t)
+        int n = Mathf.Max(1, count);
+        switch (relic.effectType)
         {
-            case RelicType.Ancla: return $"+{Pct(_anclaMaxHealthPct)} vida máxima, +{Pct(_anclaBlockChance)} de bloquear golpes";
-            case RelicType.Timon: return $"+{Pct(_timonMoveSpeedPct)} velocidad, +{Pct(_timonTurnSpeedPct)} giro";
-            case RelicType.Ron: return $"+{Pct(_ronDamagePct)} daño del cañón, -{Pct(_ronReloadPct)} tiempo de recarga";
+            case RelicType.PolvoraFina: return $"+{Pct(_damagePct * n)} daño del cañón";
+            case RelicType.RelojArena: return $"-{Pct(_reloadPct * n)} tiempo de recarga";
+            case RelicType.BalasRepuesto: return $"+{_extraAmmo * n} {(_extraAmmo * n == 1 ? "bala" : "balas")} en el cargador";
+            case RelicType.MechaLarga: return $"+{Pct(_explosionPct * n)} radio de explosión";
+            case RelicType.Pluma: return $"+{Pct(_bulletSpeedPct * n)} velocidad de bala";
+            case RelicType.Salvavidas: return $"+{Pct(_maxHealthPct * n)} vida máxima";
+            case RelicType.Catalejo: return $"+{Pct(_critChance * n)} chance de crítico";
+            case RelicType.Antorcha: return $"Durante {_freshDuration:0.#}s después de recargar, tus balas pegan +{Pct(_freshDamageMult - 1f)}";
+            case RelicType.Garfio: return $"Cada kill hace la próxima recarga {Pct(_killReloadBonus)} más rápida (hasta {Pct(_killReloadMax)}). Se reinicia al recargar";
+            case RelicType.UltimoAliento: return $"Con menos de {Pct(_lastBreathThreshold)} de vida, recargás {1f / _lastBreathReloadMul:0.#}x más rápido";
+            case RelicType.Pleno: return $"Si una bala mata a {_plenoKills} o más enemigos, te devuelve la bala";
+            case RelicType.Mina: return "Las balas que caen al agua dejan una mina flotando que explota si pasa un enemigo";
+            case RelicType.Metralla: return $"Los enemigos que matás explotan en {_shrapnelCount} balitas";
+            case RelicType.Holandes: return $"La primera vez que te hundirían, volvés con {Pct(_reviveHealthPct)} de vida";
+            case RelicType.BalaFantasma: return _pierceCount == 1 ? "Tus balas atraviesan al primer enemigo" : $"Tus balas atraviesan {_pierceCount} enemigos";
+            case RelicType.CargadorSinFondo: return $"Cada {_bottomlessKills} kills, {_bottomlessDuration:0.#}s de munición infinita";
             default: return "";
         }
     }
 
-    private string SpecialName(RelicType t)
-    {
-        switch (t)
-        {
-            case RelicType.Ancla: return "Anclado";
-            case RelicType.Timon: return "Viento a favor";
-            case RelicType.Ron: return "Barril sin fondo";
-            default: return "";
-        }
-    }
-
-    private string SpecialText(RelicType t)
-    {
-        switch (t)
-        {
-            case RelicType.Ancla: return $"si vas despacio recibís {Pct(_anclaDamageReduction)} menos daño";
-            case RelicType.Timon: return $"el sprint es más rápido y gasta {Pct(1f - _timonSprintDrainMul)} menos";
-            case RelicType.Ron: return $"{Pct(_ronFreeShotChance)} de chance de que un disparo no gaste bala";
-            default: return "";
-        }
-    }
+    [System.Obsolete("Usá Describe")] public string DescribeGain(SO_RelicData relic, int count) => Describe(relic, count);
+    [System.Obsolete("Usá Describe")] public string DescribeAll(SO_RelicData relic, int count) => Describe(relic, count);
 
     private static string Pct(float v) => Mathf.RoundToInt(v * 100f) + "%";
 }

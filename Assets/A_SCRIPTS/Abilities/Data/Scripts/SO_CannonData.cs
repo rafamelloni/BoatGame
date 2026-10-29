@@ -48,6 +48,18 @@ public class SO_CannonData : ScriptableObject
     public float groundFireDuration = 4f;
     public float groundFireDamagePerSecond = 10f;
 
+    [Header("Andanada (Broadside)")]
+    [Tooltip("Balas por costado cuando se vacia el cargador")]
+    public int broadsideShotsPerSide = 3;
+    [Tooltip("A que distancia del barco caen las balas de la andanada")]
+    public float broadsideDistance = 10f;
+    [Tooltip("Separacion entre balas a lo largo del casco")]
+    public float broadsideSpacing = 3f;
+    [Tooltip("Espera despues de la ultima bala antes de soltar la andanada")]
+    public float broadsideDelay = 0.2f;
+    [Tooltip("Tiempo entre bala y bala de la andanada (0 = todas juntas)")]
+    public float broadsideInterval = 0.06f;
+
     [Header("VFX BULLET")]
     public GameObject explosionVfx;
     public GameObject waterSplash;

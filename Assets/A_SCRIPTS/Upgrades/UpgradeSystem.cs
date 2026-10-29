@@ -23,6 +23,7 @@ public class UpgradeSystem : MonoBehaviour
     [SerializeField] private Sprite spriteChargedShot;
     [SerializeField] private Sprite spriteBurnShot;
     [SerializeField] private Sprite spriteGroundFire;
+    [SerializeField] private Sprite spriteBroadside;
 
     [SerializeField] private DashMovement dashMovement;
     [SerializeField] private LastStand lastStand;
@@ -105,6 +106,15 @@ public class UpgradeSystem : MonoBehaviour
             case StatType.BurnDuration:
                 abilityController.CannonAbility._rtData.burnDuration *= 1f + step.statValue / 100f;
                 break;
+            case StatType.BulletSpeed:
+            {
+                float mult = 1f + step.statValue / 100f;
+                var data = abilityController.CannonAbility._rtData;
+                data.launchSpeed *= mult;   // tope de velocidad (alcance)
+                data.bulletSpeed *= mult;   // rebote del Ricochet
+                data.verticalArc /= mult;   // arco mas plano = la bala llega antes
+                break;
+            }
             case StatType.None:
                 break;
         }
@@ -165,6 +175,9 @@ public class UpgradeSystem : MonoBehaviour
                 break;
             case SpecialAbilityType.GroundFire:
                 abilityHUD.UnlockNext(spriteGroundFire);
+                break;
+            case SpecialAbilityType.Broadside:
+                abilityHUD.UnlockNext(spriteBroadside);
                 break;
         }
     }

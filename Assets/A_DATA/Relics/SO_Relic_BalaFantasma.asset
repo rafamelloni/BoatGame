@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dae852075e244494c9443ee7b29f737f, type: 3}
+  m_Name: SO_Relic_BalaFantasma
+  m_EditorClassIdentifier: Assembly-CSharp::SO_RelicData
+  displayName: "Bala fantasma"
+  effectType: 18
+  rarity: 2
+  description: "Atraviesa como si nada."
+  icon: {fileID: 21300000, guid: c02394fc79cc48b9adfce77d691a6a93, type: 3}
+  color: {r: 1, g: 1, b: 1, a: 1}

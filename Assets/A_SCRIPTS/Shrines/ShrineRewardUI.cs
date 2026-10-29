@@ -8,7 +8,8 @@ using UnityEngine.UI;
 // Panel que aparece al completar un templo (estilo "Treasure Found!" de Vampire Survivors),
 // pero con el cofre en 3D: una cámara aparte lo renderiza a una RenderTexture que se muestra en el panel.
 //  - Pausa el juego mientras está abierto
-//  - ABRIR: el cofre salta/gira/se abre, da un fragmento al azar (RelicInventory) y lo muestra
+//  - ABRIR: el cofre salta/gira/se abre, da una reliquia al azar según rareza (RelicInventory) y la muestra
+//    (el borde del panel se pinta del color de la rareza)
 //  - CONTINUAR: cierra y reanuda
 // El panel se crea en tu Canvas desde el menú: Tools > Botes > Crear panel de templo
 // (queda en la escena como UI normal para que lo retoques con tus PNGs).
@@ -61,6 +62,8 @@ public class ShrineRewardUI : MonoBehaviour
     public bool IsOpen => _isOpen;
 
     private Vector2 _arrowLBase, _arrowRBase;
+    private Image _borderImage;
+    private Color _borderBaseColor;
 
     // 3D
     private GameObject _rig;
@@ -99,6 +102,7 @@ public class ShrineRewardUI : MonoBehaviour
 
         _fragmentText.gameObject.SetActive(false);
         _progressText.gameObject.SetActive(false);
+        if (_borderImage != null) _borderImage.color = _borderBaseColor;
         _buttonLabel.text = _openText;
         _button.interactable = true;
 
@@ -234,8 +238,8 @@ public class ShrineRewardUI : MonoBehaviour
 
         _onChestOpened?.Invoke();
 
-        // 4) fragmento
-        GiveFragment();
+        // 4) reliquia
+        GiveRelic();
         _opened = true;
 
         _fragmentText.gameObject.SetActive(true);
@@ -252,20 +256,23 @@ public class ShrineRewardUI : MonoBehaviour
         _anim = null;
     }
 
-    private void GiveFragment()
+    private void GiveRelic()
     {
         var inv = RelicInventory.Instance != null ? RelicInventory.Instance : FindFirstObjectByType<RelicInventory>();
-        if (inv != null && inv.TryAddRandomFragment(out SO_RelicData relic, out int count))
+        if (inv != null && inv.TryGiveRandom(out SO_RelicData relic, out int count))
         {
-            _fragmentText.text = $"Fragmento de\n<color=#{ColorUtility.ToHtmlStringRGB(relic.color)}>{relic.displayName}</color>";
-            string gain = RelicEffects.Instance != null ? RelicEffects.Instance.DescribeGain(relic, count) : "";
-            _progressText.text = (count >= RelicInventory.FragmentsToComplete
-                ? $"{count}/{RelicInventory.FragmentsToComplete}  ¡Completo!"
-                : $"{count}/{RelicInventory.FragmentsToComplete}") + (gain.Length > 0 ? "\n<size=80%>" + gain + "</size>" : "");
+            Color rc = SO_RelicData.RarityColor(relic.rarity);
+            string rarityHex = ColorUtility.ToHtmlStringRGB(rc);
+            string nameHex = ColorUtility.ToHtmlStringRGB(relic.NameColor);
+            string stack = count > 1 ? $" <size=70%>x{count}</size>" : "";
+            _fragmentText.text = $"<size=60%><color=#{rarityHex}>{SO_RelicData.RarityLabel(relic.rarity).ToUpper()}</color></size>\n<color=#{nameHex}>{relic.displayName}</color>{stack}";
+            string fx = RelicEffects.Instance != null ? RelicEffects.Instance.Describe(relic, count) : "";
+            _progressText.text = $"<size=75%>{fx}</size>";
+            if (_borderImage != null) _borderImage.color = rc;
         }
         else
         {
-            _fragmentText.text = inv == null ? "Fragmento\n(falta RelicInventory en la escena)" : "Ya completaste\ntodas las reliquias";
+            _fragmentText.text = inv == null ? "Reliquia\n(falta RelicInventory en la escena)" : "Ya tenés\ntodas las reliquias";
             _progressText.text = "";
         }
     }
@@ -314,6 +321,13 @@ public class ShrineRewardUI : MonoBehaviour
         _button.onClick.AddListener(OnButton);
         if (_arrowL != null) _arrowLBase = _arrowL.anchoredPosition;
         if (_arrowR != null) _arrowRBase = _arrowR.anchoredPosition;
+        _borderImage = _panel != null ? _panel.GetComponent<Image>() : null;
+        if (_borderImage != null) _borderBaseColor = _borderImage.color;
+        // el texto de lo que hace la reliquia puede ocupar 2 renglones
+        #pragma warning disable 0618
+        _progressText.enableWordWrapping = true;
+#pragma warning restore 0618
+        _progressText.rectTransform.sizeDelta = new Vector2(_progressText.rectTransform.sizeDelta.x, Mathf.Max(_progressText.rectTransform.sizeDelta.y, 60f));
         _root.SetActive(false);
     }
 
@@ -394,8 +408,8 @@ public class ShrineRewardUI : MonoBehaviour
         ir.sizeDelta = new Vector2(400f, 400f);
         ir.anchoredPosition = new Vector2(0f, 40f);
 
-        _fragmentText = MakeText("Fragment", _panel, "Fragmento de\nReliquia", 36f, new Vector2(0f, -170f), new Vector2(520f, 100f));
-        _progressText = MakeText("Progress", _panel, "1/3", 30f, new Vector2(0f, -235f), new Vector2(520f, 40f));
+        _fragmentText = MakeText("Fragment", _panel, "RARE\nReliquia", 36f, new Vector2(0f, -165f), new Vector2(520f, 100f));
+        _progressText = MakeText("Progress", _panel, "Lo que hace", 30f, new Vector2(0f, -232f), new Vector2(500f, 60f));
 
         // botón
         var btnImg = MakeImage("Button", _panel, _buttonColor);

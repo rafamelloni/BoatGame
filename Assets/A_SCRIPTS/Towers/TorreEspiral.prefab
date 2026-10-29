@@ -40,6 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1845140110357190723}
+  - component: {fileID: 3115649363949738834}
   - component: {fileID: 2421840846764246902}
   - component: {fileID: 7943199197086862417}
   - component: {fileID: 8863610908940547720}
@@ -140,6 +141,7 @@ MonoBehaviour:
   _launchPower: 1.3
   _deathVfx: {fileID: 3707281584461059747, guid: bf734a92b8bf4e041a2ac01e5c9b65bd, type: 3}
   _deathSplashSize: 2.5
+  _sinkVfx: {fileID: 4489588693831894998, guid: 5a82c2388a1c65b44900743f9eb3c37b, type: 3}
   _visualRoot: {fileID: 3993426821349259121}
   _destroyedVisual: {fileID: 0}
   _pattern: 0
@@ -495,3 +497,18 @@ Transform:
   - {fileID: 6946639919688061306}
   m_Father: {fileID: 5082134806699292928}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3115649363949738834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2756267015489978956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d32f031dd88347342a0c1ac496ff2950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBar
+  _health: {fileID: 0}
+  _worldOffset: {x: 0, y: 6.5, z: 0}
+  _hideUntilHit: 1

@@ -31,6 +31,16 @@ public class RT_CannonData
     public float groundFireDuration;
     public float groundFireDamagePerSecond;
 
+    public int broadsideShotsPerSide;
+    public float broadsideDistance;
+    public float broadsideSpacing;
+    public float broadsideDelay;
+    public float broadsideInterval;
+
+    // Multiplicador temporal del daño de las balas que se disparan ahora (reliquia Antorcha).
+    // No viene del SO: arranca en 1.
+    public float fireDamageMultiplier = 1f;
+
     public GameObject waterSplashVFX;
     public GameObject explosionVFX;
 
@@ -61,6 +71,12 @@ public class RT_CannonData
         groundFireRadius = so.groundFireRadius;
         groundFireDuration = so.groundFireDuration;
         groundFireDamagePerSecond = so.groundFireDamagePerSecond;
+
+        broadsideShotsPerSide = so.broadsideShotsPerSide;
+        broadsideDistance = so.broadsideDistance;
+        broadsideSpacing = so.broadsideSpacing;
+        broadsideDelay = so.broadsideDelay;
+        broadsideInterval = so.broadsideInterval;
 
         waterSplashVFX = so.waterSplash;
         explosionVFX = so.explosionVfx;

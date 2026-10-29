@@ -37,12 +37,16 @@ public class MortarTower : SpecialTower
     [Tooltip("Prefab con TowerWarningCircle. Vacío = dos discos simples")]
     [SerializeField] private TowerWarningCircle _warningPrefab;
     [SerializeField] private Color _shellColor = new Color(0.15f, 0.15f, 0.15f);
-    [SerializeField] private Color _warningColor = new Color(0.55f, 0.08f, 0.08f);
-    [SerializeField] private Color _warningFillColor = new Color(1f, 0.35f, 0.15f);
+    [Tooltip("Color del aro de aviso")]
+    [SerializeField] private Color _warningColor = new Color(1f, 0.3f, 0.18f, 1f);
+    [Tooltip("Color del relleno del aviso (el alpha es la opacidad máxima)")]
+    [SerializeField] private Color _warningFillColor = new Color(1f, 0.42f, 0.2f, 0.55f);
+    [Tooltip("Estela de la bala (en blanco se desvanece)")]
+    [SerializeField] private Color _trailColor = new Color(1f, 0.85f, 0.6f, 0.8f);
 
     private readonly List<TowerShell> _shells = new List<TowerShell>();
     private readonly List<TowerWarningCircle> _warnings = new List<TowerWarningCircle>();
-    private Material _shellMat, _warnMat, _warnFillMat;
+    private Material _shellMat, _trailMat;
 
     protected override IEnumerator Attack()
     {
@@ -103,37 +107,38 @@ public class MortarTower : SpecialTower
         var rend = go.GetComponent<Renderer>();
         if (_shellMat == null) _shellMat = MakeMat(rend.sharedMaterial, _shellColor, false);
         rend.sharedMaterial = _shellMat;
+        rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+        // estela corta para que se lea la parábola
+        var trail = go.AddComponent<TrailRenderer>();
+        if (_trailMat == null)
+        {
+            var sh = Shader.Find("Sprites/Default");
+            if (sh == null) sh = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            _trailMat = new Material(sh);
+        }
+        trail.sharedMaterial = _trailMat;
+        trail.time = 0.35f;
+        trail.minVertexDistance = 0.1f;
+        trail.widthMultiplier = 1f;
+        trail.widthCurve = new AnimationCurve(new Keyframe(0f, 0.55f), new Keyframe(1f, 0f));
+        var g = new Gradient();
+        g.SetKeys(new[] { new GradientColorKey(_trailColor, 0f), new GradientColorKey(new Color(0.35f, 0.35f, 0.38f), 1f) },
+                  new[] { new GradientAlphaKey(_trailColor.a, 0f), new GradientAlphaKey(0f, 1f) });
+        trail.colorGradient = g;
+        trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        trail.receiveShadows = false;
+        trail.emitting = false;
+
         return go.AddComponent<TowerShell>();
     }
 
+    // Aviso generado: aro que late + relleno que crece + flash al caer (ver TowerWarningCircle)
     private TowerWarningCircle CreateFallbackWarning()
     {
         var root = new GameObject("MortarWarning");
-
-        var outer = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        outer.name = "Outer";
-        Destroy(outer.GetComponent<Collider>());
-        outer.transform.SetParent(root.transform, false);
-        outer.transform.localScale = new Vector3(1f, 0.01f, 1f);
-
-        var fill = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        fill.name = "Fill";
-        Destroy(fill.GetComponent<Collider>());
-        fill.transform.SetParent(root.transform, false);
-        fill.transform.localPosition = new Vector3(0f, 0.02f, 0f);
-        fill.transform.localScale = new Vector3(0f, 0.01f, 0f);
-
-        var ro = outer.GetComponent<Renderer>();
-        var rf = fill.GetComponent<Renderer>();
-        if (_warnMat == null) _warnMat = MakeMat(ro.sharedMaterial, _warningColor, true);
-        if (_warnFillMat == null) _warnFillMat = MakeMat(rf.sharedMaterial, _warningFillColor, true);
-        ro.sharedMaterial = _warnMat;
-        rf.sharedMaterial = _warnFillMat;
-        ro.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        rf.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
         var w = root.AddComponent<TowerWarningCircle>();
-        w.Setup(outer.transform, fill.transform);
+        w.BuildDefault(_warningColor, _warningFillColor);
         return w;
     }
 
@@ -162,8 +167,7 @@ public class MortarTower : SpecialTower
         foreach (var s in _shells) if (s != null) Destroy(s.gameObject);
         foreach (var w in _warnings) if (w != null) Destroy(w.gameObject);
         if (_shellMat != null) Destroy(_shellMat);
-        if (_warnMat != null) Destroy(_warnMat);
-        if (_warnFillMat != null) Destroy(_warnFillMat);
+        if (_trailMat != null) Destroy(_trailMat);
     }
 
     protected override void OnDrawGizmosSelected()

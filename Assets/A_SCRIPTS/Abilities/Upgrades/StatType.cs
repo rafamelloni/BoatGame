@@ -20,4 +20,5 @@ public enum StatType
     BurnDamage,
     BurnDuration,
     MaxAmmo,
+    BulletSpeed,
 }

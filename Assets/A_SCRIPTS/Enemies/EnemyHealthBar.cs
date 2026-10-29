@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 // Barra de vida flotante para enemigos grandes (ShipEnemy, SpikeBall, ...).
 // Ponelo en el prefab del enemigo (mismo objeto que EnemyHealth o un hijo).
+// También sirve para las torres (SpecialTower): lee la vida de cualquier IHealthBarSource.
 // Arma sola su Canvas en World Space, sigue al enemigo y mira a cámara.
 //
 // Game feel:
@@ -70,6 +71,7 @@ public class EnemyHealthBar : MonoBehaviour
 
     private const float PixelsPerMeter = 100f;
 
+    private IHealthBarSource _source;
     private Canvas _canvas;
     private RectTransform _root;
     private RectTransform _fill;
@@ -88,10 +90,11 @@ public class EnemyHealthBar : MonoBehaviour
 
     private void Awake()
     {
-        if (_health == null) _health = GetComponentInParent<EnemyHealth>();
-        if (_health == null) _health = GetComponentInChildren<EnemyHealth>();
-        if (_health == null)
-            Debug.LogWarning($"[EnemyHealthBar] {name}: no encontré EnemyHealth.", this);
+        if (_health != null) _source = _health;
+        if (_source == null) _source = GetComponentInParent<IHealthBarSource>();
+        if (_source == null) _source = GetComponentInChildren<IHealthBarSource>();
+        if (_source == null)
+            Debug.LogWarning($"[EnemyHealthBar] {name}: no encontré EnemyHealth (ni otra fuente de vida).", this);
         Build();
     }
 
@@ -117,13 +120,13 @@ public class EnemyHealthBar : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (_health == null || !_health.IsInitialized || _canvas == null) return;
+        if (_source == null || !_source.IsInitialized || _canvas == null) return;
 
         // rayas según la vida máxima (por si cambia con el tier)
-        float max = _health.GetMaxHealt();
+        float max = _source.GetMaxHealt();
         if (!Mathf.Approximately(max, _builtMaxHealth)) BuildLines(max);
 
-        float target = Mathf.Clamp01(_health.GetHealthNormalized());
+        float target = Mathf.Clamp01(_source.GetHealthNormalized());
 
         if (target < _shown - 0.0001f)
         {

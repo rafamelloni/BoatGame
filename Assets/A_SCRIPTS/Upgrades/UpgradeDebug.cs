@@ -42,12 +42,13 @@ public class UpgradeDebug : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha3)) { if (shift) MaxPath(2); else StepPath(2); }
         if (Input.GetKeyDown(KeyCode.Alpha4)) { if (shift) MaxPath(3); else StepPath(3); }
         if (Input.GetKeyDown(KeyCode.Alpha5)) { if (shift) MaxPath(4); else StepPath(4); }
+        if (Input.GetKeyDown(KeyCode.Alpha6)) { if (shift) MaxPath(5); else StepPath(5); }
 
-        if (Input.GetKeyDown(KeyCode.R)) ResetUpgrades();
-        if (Input.GetKeyDown(KeyCode.F1)) _bossSequenceManager.ActivateBoss(_mortarBossIndex);
-        if (Input.GetKeyDown(KeyCode.F2)) _bossSequenceManager.ActivateBoss(_dashBossIndex);
-        if (Input.GetKeyDown(KeyCode.F3)) _bossSequenceManager.ActivateBoss(_finalBossIndex);
-        if (Input.GetKeyDown(KeyCode.F5)) _bossSequenceManager.ResetAll();
+        //if (Input.GetKeyDown(KeyCode.R)) ResetUpgrades();
+        //if (Input.GetKeyDown(KeyCode.F1)) _bossSequenceManager.ActivateBoss(_mortarBossIndex);
+        //if (Input.GetKeyDown(KeyCode.F2)) _bossSequenceManager.ActivateBoss(_dashBossIndex);
+        //if (Input.GetKeyDown(KeyCode.F3)) _bossSequenceManager.ActivateBoss(_finalBossIndex);
+        //if (Input.GetKeyDown(KeyCode.F5)) _bossSequenceManager.ResetAll();
 
         if (_upgradeShip != null)
         {

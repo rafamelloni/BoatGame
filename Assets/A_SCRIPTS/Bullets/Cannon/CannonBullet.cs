@@ -50,6 +50,23 @@ public class CannonBullet : BulletsBase
 
     public event Action<Vector3, Vector3, float, bool> OnSplit;
 
+    // Reliquias: (centro, enemigos que mató esa explosión)
+    public static event Action<Vector3, int> OnBulletExploded;
+    // Reliquias: la bala cayó al agua sin pegarle a nada (punto, capas que daña, vfx de explosión)
+    public static event Action<Vector3, LayerMask, GameObject> OnBulletHitWater;
+
+    private int _pierced = 0;
+    private float _fireDamageMult = 1f;
+    // Balitas de Metralla: daño propio y no disparan otras reliquias (ni minas, ni más metralla, ni Pleno)
+    private bool _isShrapnel = false;
+    private float _shrapnelDamageMult = 1f;
+
+    public void MarkShrapnel(float damageMultiplier)
+    {
+        _isShrapnel = true;
+        _shrapnelDamageMult = damageMultiplier;
+    }
+
     private Vector3 _targetPoint;
     private Vector3 _spawnPosition;
     private float _flightTime;
@@ -78,6 +95,10 @@ public class CannonBullet : BulletsBase
             _impactIndicator.ResetIndicator();
         _trail.Clear();
         _ricochetCount = 0;
+        _pierced = 0;
+        _fireDamageMult = 1f;
+        _isShrapnel = false;
+        _shrapnelDamageMult = 1f;
         _ignoredCollider = null;
         _isSplitBullet = false;
         _isCharged = false;
@@ -97,6 +118,7 @@ public class CannonBullet : BulletsBase
         _isSplitBullet = false;
         _isCharged = isCharged;
         _targetPoint = targetPoint;
+        _fireDamageMult = rtData.fireDamageMultiplier;
         Launch();
     }
 
@@ -106,6 +128,7 @@ public class CannonBullet : BulletsBase
         _playerUpgrades = playerUpgrades;
         _isSplitBullet = true;
         _isCharged = isCharged;
+        _fireDamageMult = rtData.fireDamageMultiplier;
         if (_visualTransform != null)
             _visualTransform.localScale = _isCharged ? _visualBaseScale * _rtData.chargedBulletScale : _visualBaseScale;
 
@@ -263,6 +286,16 @@ public class CannonBullet : BulletsBase
 
         if (other.CompareTag("Enemy") || other.CompareTag("ShipEnemy") || other.CompareTag("DashBoss") || other.CompareTag("MortarBoss") || other.CompareTag("Chest")) // agregado "Chest"
         {
+            // Bala fantasma: explota en el enemigo y sigue de largo
+            if (!_isShrapnel && _pierced < RelicRuntime.PierceCount)
+            {
+                _pierced++;
+                _ignoredCollider = other;
+                Explode(explosionPoint);
+                SpawnExplosionVFX(explosionPoint);
+                return;
+            }
+
             bool hasRicochet = debugRicochet || (_playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.Ricochet));
 
             if (_ricochetCount < _maxRicochetBounces && hasRicochet)
@@ -281,6 +314,7 @@ public class CannonBullet : BulletsBase
         {
             ParticlePool.Instance.GetParticle(_rtData.waterSplashVFX, explosionPoint);
             WaterImpacts.Spawn(explosionPoint, _isCharged ? 1.6f : 1f);
+            if (!_isShrapnel) OnBulletHitWater?.Invoke(explosionPoint, _damageLayers, _rtData.explosionVFX);
             Pool.Return(this);
         }
     }
@@ -332,25 +366,35 @@ public class CannonBullet : BulletsBase
     {
         float baseDamage = _rtData.damage;
         if (_isCharged) baseDamage *= _rtData.chargedDamageMultiplier;
+        baseDamage *= _fireDamageMult;
+        if (_isShrapnel) baseDamage *= _shrapnelDamageMult;
         bool isCrit = _islandUpgrades != null && UnityEngine.Random.value < _islandUpgrades.Stats.critChance;
         float damage = isCrit ? baseDamage * _islandUpgrades.Stats.critMultiplier : baseDamage;
 
         float radius = _isCharged ? _rtData.explosionRadius * _rtData.chargedExplosionMultiplier : _rtData.explosionRadius;
-        bool hasBurn = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.BurnShot);
+        bool hasBurn = !_isShrapnel && _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.BurnShot);
 
         Collider[] hits = Physics.OverlapSphere(center, radius, _damageLayers);
+        int kills = 0;
+        bool prevSuppress = RelicRuntime.SuppressProcs;
+        if (_isShrapnel) RelicRuntime.SuppressProcs = true; // lo que mate una balita no genera más balitas
         DamageContext.Set(isCrit, DamageKind.Normal); // para los damage numbers
         for (int i = 0; i < hits.Length; i++)
         {
             IDamageable damageable = hits[i].GetComponentInParent<IDamageable>();
             if (damageable != null)
             {
+                var comp = damageable as Component;
+                bool wasAlive = comp != null && comp.gameObject.activeInHierarchy;
                 damageable.TakeDamage(damage); // <-- damage, no _rtData.damage
+                if (wasAlive && !comp.gameObject.activeInHierarchy) kills++;
                 if (hasBurn)
                     ApplyBurn(damageable);
             }
         }
         DamageContext.Clear();
+        RelicRuntime.SuppressProcs = prevSuppress;
+        if (!_isShrapnel) OnBulletExploded?.Invoke(center, kills);
 
         bool hasGroundFire = _playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.GroundFire);
         if (hasGroundFire)

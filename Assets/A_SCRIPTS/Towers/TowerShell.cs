@@ -82,6 +82,8 @@ public class TowerShell : MonoBehaviour
             ParticlePool.Instance.GetParticle(_landingVfx, _to);
         WaterImpacts.Spawn(_to, _splashSize);
 
+        // el aviso hace su flash de impacto y se apaga solo
+        if (_warning != null) { _warning.PlayImpact(); _warning = null; }
         Despawn();
     }
 

@@ -24,7 +24,15 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
 
     public event Action<float> OnCooldownStarted;      // arranca la recarga (la UI radial la muestra)
     public event Action<int, int> OnAmmoChanged;       // (actual, máximo)
-    public float CooldownDuration => _rtData.cooldown;
+    public event Action OnReloaded;                     // terminó una recarga (reliquias)
+
+    // Reliquias: multiplica el tiempo de UNA recarga; se consulta una vez al empezar a recargar
+    public Func<float> ReloadTimeMultiplier;
+    // Reliquias: mientras está en true, disparar no gasta balas
+    public bool InfiniteAmmo;
+    private float _currentReloadDuration;
+
+    public float CooldownDuration => _reloading ? _currentReloadDuration : _rtData.cooldown;
     public float RemainingCooldown => _reloading ? Mathf.Max(0f, _reloadEndTime - Time.time) : 0f;
     public bool IsOnCooldown => _reloading;
     public bool IsReloading => _reloading;
@@ -57,6 +65,7 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
             _reloading = false;
             _currentAmmo = _rtData.maxAmmo;
             OnAmmoChanged?.Invoke(_currentAmmo, _rtData.maxAmmo);
+            OnReloaded?.Invoke();
         }
     }
 
@@ -67,19 +76,26 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         if (Time.time < _nextShotTime) return;
         if (_currentAmmo <= 0) { StartReload(); return; }
 
-        _currentAmmo--;
+        if (!InfiniteAmmo) _currentAmmo--;
         _nextShotTime = Time.time + _rtData.timeBetweenShots;
         OnAmmoChanged?.Invoke(_currentAmmo, _rtData.maxAmmo);
         runner.StartCoroutine(FireBurst());
 
-        if (_currentAmmo <= 0) StartReload();
+        if (_currentAmmo <= 0)
+        {
+            if (_playerUpgrades != null && _playerUpgrades.HasAbility(SpecialAbilityType.Broadside))
+                runner.StartCoroutine(FireBroadside());
+            StartReload();
+        }
     }
 
     private void StartReload()
     {
         _reloading = true;
-        _reloadEndTime = Time.time + _rtData.cooldown;
-        OnCooldownStarted?.Invoke(_rtData.cooldown);
+        float mult = ReloadTimeMultiplier != null ? Mathf.Max(0.05f, ReloadTimeMultiplier()) : 1f;
+        _currentReloadDuration = _rtData.cooldown * mult;
+        _reloadEndTime = Time.time + _currentReloadDuration;
+        OnCooldownStarted?.Invoke(_currentReloadDuration);
     }
 
     // Mejoras de munición: suben el máximo y, si no está recargando, también la actual
@@ -150,6 +166,59 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         }
     }
 
+    // Andanada: al vaciar el cargador, cada costado suelta una fila de balas
+    // perpendicular al casco. Usa FireFromPoint, así que hereda Split, Ricochet,
+    // fuego, etc.
+    private IEnumerator FireBroadside()
+    {
+        yield return new WaitForSeconds(_rtData.broadsideDelay);
+
+        int count = Mathf.Max(1, _rtData.broadsideShotsPerSide);
+        float start = -(count - 1) * 0.5f * _rtData.broadsideSpacing;
+
+        Transform rightPoint = FirstPoint(hardpoints.rightShootPoints);
+        Transform leftPoint = FirstPoint(hardpoints.leftShootPoints);
+
+        for (int i = 0; i < count; i++)
+        {
+            // Se recalcula en cada bala porque el barco se sigue moviendo
+            Vector3 shipPos = hardpoints.transform.position;
+            Vector3 flatRight = hardpoints.transform.right;
+            flatRight.y = 0f;
+            flatRight.Normalize();
+            Vector3 flatForward = Vector3.Cross(flatRight, Vector3.up);
+
+            Vector3 along = flatForward * (start + i * _rtData.broadsideSpacing);
+            Vector3 rightTarget = shipPos + flatRight * _rtData.broadsideDistance + along;
+            Vector3 leftTarget = shipPos - flatRight * _rtData.broadsideDistance + along;
+
+            if (rightPoint != null)
+            {
+                FireFromPoint(rightPoint, 1f, rightTarget, false);
+                FireMuzzle(rightPoint);
+                hardpoints._cannonSmokeShootR.Play();
+            }
+            if (leftPoint != null)
+            {
+                FireFromPoint(leftPoint, -1f, leftTarget, false);
+                FireMuzzle(leftPoint);
+                hardpoints._cannonSmokeShootL.Play();
+            }
+            _camera.ApplyCannonImpact();
+
+            if (i < count - 1 && _rtData.broadsideInterval > 0f)
+                yield return new WaitForSeconds(_rtData.broadsideInterval);
+        }
+    }
+
+    private Transform FirstPoint(Transform[] points)
+    {
+        if (points == null) return null;
+        foreach (Transform p in points)
+            if (p != null) return p;
+        return null;
+    }
+
     // Cañones extra (tier 2+): cada uno tiene su propio CannonMuzzle con humo y recoil.
     // Los cañones originales no tienen CannonMuzzle, así que acá no hacen nada.
     private void FireMuzzle(Transform point)
@@ -215,6 +284,16 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         return _shipRoot.position + yawOnly * scaledLocal;
     }
 
+    // Bala suelta disparada desde cualquier punto (reliquia Metralla)
+    public void FireExtraBullet(Vector3 position, Vector3 velocity, float damageMultiplier)
+    {
+        var b = _cannonBullet.Create();
+        var cb = b.GetComponent<CannonBullet>();
+        if (cb == null) return;
+        cb.SetupSplit(position, velocity, _rtData, _playerUpgrades, false);
+        cb.MarkShrapnel(damageMultiplier);
+    }
+
     private void SpawnSplitBullet(Vector3 position, Vector3 direction, float damageMultiplier, bool isCharged)
     {
         var b = _cannonBullet.Create();
@@ -238,6 +317,11 @@ public class CannonStrategy : IAbilityStrategy, IcooldownAbilities
         _rtData.burnDamagePerTick = _baseData.burnDamagePerTick;
         _rtData.burnDuration = _baseData.burnDuration;
         _rtData.maxAmmo = _baseData.maxAmmo;
+        _rtData.launchSpeed = _baseData.launchSpeed;
+        _rtData.bulletSpeed = _baseData.bulletSpeed;
+        _rtData.verticalArc = _baseData.verticalArc;
+        _rtData.fireDamageMultiplier = 1f;
+        InfiniteAmmo = false;
         _shotsSinceCharge = 0;
         _currentAmmo = _rtData.maxAmmo;
         _reloading = false;

@@ -13,5 +13,6 @@ public enum SpecialAbilityType
     CrossbowBurst,
     ChargedShot,
     BurnShot,
-    GroundFire
+    GroundFire,
+    Broadside
 }
