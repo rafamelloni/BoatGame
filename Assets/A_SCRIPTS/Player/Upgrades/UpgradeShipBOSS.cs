@@ -56,6 +56,8 @@ public class UpgradeShipBOSS : MonoBehaviour
     [SerializeField] RT_PlayerHealth _playerHealthRT;
     [SerializeField] float _healthBonusPerUpgrade = 100f;
     [SerializeField] float _speedBonusPerUpgrade = 5f;
+    [Tooltip("Daño de cada bala según el tier del barco, para que más cañones no multipliquen todo.")]
+    [SerializeField] float[] _bulletDamageByTier = { 1f, 0.7f, 0.6f };
 
     private int _currentTier = 0;
     private ShipHardpoints _hardpoints;
@@ -160,10 +162,20 @@ public class UpgradeShipBOSS : MonoBehaviour
     private void ApplyTier(int tierIndex)
     {
         _currentTier = tierIndex;
+        ApplyBulletDamage(tierIndex);
         ApplyModel(tierIndex);
         var tier = _tiers[tierIndex];
         _abilityController.ShipUpgraded(tier.cannonPosR, tier.cannonPosL, tier.chestPos);
         ApplyShootPoints(tier);
+    }
+
+    private void ApplyBulletDamage(int tierIndex)
+    {
+        if (_abilityController == null || _abilityController.CannonAbility == null) return;
+        if (_bulletDamageByTier == null || _bulletDamageByTier.Length == 0) return;
+
+        int index = Mathf.Clamp(tierIndex, 0, _bulletDamageByTier.Length - 1);
+        _abilityController.CannonAbility._rtData.shipTierDamageMultiplier = _bulletDamageByTier[index];
     }
 
     private void ApplyModel(int tierIndex)
@@ -231,6 +243,7 @@ public class UpgradeShipBOSS : MonoBehaviour
             _isAnimating = false;
         }
         _currentTier = 0;
+        ApplyBulletDamage(0);
         ApplyModel(0);
         if (_hardpoints != null)
         {

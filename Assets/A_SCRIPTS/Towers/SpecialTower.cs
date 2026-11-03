@@ -98,6 +98,7 @@ public abstract class SpecialTower : MonoBehaviour, IDamageable, IHealthBarSourc
     protected Transform Player { get; private set; }
     protected Rigidbody PlayerRb { get; private set; }
     protected bool IsDead => _dead;
+    public bool IsAlive => !_dead;
 
     private float _health;
     private bool _dead;

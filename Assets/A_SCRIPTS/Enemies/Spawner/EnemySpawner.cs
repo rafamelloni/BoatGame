@@ -72,6 +72,10 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private int _waveEnemyCount = 60;
     [Tooltip("Radio alrededor del player donde NO puede spawnear nada durante la oleada.")]
     [SerializeField] private float _waveSafeRadius = 20f;
+    [Tooltip("Distancia máxima al jugador a la que puede aparecer una oleada.")]
+    [SerializeField] private float _waveOuterRadius = 45f;
+    [Tooltip("Cartel que aparece con cada oleada. Vacío = sin cartel.")]
+    [SerializeField] private string _waveAnnouncement = "WAVE INCOMING";
     [Tooltip("Distancia mínima entre dos enemigos de la misma oleada (para que no se pisen entre sí).")]
     [SerializeField] private float _waveMinSpacing = 4f;
     [Tooltip("Intentos máximos para encontrar posición válida por cada enemigo de la oleada.")]
@@ -126,6 +130,8 @@ public class EnemySpawner : MonoBehaviour
     private Coroutine _spikeLoop;
     private Coroutine _heavyLoop;
     private Coroutine _zombieLoop;
+    private Coroutine _waveRoutine;
+    private BossArrivalText _announcer;
 
     private float _lastTumultoCheck;
     private float _lastTumultoSpawn;
@@ -212,6 +218,12 @@ public class EnemySpawner : MonoBehaviour
         _isRunning = false;
         _phaseManager.StopSession();
         StopAllLoops();
+
+        if (_waveRoutine != null)
+        {
+            StopCoroutine(_waveRoutine);
+            _waveRoutine = null;
+        }
     }
 
     public void ResumeSpawning()
@@ -408,23 +420,41 @@ public class EnemySpawner : MonoBehaviour
     [ContextMenu("Trigger Wave (Debug)")]
     public void TriggerWave()
     {
+        TriggerWave(_waveEnemyCount * 2);
+    }
+
+    public void TriggerWave(int totalToSpawn)
+    {
         if (_waveComposition == null || _waveComposition.Length == 0)
         {
             Debug.LogWarning("[EnemySpawner] Wave sin composición configurada.");
             return;
         }
-        StartCoroutine(WaveRoutine());
+
+        AnnounceWave();
+
+        if (_waveRoutine != null) StopCoroutine(_waveRoutine);
+        _waveRoutine = StartCoroutine(WaveRoutine(totalToSpawn));
     }
 
-    private IEnumerator WaveRoutine()
+    private void AnnounceWave()
+    {
+        if (string.IsNullOrEmpty(_waveAnnouncement)) return;
+
+        if (_announcer == null)
+            _announcer = FindFirstObjectByType<BossArrivalText>(FindObjectsInactive.Include);
+
+        if (_announcer != null) _announcer.Play(_waveAnnouncement);
+    }
+
+    private IEnumerator WaveRoutine(int totalToSpawn)
     {
         var usedPositions = new List<Vector3>();
         int spawned = 0;
-        int totalToSpawn = _waveEnemyCount * 2;
 
         // Línea de adelante: de _waveSafeRadius hasta la mitad del rango.
-        // Línea de atrás: de esa mitad hasta _maxDistanceFromPlayer.
-        float ringBoundary = _waveSafeRadius + (_maxDistanceFromPlayer - _waveSafeRadius) * 0.5f;
+        // Línea de atrás: de esa mitad hasta _waveOuterRadius.
+        float ringBoundary = _waveSafeRadius + (_waveOuterRadius - _waveSafeRadius) * 0.5f;
 
         for (int i = 0; i < totalToSpawn; i++)
         {
@@ -432,7 +462,7 @@ public class EnemySpawner : MonoBehaviour
             // no primero toda la de adelante y después toda la de atrás.
             bool frontLine = i % 2 == 0;
             float minDist = frontLine ? _waveSafeRadius : ringBoundary;
-            float maxDist = frontLine ? ringBoundary : _maxDistanceFromPlayer;
+            float maxDist = frontLine ? ringBoundary : _waveOuterRadius;
 
             Vector3? pos = TryGetWavePosition(usedPositions, minDist, maxDist);
             if (pos != null)
@@ -443,7 +473,9 @@ public class EnemySpawner : MonoBehaviour
             }
             yield return null;
         }
+
         Debug.Log($"[EnemySpawner] Wave terminada: {spawned}/{totalToSpawn} enemigos spawneados.");
+        _waveRoutine = null;
     }
 
     private Vector3? TryGetWavePosition(List<Vector3> usedPositions, float minDist, float maxDist)
@@ -468,7 +500,9 @@ public class EnemySpawner : MonoBehaviour
 
             // El clamp de arriba puede haber empujado el punto de nuevo
             // adentro del radio seguro si el player está cerca del borde del mapa.
-            if (Vector3.Distance(candidate, _player.position) < minDist) continue;
+            Vector3 flatOffset = candidate - _player.position;
+            flatOffset.y = 0f;
+            if (flatOffset.magnitude < minDist) continue;
             if (IsOverlappingSomething(candidate)) continue;
 
             bool tooCloseToOther = false;

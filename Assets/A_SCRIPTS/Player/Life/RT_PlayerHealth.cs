@@ -70,6 +70,7 @@ public class RT_PlayerHealth : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private Image _healthBar;
+    private PlayerHealthBarFx _healthBarFx;
 
     [Header("Regeneración")]
     [SerializeField] private float _regenRate = 0f;
@@ -96,6 +97,7 @@ public class RT_PlayerHealth : MonoBehaviour
     private void Awake()
     {
         _stats = GetComponent<RT_PlayerStats>();
+        SetupHealthBarFx();
 
         if (_shipRenderer != null)
             _shipMaterial = _shipRenderer.material;
@@ -352,8 +354,19 @@ public class RT_PlayerHealth : MonoBehaviour
         _vfxDestroyed.SetActive(_stats.currentHealth <= _vidaParaActivarFuego);
     }
 
+    private void SetupHealthBarFx()
+    {
+        if (_healthBar == null || _healthBar.transform.parent == null) return;
+
+        GameObject barParent = _healthBar.transform.parent.gameObject;
+        _healthBarFx = barParent.GetComponent<PlayerHealthBarFx>();
+        if (_healthBarFx == null) _healthBarFx = barParent.AddComponent<PlayerHealthBarFx>();
+        _healthBarFx.Init(this, _healthBar);
+    }
+
     private void UpdateHealthUI()
     {
+        if (_healthBarFx != null) return; // la barra la actualiza PlayerHealthBarFx
         if (_stats == null || _stats.maxHealth <= 0f) return;
         if (_healthBar != null)
             _healthBar.fillAmount = _stats.currentHealth / _stats.maxHealth;

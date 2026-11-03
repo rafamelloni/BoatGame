@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9698848da278f6b4694015d0c014d206, type: 3}
+  m_Name: SO_RunPlan
+  m_EditorClassIdentifier: Assembly-CSharp::SO_RunPlan
+  events:
+  - time: 30
+    type: 2
+    amount: 1
+  - time: 60
+    type: 0
+    amount: 6
+  - time: 60
+    type: 1
+    amount: 1
+  - time: 75
+    type: 2
+    amount: 1
+  - time: 110
+    type: 0
+    amount: 8
+  - time: 125
+    type: 2
+    amount: 1
+  - time: 150
+    type: 0
+    amount: 10
+  - time: 195
+    type: 2
+    amount: 1
+  - time: 215
+    type: 0
+    amount: 10
+  - time: 240
+    type: 1
+    amount: 1
+  - time: 245
+    type: 2
+    amount: 1
+  - time: 265
+    type: 0
+    amount: 14
+  - time: 290
+    type: 2
+    amount: 1
+  - time: 315
+    type: 0
+    amount: 18
+  - time: 330
+    type: 2
+    amount: 1
+  - time: 375
+    type: 2
+    amount: 1
+  - time: 395
+    type: 0
+    amount: 14
+  - time: 420
+    type: 1
+    amount: 1
+  - time: 425
+    type: 2
+    amount: 1
+  - time: 445
+    type: 0
+    amount: 20
+  - time: 465
+    type: 2
+    amount: 1
+  - time: 495
+    type: 0
+    amount: 26
+  - time: 510
+    type: 2
+    amount: 1

@@ -16,10 +16,23 @@ public class BossArrivalText : MonoBehaviour
     [SerializeField] private float _punchScale = 1.3f;
     [SerializeField] private float _punchDuration = 0.15f;
 
+    private string _defaultText;
+    private Coroutine _routine;
+
     public void Play()
     {
+        Play(null);
+    }
+
+    // Sin mensaje usa el texto original del cartel (el del boss)
+    public void Play(string message)
+    {
+        if (_defaultText == null) _defaultText = _text.text;
+        _text.text = string.IsNullOrEmpty(message) ? _defaultText : message;
+
         gameObject.SetActive(true);
-        StartCoroutine(AnimateRoutine());
+        if (_routine != null) StopCoroutine(_routine);
+        _routine = StartCoroutine(AnimateRoutine());
     }
 
     private IEnumerator AnimateRoutine()

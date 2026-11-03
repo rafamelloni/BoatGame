@@ -9,6 +9,7 @@ public class CannonBulletIsland : BulletsBase
     private RT_CannonData _rtData;
     float _side;
     private CannonBulletImpactIndicator _impactIndicator;
+    private bool _aimed;
 
   
 
@@ -30,10 +31,36 @@ public class CannonBulletIsland : BulletsBase
 
     public void Setup(Transform point, RT_CannonData rtData, float side)
     {
+        _aimed = false;
         _pointShoot = point;
         _rtData = rtData;
         _side = side;
         Launch();
+    }
+
+    // Tira la bala con arco para que caiga en el punto indicado
+    public void SetupAimed(Transform point, RT_CannonData rtData, Vector3 target, float speed)
+    {
+        _aimed = true;
+        _pointShoot = point;
+        _rtData = rtData;
+
+        transform.position = point.position;
+        transform.rotation = point.rotation;
+        _rb.position = point.position;
+        _rb.rotation = point.rotation;
+        _rb.angularVelocity = Vector3.zero;
+
+        Vector3 toTarget = target - point.position;
+        Vector3 flat = toTarget;
+        flat.y = 0f;
+        float flightTime = Mathf.Max(flat.magnitude / Mathf.Max(speed, 0.01f), 0.2f);
+
+        Vector3 startVelocity = (toTarget - 0.5f * Physics.gravity * flightTime * flightTime) / flightTime;
+        _rb.linearVelocity = startVelocity;
+
+        if (_impactIndicator != null)
+            _impactIndicator.Init(point.position, startVelocity);
     }
 
     private void Launch()
@@ -63,6 +90,10 @@ public class CannonBulletIsland : BulletsBase
     }
     private void OnTriggerEnter(Collider other)
     {
+        // Las balas apuntadas solo terminan en el jugador o en el agua:
+        // así no se cortan contra el barco que las disparó ni contra otros enemigos
+        if (_aimed && !other.CompareTag("Player") && !other.CompareTag("Floor")) return;
+
         Vector3 explosionPoint = other.ClosestPoint(transform.position);
 
         if (other.CompareTag("Player"))

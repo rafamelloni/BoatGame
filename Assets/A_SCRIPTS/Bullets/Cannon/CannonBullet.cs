@@ -367,6 +367,7 @@ public class CannonBullet : BulletsBase
         float baseDamage = _rtData.damage;
         if (_isCharged) baseDamage *= _rtData.chargedDamageMultiplier;
         baseDamage *= _fireDamageMult;
+        baseDamage *= _rtData.shipTierDamageMultiplier;
         if (_isShrapnel) baseDamage *= _shrapnelDamageMult;
         bool isCrit = _islandUpgrades != null && UnityEngine.Random.value < _islandUpgrades.Stats.critChance;
         float damage = isCrit ? baseDamage * _islandUpgrades.Stats.critMultiplier : baseDamage;

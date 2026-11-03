@@ -41,6 +41,9 @@ public class RT_CannonData
     // No viene del SO: arranca en 1.
     public float fireDamageMultiplier = 1f;
 
+    // Baja el daño por bala según los cañones del barco (lo setea UpgradeShipBOSS).
+    public float shipTierDamageMultiplier = 1f;
+
     public GameObject waterSplashVFX;
     public GameObject explosionVFX;
 

@@ -23,6 +23,9 @@ public class TimerBoss : MonoBehaviour
     private bool timerActivo = false;
     private int _nextBossIndex = 0;
 
+    public float ElapsedTime => tiempoTotal - tiempoActual;
+    public bool IsRunning => timerActivo;
+
     private void Start()
     {
         tiempoActual = tiempoTotal;
