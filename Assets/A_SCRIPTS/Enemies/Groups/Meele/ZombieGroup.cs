@@ -4,6 +4,7 @@ using UnityEngine;
 public class ZombieGroup : MonoBehaviour
 {
     [SerializeField] private EnemyHealth[] _members;
+    public EnemyHealth[] Members => _members;
     private int _aliveCount;
 
     public event Action<ZombieGroup> OnGroupDead;

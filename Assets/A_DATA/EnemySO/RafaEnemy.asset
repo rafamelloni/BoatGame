@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90e00291d32278e4e8a219a2537c8b47, type: 3}
   m_Name: RafaEnemy
   m_EditorClassIdentifier: Assembly-CSharp::SO_EnemyData
-  maxHealth: 100
+  maxHealth: 70
   fireRate: 0
   woodExplosionVFX: {fileID: 3707281584461059747, guid: bf734a92b8bf4e041a2ac01e5c9b65bd, type: 3}
   bulletSpeed: 15

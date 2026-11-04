@@ -56,9 +56,6 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float _tumultoRadius = 20f;
     [SerializeField] private int _tumultoMinGroups = 3;
 
-    [Header("Rafa")]
-    [SerializeField] private float _rafaLifetime = 10f;
-
     [Header("Distance Culling")]
     [SerializeField] private float _maxGroupDistanceFromPlayer = 80f;
     [SerializeField] private float _distanceCheckInterval = 5f;
@@ -94,10 +91,11 @@ public class EnemySpawner : MonoBehaviour
     // ACTUAL (ya se había movido), el Remove nunca encontraba nada y la lista solo crecía.
     private readonly Dictionary<ShipEnemy, Vector3> _shipSpawnPositions = new();
     private readonly Dictionary<RafaEnemy, Vector3> _rafaSpawnPositions = new();
-    // Timer de vida de cada Rafa: se corta cuando vuelve al pool, si no mataba al Rafa reusado
-    private readonly Dictionary<RafaEnemy, Coroutine> _rafaLifetimes = new();
     private readonly List<SpikeBallEnemy> _activeSpikes = new();
     private readonly List<HeavyRangedEnemy> _activeHeavies = new();
+    // Grupos que vinieron de una wave: nunca se borran por distancia
+    private readonly HashSet<EnemyGroup> _waveGroups = new();
+    private readonly HashSet<ZombieGroup> _waveZombieGroups = new();
 
     private int _activeGroupCount = 0;
     private int _activeZombieGroupCount = 0;
@@ -243,9 +241,6 @@ public class EnemySpawner : MonoBehaviour
         DespawnZombieGroups();
         _factory.DespawnAll<ShipEnemy>();
         _factory.DespawnAll<RafaEnemy>();
-        foreach (var co in _rafaLifetimes.Values)
-            if (co != null) StopCoroutine(co);
-        _rafaLifetimes.Clear();
         foreach (var s in _activeSpikes)
             if (s != null) s.OnDead -= OnSpikeReturned;
         if (_factory.HasPool<SpikeBallEnemy>()) _factory.DespawnAll<SpikeBallEnemy>();
@@ -310,10 +305,10 @@ public class EnemySpawner : MonoBehaviour
     private void DespawnFarGroups()
     {
         var toRemove = new List<EnemyGroup>();
-        foreach (var kvp in _activeGroupPositions)
+        foreach (var group in _activeGroupPositions.Keys)
         {
-            if (Vector3.Distance(kvp.Key.transform.position, _player.position) > _maxGroupDistanceFromPlayer)
-                toRemove.Add(kvp.Key);
+            if (!_waveGroups.Contains(group) && CanCull(group.Members))
+                toRemove.Add(group);
         }
         foreach (var group in toRemove)
         {
@@ -325,10 +320,10 @@ public class EnemySpawner : MonoBehaviour
         }
 
         var toRemoveZ = new List<ZombieGroup>();
-        foreach (var kvp in _activeZombieGroupPositions)
+        foreach (var group in _activeZombieGroupPositions.Keys)
         {
-            if (Vector3.Distance(kvp.Key.transform.position, _player.position) > _maxGroupDistanceFromPlayer)
-                toRemoveZ.Add(kvp.Key);
+            if (!_waveZombieGroups.Contains(group) && CanCull(group.Members))
+                toRemoveZ.Add(group);
         }
         foreach (var group in toRemoveZ)
         {
@@ -338,6 +333,32 @@ public class EnemySpawner : MonoBehaviour
             _activeZombieGroupCount--;
             _factory.ReturnZombieGroup(group);
         }
+    }
+
+    // Solo se borra si TODOS los barcos vivos están lejos y fuera de cámara.
+    // Se mide desde cada barco porque el root del grupo se queda donde spawneó.
+    private bool CanCull(EnemyHealth[] members)
+    {
+        float maxSqr = _maxGroupDistanceFromPlayer * _maxGroupDistanceFromPlayer;
+        Camera cam = _camera != null ? _camera : Camera.main;
+
+        foreach (var member in members)
+        {
+            if (member == null || !member.gameObject.activeInHierarchy) continue;
+
+            Vector3 pos = member.transform.position;
+            Vector3 offset = pos - _player.position;
+            offset.y = 0f;
+            if (offset.sqrMagnitude <= maxSqr) return false;
+
+            if (cam != null)
+            {
+                Vector3 vp = cam.WorldToViewportPoint(pos);
+                if (vp.z > 0f && vp.x > -0.1f && vp.x < 1.1f && vp.y > -0.1f && vp.y < 1.1f)
+                    return false;
+            }
+        }
+        return true;
     }
 
     // ——— Tumulto spawn ———
@@ -526,7 +547,9 @@ public class EnemySpawner : MonoBehaviour
         switch (PickWaveType())
         {
             case TumultoSpawnType.Group:
-                RegisterGroup(_factory.GetGroup(pos, _spawnYOffset));
+                var waveGroup = _factory.GetGroup(pos, _spawnYOffset);
+                _waveGroups.Add(waveGroup);
+                RegisterGroup(waveGroup);
                 break;
             case TumultoSpawnType.Ship:
                 var ship = _factory.Get<ShipEnemy>(pos, _spawnYOffset);
@@ -537,7 +560,9 @@ public class EnemySpawner : MonoBehaviour
                 RegisterRafa(_factory.Get<RafaEnemy>(pos, _spawnYOffset));
                 break;
             case TumultoSpawnType.ZombieGroup:
-                RegisterZombieGroup(_factory.GetZombieGroup(pos, _spawnYOffset));
+                var waveZombies = _factory.GetZombieGroup(pos, _spawnYOffset);
+                _waveZombieGroups.Add(waveZombies);
+                RegisterZombieGroup(waveZombies);
                 break;
             case TumultoSpawnType.Spike:
                 if (_factory.HasPool<SpikeBallEnemy>())
@@ -628,6 +653,7 @@ public class EnemySpawner : MonoBehaviour
 
     private void ReturnGroup(EnemyGroup group)
     {
+        _waveGroups.Remove(group);
         group.OnGroupDead -= ReturnGroup;
         _activeGroupPositions.Remove(group);
         _factory.ReturnGroup(group);
@@ -678,8 +704,6 @@ public class EnemySpawner : MonoBehaviour
         _rafaSpawnPositions[rafa] = spawnPos;
         _activeRafaPositions.Add(spawnPos);
         rafa.OnDead += OnRafaReturned;
-        StopRafaLifetime(rafa);
-        _rafaLifetimes[rafa] = StartCoroutine(RafaLifetimeCoroutine(rafa));
     }
 
     private void OnRafaReturned(RafaEnemy rafa)
@@ -690,23 +714,6 @@ public class EnemySpawner : MonoBehaviour
             _activeRafaPositions.Remove(spawnPos);
             _rafaSpawnPositions.Remove(rafa);
         }
-        StopRafaLifetime(rafa);
-    }
-
-    private void StopRafaLifetime(RafaEnemy rafa)
-    {
-        if (_rafaLifetimes.TryGetValue(rafa, out var co))
-        {
-            if (co != null) StopCoroutine(co);
-            _rafaLifetimes.Remove(rafa);
-        }
-    }
-
-    private IEnumerator RafaLifetimeCoroutine(RafaEnemy rafa)
-    {
-        yield return new WaitForSeconds(_rafaLifetime);
-        if (rafa != null && rafa.gameObject.activeInHierarchy)
-            rafa.GetComponent<EnemyHealth>().TakeDamage(999f);
     }
 
     private void SpawnSpike()
@@ -787,6 +794,7 @@ public class EnemySpawner : MonoBehaviour
 
     private void ReturnZombieGroup(ZombieGroup group)
     {
+        _waveZombieGroups.Remove(group);
         group.OnGroupDead -= ReturnZombieGroup;
         _activeZombieGroupPositions.Remove(group);
         _factory.ReturnZombieGroup(group);
@@ -796,6 +804,7 @@ public class EnemySpawner : MonoBehaviour
 
     private void DespawnGroups()
     {
+        _waveGroups.Clear();
         var active = FindObjectsByType<EnemyGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (var group in active)
         {
@@ -809,6 +818,7 @@ public class EnemySpawner : MonoBehaviour
 
     private void DespawnZombieGroups()
     {
+        _waveZombieGroups.Clear();
         var active = FindObjectsByType<ZombieGroup>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (var group in active)
         {

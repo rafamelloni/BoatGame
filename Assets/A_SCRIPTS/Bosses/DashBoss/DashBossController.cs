@@ -34,6 +34,29 @@ public class DashBossController : Enemy
     [SerializeField] private GameObject _dashFirePrefab;
     [SerializeField] private float _fireYOffset = 0.5f;
 
+    [Header("Franja de aviso")]
+    [SerializeField] private float _lineWidth = 4f;
+    [SerializeField] private float _circleLineWidth = 3f;
+    [SerializeField] private Color _lineColor = new Color(1f, 0.3f, 0.15f, 1f);
+
+    [Header("Llegada del dash")]
+    [SerializeField] private float _landingRingSize = 2.5f;
+    [SerializeField] private float _landingShakeStrength = 0.2f;
+    [SerializeField] private float _landingShakeDuration = 0.2f;
+    [Tooltip("El temblor de llegada solo se siente si el jugador está a esta distancia o menos")]
+    [SerializeField] private float _landingShakeRadius = 16f;
+    [SerializeField] private float _circleLandingRingSize = 1.2f;
+    [SerializeField] private float _circleLandingShakeStrength = 0.1f;
+
+    [Header("Golpe al jugador")]
+    [SerializeField] private float _hitRingSize = 3f;
+    [SerializeField] private float _hitShakeStrength = 0.6f;
+    [SerializeField] private float _hitShakeDuration = 0.35f;
+    [Tooltip("Segundos reales de congelado. 0 = sin congelado")]
+    [SerializeField] private float _hitStopDuration = 0.05f;
+    [SerializeField] private Color _hitFlashColor = new Color(1f, 0.25f, 0.15f, 0.35f);
+    [SerializeField] private float _hitFlashDuration = 0.18f;
+
     [SerializeField] private Transform player;
 
     private Transform _player;
@@ -44,6 +67,7 @@ public class DashBossController : Enemy
 
     private readonly List<DashCircleIndicator> _activeIndicators = new();
     private readonly List<GameObject> _activeFires = new();
+    private readonly List<DashLineTelegraph> _activeLines = new();
 
     private void Awake()
     {
@@ -79,10 +103,16 @@ public class DashBossController : Enemy
             StartCoroutine(DoDash());
     }
 
+    private void OnDisable()
+    {
+        ClearLines();
+    }
+
     private void OnDeath()
     {
         StopAllCoroutines();
         ClearFires();
+        ClearLines();
         foreach (var indicator in _activeIndicators)
             if (indicator != null)
                 Destroy(indicator.gameObject);
@@ -95,6 +125,46 @@ public class DashBossController : Enemy
         indicator.Play(duration, onComplete);
         _activeIndicators.Add(indicator);
         return indicator;
+    }
+
+    private DashLineTelegraph SpawnLine(Vector3 from, Vector3 to, float fillDuration, float width)
+    {
+        DashLineTelegraph line = DashLineTelegraph.Spawn(from, to, fillDuration, width, _lineColor);
+        if (line != null) _activeLines.Add(line);
+        return line;
+    }
+
+    private void FireLine(DashLineTelegraph line)
+    {
+        if (line == null) return;
+        _activeLines.Remove(line);
+        line.Fire();
+    }
+
+    private void ClearLines()
+    {
+        foreach (var line in _activeLines)
+            if (line != null) line.Cancel();
+        _activeLines.Clear();
+    }
+
+    private void PlayLanding(Vector3 position, float ringSize, float shakeStrength)
+    {
+        WaterImpacts.Spawn(position, ringSize);
+        if (_dashImpactParticles != null) _dashImpactParticles.Play(true);
+
+        if (_player == null) return;
+        Vector3 toPlayer = _player.position - position;
+        toPlayer.y = 0f;
+        if (toPlayer.sqrMagnitude <= _landingShakeRadius * _landingShakeRadius)
+            BossHitFeedback.Shake(shakeStrength, _landingShakeDuration);
+    }
+
+    // Lo llama PlayerCollisions cuando el boss choca al jugador
+    public void PlayHitFeedback(Vector3 point, bool allowHitStop)
+    {
+        BossHitFeedback.PlayHit(point, _hitRingSize, _hitShakeStrength, _hitShakeDuration,
+            allowHitStop ? _hitStopDuration : 0f, _hitFlashColor, _hitFlashDuration);
     }
 
     private void DestroyIndicator(DashCircleIndicator indicator)
@@ -131,11 +201,14 @@ public class DashBossController : Enemy
 
         bool shouldDash = false;
         DashCircleIndicator indicator = SpawnIndicator(destination, _telegraphDuration, () => shouldDash = true);
+        DashLineTelegraph line = SpawnLine(transform.position, destination, _telegraphDuration, _lineWidth);
 
         yield return new WaitUntil(() => shouldDash);
 
         DestroyIndicator(indicator);
+        FireLine(line);
         yield return _movement.ExecuteDash(destination);
+        PlayLanding(destination, _landingRingSize, _landingShakeStrength);
 
         _movement.LockRotation(false);
         _nextDashTime = Time.time + _timeBetweenDashes;
@@ -161,9 +234,12 @@ public class DashBossController : Enemy
             yield return _movement.RotateToFace(destination);
             bool shouldDash = false;
             DashCircleIndicator indicator = SpawnIndicator(destination, _telegraphDuration, () => shouldDash = true);
+            DashLineTelegraph line = SpawnLine(transform.position, destination, _telegraphDuration, _lineWidth);
             yield return new WaitUntil(() => shouldDash);
             DestroyIndicator(indicator);
+            FireLine(line);
             yield return _movement.ExecuteDash(destination);
+            PlayLanding(destination, _landingRingSize, _landingShakeStrength);
             _movement.LockRotation(false);
             yield return new WaitForSeconds(0.15f);
         }
@@ -207,10 +283,17 @@ public class DashBossController : Enemy
 
         float spawnInterval = _circleTelegraphSpawnDuration / count;
         DashCircleIndicator[] indicators = new DashCircleIndicator[count];
+        DashLineTelegraph[] lines = new DashLineTelegraph[count];
+
+        // Todos los tramos terminan de llenarse justo cuando arranca el primer dash
+        float timeUntilFirstDash = _circleTelegraphSpawnDuration + Mathf.Max(0f, _telegraphDuration - _circleTelegraphSpawnDuration);
+        Vector3 lineStart = transform.position;
 
         for (int i = 0; i < count; i++)
         {
             indicators[i] = SpawnIndicator(destinations[i], _telegraphDuration);
+            lines[i] = SpawnLine(lineStart, destinations[i], timeUntilFirstDash - i * spawnInterval, _circleLineWidth);
+            lineStart = destinations[i];
             yield return new WaitForSeconds(spawnInterval);
         }
 
@@ -224,8 +307,10 @@ public class DashBossController : Enemy
             transform.rotation = Quaternion.LookRotation(dir.normalized);
 
             DestroyIndicator(indicators[i]);
+            FireLine(lines[i]);
 
             yield return _movement.ExecuteDash(destinations[i], _circleDashDuration, revertTilt: false);
+            PlayLanding(destinations[i], _circleLandingRingSize, _circleLandingShakeStrength);
             SpawnDashFire(prevPos, destinations[i]);
             prevPos = destinations[i];
 
@@ -276,6 +361,7 @@ public class DashBossController : Enemy
     {
         StopAllCoroutines();
         ClearFires();
+        ClearLines();
         foreach (var indicator in _activeIndicators)
             if (indicator != null) Destroy(indicator.gameObject);
         _activeIndicators.Clear();

@@ -62,7 +62,12 @@ public class PlayerCollisions : MonoBehaviour
             //collision.gameObject.GetComponent<EnemyHealth>()?.TakeDamage(9999);
             _health.TakeDamage(stats.damageWhenBumpingBoss);
 
-
+            DashBossController dashBoss = collision.gameObject.GetComponentInParent<DashBossController>();
+            if (dashBoss != null)
+            {
+                Vector3 hitPoint = collision.contactCount > 0 ? collision.GetContact(0).point : transform.position;
+                dashBoss.PlayHitFeedback(hitPoint, _health.CurrentHealth > 0f);
+            }
         }
     }
 

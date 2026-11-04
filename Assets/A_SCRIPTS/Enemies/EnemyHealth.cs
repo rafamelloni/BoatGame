@@ -66,15 +66,18 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IHealthBarSource
 
     private void Die()
     {
+        // Se guarda antes de OnDeath: el grupo puede volver al pool y mover este transform
+        Vector3 deathPosition = transform.position;
+
         if (_logEarlyDeaths && Time.time - _revivedAt < 1.5f)
             Debug.LogWarning($"[EnemyHealth] {name} murió {Time.time - _revivedAt:0.00}s después de spawnear. Quién lo mató:\n{Environment.StackTrace}", this);
 
         OnDeath?.Invoke();
-        OnAnyEnemyDied?.Invoke(transform.position);
+        OnAnyEnemyDied?.Invoke(deathPosition);
         IsDying = true;
         if (_rtData.woodExplosion != null)
         {
-            ParticlePool.Instance.GetParticle(_rtData.woodExplosion, transform.position);
+            ParticlePool.Instance.GetParticle(_rtData.woodExplosion, deathPosition);
         }
         gameObject.SetActive(false);
         IsDying = false;

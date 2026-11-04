@@ -32,6 +32,8 @@ public class followPlayer : MonoBehaviour
     // shake
     private float _shakeTimer = 0f;
     private Vector3 _shakeOffset = Vector3.zero;
+    private float _activeShakeStrength;
+    private float _activeShakeDuration = 1f;
 
     // smooth follow
     private Vector3 _currentVelocity = Vector3.zero;
@@ -50,7 +52,18 @@ public class followPlayer : MonoBehaviour
     {
         _zoomOffset = zoomPunchAmount;
         _zoomTimer = zoomPunchDuration;
-        _shakeTimer = shakeDuration;
+        ApplyShake(shakeStrength, shakeDuration);
+    }
+
+    // Temblor con fuerza propia. Un temblor débil no corta a uno más fuerte que sigue activo.
+    public void ApplyShake(float strength, float duration)
+    {
+        float current = _shakeTimer > 0f ? (_shakeTimer / _activeShakeDuration) * _activeShakeStrength : 0f;
+        if (strength < current) return;
+
+        _activeShakeStrength = strength;
+        _activeShakeDuration = Mathf.Max(duration, 0.01f);
+        _shakeTimer = _activeShakeDuration;
     }
 
     void FixedUpdate()
@@ -73,7 +86,7 @@ public class followPlayer : MonoBehaviour
         if (_shakeTimer > 0f)
         {
             _shakeTimer -= Time.deltaTime;
-            float strength = (_shakeTimer / shakeDuration) * shakeStrength;
+            float strength = (_shakeTimer / _activeShakeDuration) * _activeShakeStrength;
             _shakeOffset = new Vector3(
                 Random.Range(-strength, strength),
                 0f,
