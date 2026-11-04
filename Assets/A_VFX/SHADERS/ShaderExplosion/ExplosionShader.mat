@@ -38,9 +38,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _Dissolve1: 0
+    - _Smoothstep: 0.01
     m_Colors:
-    - _DarkColor: {r: 1, g: 0.6399195, b: 0, a: 1}
+    - _DarkColor: {r: 1, g: 0.3452014, b: 0, a: 1}
     - _FireColor: {r: 11.984313, g: 3.2149687, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

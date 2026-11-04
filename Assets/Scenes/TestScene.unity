@@ -95458,14 +95458,14 @@ MonoBehaviour:
     maxActiveGroups: 0
     groupHealth: 0
     shipSpawnInterval: 0
-    maxActiveShips: 0
+    maxActiveShips: 2
     shipHealth: 0
     rafaSpawnInterval: 0
     maxActiveRafas: 0
     rafaHealth: 0
     zombieSpawnInterval: 5
     zombieGroupPrefabIndex: 0
-    maxActiveZombies: 2
+    maxActiveZombies: 0
     zombieHealth: 0
     spikeSpawnInterval: 0
     maxActiveSpikes: 0

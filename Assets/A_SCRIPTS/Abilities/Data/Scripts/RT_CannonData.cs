@@ -14,6 +14,7 @@ public class RT_CannonData
     public float dropDelay;
     public float launchSpeed;
     public float explosionRadius;
+    public float baseExplosionRadius;
     public int chargedShotInterval;
     public float chargedBulletScale;
     public float chargedDamageMultiplier;
@@ -58,6 +59,7 @@ public class RT_CannonData
         damage = so.damage;
         dropDelay = so.dropDelay;
         explosionRadius = so.explosionRadius;
+        baseExplosionRadius = so.explosionRadius;
         chargedShotInterval = so.chargedShotInterval;
         chargedBulletScale = so.chargedBulletScale;
         chargedDamageMultiplier = so.chargedDamageMultiplier;

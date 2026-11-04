@@ -358,8 +358,24 @@ public class CannonBullet : BulletsBase
     private void SpawnExplosionVFX(Vector3 position)
     {
         GameObject vfx = ParticlePool.Instance.GetParticle(_rtData.explosionVFX, position);
-        if (vfx != null)
-            vfx.transform.localScale = _isCharged ? Vector3.one * _rtData.chargedVfxScale : Vector3.one;
+        if (vfx == null) return;
+
+        // Crece en la misma proporción que el radio de daño
+        float growth = _rtData.explosionRadius / Mathf.Max(_rtData.baseExplosionRadius, 0.01f);
+        float charged = _isCharged ? _rtData.chargedVfxScale : 1f;
+
+        ScaleFromPrefab(vfx.transform, _rtData.explosionVFX.transform, growth * charged);
+    }
+
+    // Con Scaling Mode en Local, cada Particle System solo usa su propia escala,
+    // así que hay que escalarlos uno por uno a partir de los valores del prefab
+    private void ScaleFromPrefab(Transform instance, Transform prefab, float factor)
+    {
+        instance.localScale = prefab.localScale * factor;
+
+        int count = Mathf.Min(instance.childCount, prefab.childCount);
+        for (int i = 0; i < count; i++)
+            ScaleFromPrefab(instance.GetChild(i), prefab.GetChild(i), factor);
     }
 
     private void Explode(Vector3 center)
