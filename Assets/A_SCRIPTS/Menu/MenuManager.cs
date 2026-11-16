@@ -1,30 +1,22 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
+// Menú dentro de la escena del juego. El menú principal ahora vive en la escena MainMenu,
+// así que acá se saltea y se abre directo la preselección de barco.
 public class MenuManager : MonoBehaviour
 {
+    [SerializeField] GameObject _preseleccion;
+    [SerializeField] GameObject MenuPrefab;
 
-    [SerializeField]GameObject _preseleccion;
-    [SerializeField]GameObject MenuPrefab;
-
-    [Header("Overworld")]
-    [Tooltip("Escena del mapa de oceanos. Si esta vacia o no esta en Build Settings, Play va directo a la preseleccion como antes.")]
-    [SerializeField] string _overworldScene = "Overworld";
+    [Tooltip("Abrir la preselección apenas arranca la escena (el menú principal está en MainMenu)")]
+    [SerializeField] bool _skipMenuOnStart = true;
 
     private void Start()
     {
-        // Si venimos del Overworld (ya se eligio el oceano), salteamos el menu
-        if (OverworldSession.ConsumeSkipMenu())
-            OpenPreselection();
+        if (_skipMenuOnStart) OpenPreselection();
     }
 
     public void PlayButtonOnClick()
     {
-        if (!string.IsNullOrEmpty(_overworldScene) && Application.CanStreamedLevelBeLoaded(_overworldScene))
-        {
-            SceneManager.LoadScene(_overworldScene);
-            return;
-        }
         OpenPreselection();
     }
 

@@ -34,6 +34,9 @@ public class Movement : MonoBehaviour
     private float _currentSpeed = 0f;
     private float _smoothTurn = 0f;
 
+    // Si está seteado reemplaza al teclado (lo usa el barco del menú). x = giro (-1..1), y = avance (0..1).
+    public System.Func<Vector2> InputOverride;
+
     public float GetCurrentBankZ() => _currentBankZ;
     public bool IsSprinting => _isSprinting && _sprintEnabled;
 
@@ -67,9 +70,11 @@ public class Movement : MonoBehaviour
         if (!enabled) return;
         HandleSprint();
 
-        float vertical = Input.GetAxisRaw("Vertical");
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        vertical = Mathf.Clamp01(vertical);
+        Vector2 input = InputOverride != null
+            ? InputOverride()
+            : new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        float vertical = Mathf.Clamp01(input.y);
+        float horizontal = Mathf.Clamp(input.x, -1f, 1f);
 
         float targetTurn = horizontal * _stats.turnSpeed;
         _smoothTurn = Mathf.Lerp(_smoothTurn, targetTurn, Time.deltaTime * 5f);
