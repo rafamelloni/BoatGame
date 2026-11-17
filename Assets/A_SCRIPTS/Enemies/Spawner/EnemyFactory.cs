@@ -33,6 +33,10 @@ public class EnemyFactory : MonoBehaviour
     [SerializeField] private GameObject _heavyPrefab;
     [SerializeField] private int _initialHeavyStock = 2;
 
+    [Header("Mortar")]
+    [SerializeField] private GameObject _mortarPrefab;
+    [SerializeField] private int _initialMortarStock = 2;
+
     [Header("References")]
     [SerializeField] private Transform _player;
     [SerializeField] private Transform _playerAimPo;
@@ -53,6 +57,7 @@ public class EnemyFactory : MonoBehaviour
         InitPool<RafaEnemy>(_rafaPrefab, _initialRafaStock);
         if (_spikePrefab != null) InitPool<SpikeBallEnemy>(_spikePrefab, _initialSpikeStock);
         if (_heavyPrefab != null) InitPool<HeavyRangedEnemy>(_heavyPrefab, _initialHeavyStock);
+        if (_mortarPrefab != null) InitPool<MortarEnemy>(_mortarPrefab, _initialMortarStock);
     }
 
     public bool HasPool<T>() where T : MonoBehaviour => _pools.ContainsKey(typeof(T));
@@ -198,6 +203,10 @@ public class EnemyFactory : MonoBehaviour
                 heavy.SetPlayer(_player);
                 heavy.OnDead += OnHeavyDead;
                 break;
+            case MortarEnemy mortar:
+                mortar.SetPlayer(_player);
+                mortar.OnDead += OnMortarDead;
+                break;
         }
     }
 
@@ -218,6 +227,9 @@ public class EnemyFactory : MonoBehaviour
             case HeavyRangedEnemy heavy:
                 heavy.OnDead -= OnHeavyDead;
                 break;
+            case MortarEnemy mortar:
+                mortar.OnDead -= OnMortarDead;
+                break;
         }
         instance.gameObject.SetActive(false);
     }
@@ -233,6 +245,7 @@ public class EnemyFactory : MonoBehaviour
             RafaEnemy => _currentPhase.rafaHealth,
             SpikeBallEnemy => _currentPhase.spikeHealth,
             HeavyRangedEnemy => _currentPhase.heavyHealth,
+            MortarEnemy => _currentPhase.mortarHealth,
             _ => 0f
         };
 
@@ -244,6 +257,7 @@ public class EnemyFactory : MonoBehaviour
     private void OnRafaDead(RafaEnemy rafa) => Return(rafa);
     private void OnSpikeDead(SpikeBallEnemy spike) => Return(spike);
     private void OnHeavyDead(HeavyRangedEnemy heavy) => Return(heavy);
+    private void OnMortarDead(MortarEnemy mortar) => Return(mortar);
 
     private void InitGroupPools()
     {

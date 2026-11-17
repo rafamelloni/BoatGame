@@ -57,7 +57,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IHealthBarSource
             kind = DamageContext.Kind,
             killed = _rtData.currentHealth <= 0
         });
-        _hitFlash?.Flash();
+        if (_hitFlash != null) _hitFlash.Flash();
         if (_rtData.currentHealth <= 0)
         {
             Die();

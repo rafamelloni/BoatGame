@@ -51,6 +51,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float _minDistanceBetweenZombies = 15f;
     [SerializeField] private float _minDistanceBetweenSpikes = 15f;
     [SerializeField] private float _minDistanceBetweenHeavies = 25f;
+    [SerializeField] private float _minDistanceBetweenMortars = 25f;
 
     [Header("Tumulto")]
     [SerializeField] private float _tumultoRadius = 20f;
@@ -93,6 +94,7 @@ public class EnemySpawner : MonoBehaviour
     private readonly Dictionary<RafaEnemy, Vector3> _rafaSpawnPositions = new();
     private readonly List<SpikeBallEnemy> _activeSpikes = new();
     private readonly List<HeavyRangedEnemy> _activeHeavies = new();
+    private readonly List<MortarEnemy> _activeMortars = new();
     // Grupos que vinieron de una wave: nunca se borran por distancia
     private readonly HashSet<EnemyGroup> _waveGroups = new();
     private readonly HashSet<ZombieGroup> _waveZombieGroups = new();
@@ -112,6 +114,8 @@ public class EnemySpawner : MonoBehaviour
     private int _maxSpikes;
     private float _heavyInterval;
     private int _maxHeavies;
+    private float _mortarInterval;
+    private int _maxMortars;
     private float _zombieInterval;
     private int _maxZombies;
     private int _currentZombieGroupPrefabIndex;
@@ -127,6 +131,7 @@ public class EnemySpawner : MonoBehaviour
     private Coroutine _rafaLoop;
     private Coroutine _spikeLoop;
     private Coroutine _heavyLoop;
+    private Coroutine _mortarLoop;
     private Coroutine _zombieLoop;
     private Coroutine _waveRoutine;
     private BossArrivalText _announcer;
@@ -253,6 +258,11 @@ public class EnemySpawner : MonoBehaviour
             if (h != null) h.OnDead -= OnHeavyReturned;
         if (_factory.HasPool<HeavyRangedEnemy>()) _factory.DespawnAll<HeavyRangedEnemy>();
         _activeHeavies.Clear();
+        foreach (var m in _activeMortars)
+            if (m != null) m.OnDead -= OnMortarReturned;
+        if (_factory.HasPool<MortarEnemy>()) _factory.DespawnAll<MortarEnemy>();
+        _activeMortars.Clear();
+        MortarEnemy.DespawnAllShells();
     }
 
 
@@ -280,6 +290,8 @@ public class EnemySpawner : MonoBehaviour
         _maxSpikes = phase.maxActiveSpikes;
         _heavyInterval = phase.heavySpawnInterval;
         _maxHeavies = phase.maxActiveHeavies;
+        _mortarInterval = phase.mortarSpawnInterval;
+        _maxMortars = phase.maxActiveMortars;
         _zombieInterval = phase.zombieSpawnInterval;
         _maxZombies = phase.maxActiveZombies;
         _currentZombieGroupPrefabIndex = phase.zombieGroupPrefabIndex;
@@ -387,6 +399,9 @@ public class EnemySpawner : MonoBehaviour
             case TumultoSpawnType.Heavy:
                 SpawnHeavyAroundPlayer(spawnDir);
                 break;
+            case TumultoSpawnType.Mortar:
+                SpawnMortarAroundPlayer(spawnDir);
+                break;
         }
     }
 
@@ -427,6 +442,14 @@ public class EnemySpawner : MonoBehaviour
         var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
         if (pos == null) return;
         RegisterHeavy(_factory.Get<HeavyRangedEnemy>(pos.Value, _spawnYOffset));
+    }
+
+    private void SpawnMortarAroundPlayer(Vector3 directionBias)
+    {
+        if (!_factory.HasPool<MortarEnemy>()) return;
+        var pos = TryGetValidPositionWithOffset(_ => false, directionBias);
+        if (pos == null) return;
+        RegisterMortar(_factory.Get<MortarEnemy>(pos.Value, _spawnYOffset));
     }
 
     private void SpawnZombieGroupAroundPlayer(Vector3 directionBias)
@@ -572,6 +595,10 @@ public class EnemySpawner : MonoBehaviour
                 if (_factory.HasPool<HeavyRangedEnemy>())
                     RegisterHeavy(_factory.Get<HeavyRangedEnemy>(pos, _spawnYOffset));
                 break;
+            case TumultoSpawnType.Mortar:
+                if (_factory.HasPool<MortarEnemy>())
+                    RegisterMortar(_factory.Get<MortarEnemy>(pos, _spawnYOffset));
+                break;
         }
     }
 
@@ -603,6 +630,8 @@ public class EnemySpawner : MonoBehaviour
             _spikeLoop = StartCoroutine(SpawnLoop(_spikeInterval, () => _activeSpikes.Count < _maxSpikes, SpawnSpike));
         if (_maxHeavies > 0 && _heavyInterval > 0f && _factory.HasPool<HeavyRangedEnemy>())
             _heavyLoop = StartCoroutine(SpawnLoop(_heavyInterval, () => _activeHeavies.Count < _maxHeavies, SpawnHeavy));
+        if (_maxMortars > 0 && _mortarInterval > 0f && _factory.HasPool<MortarEnemy>())
+            _mortarLoop = StartCoroutine(SpawnLoop(_mortarInterval, () => _activeMortars.Count < _maxMortars, SpawnMortar));
     }
 
     private void StopAllLoops()
@@ -613,6 +642,7 @@ public class EnemySpawner : MonoBehaviour
         if (_zombieLoop != null) { StopCoroutine(_zombieLoop); _zombieLoop = null; }
         if (_spikeLoop != null) { StopCoroutine(_spikeLoop); _spikeLoop = null; }
         if (_heavyLoop != null) { StopCoroutine(_heavyLoop); _heavyLoop = null; }
+        if (_mortarLoop != null) { StopCoroutine(_mortarLoop); _mortarLoop = null; }
     }
 
     private IEnumerator SpawnLoop(float interval, Func<bool> canSpawn, Action spawnAction)
@@ -770,6 +800,33 @@ public class EnemySpawner : MonoBehaviour
         return false;
     }
 
+    private void SpawnMortar()
+    {
+        var pos = TryGetValidPosition(IsTooCloseToMortar);
+        if (pos == null) return;
+        RegisterMortar(_factory.Get<MortarEnemy>(pos.Value, _spawnYOffset));
+    }
+
+    private void RegisterMortar(MortarEnemy mortar)
+    {
+        if (mortar == null) return;
+        _activeMortars.Add(mortar);
+        mortar.OnDead += OnMortarReturned;
+    }
+
+    private void OnMortarReturned(MortarEnemy mortar)
+    {
+        mortar.OnDead -= OnMortarReturned;
+        _activeMortars.Remove(mortar);
+    }
+
+    private bool IsTooCloseToMortar(Vector3 c)
+    {
+        foreach (var m in _activeMortars)
+            if (m != null && Vector3.Distance(c, m.transform.position) < _minDistanceBetweenMortars) return true;
+        return false;
+    }
+
     private void SpawnZombieGroup()
     {
         var pos = TryGetValidPosition(IsTooCloseToZombie);
@@ -904,6 +961,7 @@ public class EnemySpawner : MonoBehaviour
         allPositions.AddRange(_activeRafaPositions);
         foreach (var s in _activeSpikes) if (s != null) allPositions.Add(s.transform.position);
         foreach (var h in _activeHeavies) if (h != null) allPositions.Add(h.transform.position);
+        foreach (var m in _activeMortars) if (m != null) allPositions.Add(m.transform.position);
 
         foreach (var pos in allPositions)
         {

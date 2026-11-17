@@ -42,6 +42,8 @@ public class HeavyProjectile : BulletsBase
     private Vector3 _arcFrom, _arcTo;
     private float _arcHeight, _arcT, _arcDuration, _landingRadius;
     private GameObject _landingVfx;
+    private TowerWarningCircle _warning; // aviso en el agua de dónde cae (opcional)
+    private float _splashSize;           // anillo de espuma en el shader del agua al caer (0 = nada)
 
     public struct TrailSettings
     {
@@ -116,6 +118,7 @@ public class HeavyProjectile : BulletsBase
     {
         // posicionar ANTES de que la estela emita, así no dibuja una raya desde donde murió
         if (_trail != null) { _trail.emitting = false; _trail.Clear(); }
+        HideWarning();
 
         direction.y = 0f;
         _dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : transform.forward;
@@ -146,7 +149,8 @@ public class HeavyProjectile : BulletsBase
 
     // Parábola: sale de "from" y cae exactamente en "to". speed = velocidad horizontal (m/s)
     public void LaunchArc(Vector3 from, Vector3 to, float speed, float arcHeight, float damage, float size,
-                          float landingRadius, GameObject landingVfx, GameObject impactVfx, TrailSettings trail)
+                          float landingRadius, GameObject landingVfx, GameObject impactVfx, TrailSettings trail,
+                          TowerWarningCircle warning = null, float splashSize = 0f)
     {
         Vector3 flat = to - from; flat.y = 0f;
         Launch(from, flat, speed, damage, size, 999f, impactVfx, trail);
@@ -158,6 +162,10 @@ public class HeavyProjectile : BulletsBase
         _arcDuration = Mathf.Max(0.3f, flat.magnitude / Mathf.Max(speed, 0.01f));
         _landingRadius = landingRadius;
         _landingVfx = landingVfx;
+
+        _splashSize = splashSize;
+        _warning = warning;
+        if (_warning != null) _warning.Show(to, landingRadius);
     }
 
     private void Update()
@@ -173,6 +181,7 @@ public class HeavyProjectile : BulletsBase
             transform.position = pos;
             Vector3 vel = pos - prev;
             if (vel.sqrMagnitude > 0.000001f) transform.rotation = Quaternion.LookRotation(vel.normalized, Vector3.up);
+            if (_warning != null) _warning.SetProgress(k);
             if (k >= 1f) Land();
             return;
         }
@@ -213,6 +222,9 @@ public class HeavyProjectile : BulletsBase
         }
         if (_landingVfx != null && ParticlePool.Instance != null)
             ParticlePool.Instance.GetParticle(_landingVfx, transform.position);
+        if (_splashSize > 0f) WaterImpacts.Spawn(_arcTo, _splashSize);
+        // el aviso hace su flash de impacto y se apaga solo
+        if (_warning != null) { _warning.PlayImpact(); _warning = null; }
         _alive = false;
         if (Pool != null) Pool.Return(this);
         else TurnOff();
@@ -222,6 +234,7 @@ public class HeavyProjectile : BulletsBase
     {
         if (!_alive) return;
         _alive = false;
+        HideWarning(); // si te pegó en el aire, el aviso se apaga
         if (impact && _impactVfx != null && ParticlePool.Instance != null)
             ParticlePool.Instance.GetParticle(_impactVfx, transform.position);
 
@@ -234,6 +247,12 @@ public class HeavyProjectile : BulletsBase
         _alive = false;
         if (_trail != null) { _trail.emitting = false; _trail.Clear(); }
         if (_smokePS != null) _smokePS.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        HideWarning();
         gameObject.SetActive(false);
+    }
+
+    private void HideWarning()
+    {
+        if (_warning != null) { _warning.Hide(); _warning = null; }
     }
 }

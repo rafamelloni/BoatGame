@@ -49,6 +49,7 @@ GameObject:
   - component: {fileID: 3863729320540702181}
   - component: {fileID: -1427120939056475581}
   - component: {fileID: 3973654267918894439}
+  - component: {fileID: 2750396057499342131}
   m_Layer: 6
   m_Name: SpikeEnemy
   m_TagString: ShipEnemy
@@ -263,6 +264,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.01, y: 0.01, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2750396057499342131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3785012795159777324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b4bc6f726beef74abc25cf0fab9d5eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BigEnemySeparation
+  _radius: 3.86
+  _strength: 10
+  _maxPushSpeed: 12
 --- !u!1 &4624417066062138785
 GameObject:
   m_ObjectHideFlags: 0

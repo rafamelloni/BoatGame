@@ -55,6 +55,16 @@ public class HeavyRangedEnemy : Enemy
     [Tooltip("Radio de daño donde cae la bala")]
     [SerializeField] private float _landingRadius = 2.5f;
 
+    [Header("Aviso de caída (solo con parábola)")]
+    [Tooltip("Muestra en el agua dónde va a caer la bala: un círculo que se llena mientras vuela")]
+    [SerializeField] private bool _showLandingWarning = true;
+    [Tooltip("Prefab con TowerWarningCircle. Vacío = aviso por defecto (el mismo de la torre mortero)")]
+    [SerializeField] private TowerWarningCircle _warningPrefab;
+    [SerializeField] private Color _warningColor = new Color(1f, 0.3f, 0.18f, 1f);
+    [SerializeField] private Color _warningFillColor = new Color(1f, 0.42f, 0.2f, 0.55f);
+    [Tooltip("Tamaño del anillo de espuma en el shader del agua cuando cae la bala. 0 = sin anillo")]
+    [SerializeField, Min(0f)] private float _splashSize = 2.2f;
+
     [Header("Olas (idle)")]
     [SerializeField] private float _waveBob = 0.15f;
     [SerializeField] private float _waveBobFrequency = 1.2f;
@@ -119,6 +129,8 @@ public class HeavyRangedEnemy : Enemy
 
     // un BulletFactory compartido por prefab de proyectil (mismo pool que usan tus balas)
     private static readonly Dictionary<HeavyProjectile, BulletFactory> _factories = new();
+    // avisos compartidos entre todos los Heavy (la bala apaga el suyo al caer o morir)
+    private static readonly List<TowerWarningCircle> _warnings = new();
 
     private Transform _player;
     private State _state;
@@ -329,7 +341,8 @@ public class HeavyRangedEnemy : Enemy
             Vector3 target = _player.position;
             target.y = transform.position.y - _appliedOffset.y; // cae a la altura del agua
             bullet.LaunchArc(origin, target, _projectileSpeed, _arcHeight, _projectileDamage, _projectileSize,
-                             _landingRadius, _landingVfx != null ? _landingVfx : _impactVfx, _impactVfx, trail);
+                             _landingRadius, _landingVfx != null ? _landingVfx : _impactVfx, _impactVfx, trail,
+                             _showLandingWarning ? GetWarning() : null, _splashSize);
         }
         else
         {
@@ -357,6 +370,23 @@ public class HeavyRangedEnemy : Enemy
         f.prefab = prefab;
         _factories[prefab] = f;
         return f;
+    }
+
+    private TowerWarningCircle GetWarning()
+    {
+        _warnings.RemoveAll(w => w == null);
+        foreach (var w in _warnings) if (w.IsFree) return w;
+        TowerWarningCircle warn;
+        if (_warningPrefab != null) warn = Instantiate(_warningPrefab);
+        else
+        {
+            var root = new GameObject("HeavyWarning");
+            warn = root.AddComponent<TowerWarningCircle>();
+            warn.BuildDefault(_warningColor, _warningFillColor);
+        }
+        warn.gameObject.SetActive(false);
+        _warnings.Add(warn);
+        return warn;
     }
 
     private static Gradient DefaultTrailGradient()

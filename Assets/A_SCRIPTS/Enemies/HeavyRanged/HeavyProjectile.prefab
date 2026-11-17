@@ -309,3 +309,10 @@ MonoBehaviour:
   _visual: {fileID: 0}
   _playerTag: Player
   _islandTag: Islas
+  _smoke: 1
+  _smokePerMeter: 2.5
+  _smokeLifetime: 1.6
+  _smokeSize: {x: 0.35, y: 0.6}
+  _smokeColorStart: {r: 0.46226418, g: 0.46226418, b: 0.46226418, a: 0.9}
+  _smokeColorEnd: {r: 0.35, g: 0.3, b: 0.3, a: 0}
+  _smokeMaterial: {fileID: 0}
