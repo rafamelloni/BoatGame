@@ -21,6 +21,7 @@ public class TimerBoss : MonoBehaviour
 
     private float tiempoActual;
     private bool timerActivo = false;
+    private bool _inicializado;
     private int _nextBossIndex = 0;
 
     public float ElapsedTime => tiempoTotal - tiempoActual;
@@ -28,8 +29,16 @@ public class TimerBoss : MonoBehaviour
 
     private void Start()
     {
+        Inicializar();
+    }
+
+    // Puede llegar StartTimer() antes de que este objeto se active (PlayButton activa el canvas después).
+    // Sin esto tiempoActual valía 0, ElapsedTime daba 900 y RunEventSpawner disparaba todos los eventos juntos.
+    private void Inicializar()
+    {
+        if (_inicializado) return;
+        _inicializado = true;
         tiempoActual = tiempoTotal;
-        //timerActivo = false;
         ActualizarUI();
     }
 
@@ -85,6 +94,7 @@ public class TimerBoss : MonoBehaviour
 
     public void StartTimer()
     {
+        Inicializar();
         timerActivo = true;
     }
 
@@ -95,6 +105,7 @@ public class TimerBoss : MonoBehaviour
 
     public void ResetTimer()
     {
+        _inicializado = true;
         tiempoActual = tiempoTotal;
         timerActivo = false;
         _nextBossIndex = 0;

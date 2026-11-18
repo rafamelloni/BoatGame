@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 public class UpgradeUI : MonoBehaviour
 {
@@ -36,6 +37,7 @@ public class UpgradeUI : MonoBehaviour
     private Vector2 _panelBasePos;
     private float _panelBaseRotZ;
     private float _idleTiempo;
+    private bool _confirming; // mientras navega el barquito no se puede tocar nada
 
 
 
@@ -61,7 +63,10 @@ public class UpgradeUI : MonoBehaviour
     }
     private void OnEnable()
     {
+        _confirming = false;
+        foreach (var b in pathButtons) b.interactable = true;
         RefreshOffer();
+        pathMap.CancelAnimation();
         pathMap.ResetMap();
 
         _panelBasePos = panelRect.anchoredPosition;
@@ -105,7 +110,7 @@ public class UpgradeUI : MonoBehaviour
     }
     private void OnPathSelected(int index)
     {
-        if (index >= _currentOffer.Count) return;
+        if (_confirming || index >= _currentOffer.Count) return;
         for (int i = 0; i < _currentOffer.Count; i++)
             pathButtons[i].GetComponent<Image>().sprite = _currentOffer[i].pathIconGrey;
         pathButtons[index].GetComponent<Image>().sprite = _currentOffer[index].pathIconSelected;
@@ -121,11 +126,32 @@ public class UpgradeUI : MonoBehaviour
         pathMap.UpdateMap(_selectedPath);
         confirmButton.interactable = true;
     }
+    private void OnDisable()
+    {
+        // si se apaga en medio de la animación, que no quede trabado
+        _confirming = false;
+        if (pathMap != null) pathMap.CancelAnimation();
+    }
+
     private void OnConfirm()
     {
-        if (_selectedPath == null) return;
+        if (_selectedPath == null || _confirming) return;
+        int fromLevel = playerUpgrades.GetLevel(_selectedPath);
         upgradeSystem.ApplyUpgrade(_selectedPath);
         confirmButton.interactable = false;
+        StartCoroutine(ConfirmRoutine(_selectedPath, fromLevel));
+    }
+
+    // Primero la isla + el barquito navegando, después se va el pergamino
+    private IEnumerator ConfirmRoutine(SO_UpgradePath path, int fromLevel)
+    {
+        _confirming = true;
+        foreach (var b in pathButtons) b.interactable = false;
+
+        yield return pathMap.PlayAdvance(path, fromLevel);
+
+        foreach (var b in pathButtons) b.interactable = true;
+        _confirming = false;
         pergamino.ClosePergamino(() => RefreshOffer());
     }
 }

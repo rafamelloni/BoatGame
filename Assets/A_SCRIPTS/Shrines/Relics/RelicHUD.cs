@@ -37,7 +37,7 @@ public class RelicHUD : MonoBehaviour
     [Header("Columna")]
     [SerializeField] private float _slotSize = 72f;
     [SerializeField] private float _spacing = 10f;
-    [Tooltip("Reliquias por columna; si hay más, arma otra columna a la derecha")]
+    [Tooltip("Reliquias por fila; si hay más, arma otra fila arriba")]
     [SerializeField] private int _perColumn = 8;
     [Tooltip("Qué tan rápido se corren las reliquias cuando entra una nueva")]
     [SerializeField] private float _slideSpeed = 12f;
@@ -147,16 +147,21 @@ public class RelicHUD : MonoBehaviour
     }
 
     // Posición de la reliquia "index", relativa a la esquina de arriba a la izquierda del HUD.
-    // Orden de llegada de arriba hacia abajo; cuando se llena la columna sigue en la de al lado.
+    // Fila horizontal desde la esquina del pivot.
+    // Pivot (0,0) = abajo-izq: avanza hacia la derecha y la fila siguiente va arriba.
+    // _perColumn ahora es "reliquias por fila".
     private Vector2 SlotPosition(int index, int total)
     {
-        int perCol = Mathf.Max(1, _perColumn);
-        int col = index / perCol;
-        int row = index % perCol;
+        int perRow = Mathf.Max(1, _perColumn);
+        int col = index % perRow;
+        int row = index / perRow;
         float step = _slotSize + _spacing;
-        float x = col * (step + 8f) + _slotSize * 0.5f;
-        float y = row * step + _slotSize * 0.5f;
-        return new Vector2(x, -y);
+        float x = col * step + _slotSize * 0.5f;
+        float y = row * (step + 8f) + _slotSize * 0.5f;
+
+        float dirX = Rect.pivot.x > 0.5f ? -1f : 1f;  // pivot a la derecha -> avanza hacia la izquierda
+        float dirY = Rect.pivot.y < 0.5f ? 1f : -1f;  // pivot abajo -> las filas nuevas van arriba
+        return new Vector2(x * dirX, y * dirY);
     }
 
     private void Relayout()
